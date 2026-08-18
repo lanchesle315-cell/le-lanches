@@ -4,453 +4,2293 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0b0b0b" />
-  <meta name="description" content="Cardápio online do Lê Lanches em Sorocaba. Prensados, smash burgers, fritas e bebidas." />
+  <meta
+    name="description"
+    content="Cardápio online do Lê Lanches em Sorocaba. Prensados, smash burgers, fritas e bebidas."
+  />
+
   <title>Lê Lanches | Cardápio Online</title>
-  <link rel="icon" type="image/png" href="img/le-lanches-logo.png">
-  <link rel="stylesheet" href="css/style.css?v=20260818-lelanches">
+
+  <link
+    rel="icon"
+    type="image/png"
+    href="img/le-lanches-logo.png"
+  >
+
+  <link
+    rel="stylesheet"
+    href="css/style.css?v=20260818-lelanches"
+  >
+
+  <!-- =====================================================
+       NOVO HERO COMPACTO
+       ===================================================== -->
+  <style>
+    /*
+     * Sobrescreve somente o topo da página.
+     * O restante continua usando css/style.css normalmente.
+     */
+
+    .hero {
+      position: relative;
+      min-height: auto !important;
+      height: auto !important;
+
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+
+      gap: 42px !important;
+
+      padding: 26px 30px 28px !important;
+
+      overflow: hidden;
+
+      background:
+        radial-gradient(
+          circle at 22% 45%,
+          rgba(255, 153, 0, 0.08),
+          transparent 34%
+        ),
+        linear-gradient(
+          135deg,
+          #090909 0%,
+          #11100f 65%,
+          #17100d 100%
+        );
+
+      border-bottom: 1px solid rgba(255, 145, 0, 0.15);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+
+      left: 0;
+      right: 0;
+      bottom: 0;
+
+      height: 3px;
+
+      background: linear-gradient(
+        90deg,
+        transparent,
+        #ff9d00,
+        #ff5e00,
+        transparent
+      );
+
+      opacity: 0.65;
+    }
+
+    .hero-glow {
+      position: absolute !important;
+
+      width: 420px !important;
+      height: 420px !important;
+
+      left: -130px !important;
+      top: -150px !important;
+
+      border-radius: 50%;
+
+      background: rgba(255, 139, 0, 0.07) !important;
+      filter: blur(80px);
+
+      pointer-events: none;
+    }
+
+    /*
+     * Logo menor
+     */
+    .hero-logo {
+      position: relative;
+
+      width: 215px !important;
+      max-width: 215px !important;
+      height: auto !important;
+
+      flex: 0 0 215px;
+
+      object-fit: contain;
+
+      filter:
+        drop-shadow(0 10px 22px rgba(0, 0, 0, 0.52))
+        drop-shadow(0 0 11px rgba(255, 157, 0, 0.08));
+
+      transition:
+        transform 0.25s ease,
+        filter 0.25s ease;
+    }
+
+    .hero-logo:hover {
+      transform: scale(1.025);
+
+      filter:
+        drop-shadow(0 12px 25px rgba(0, 0, 0, 0.6))
+        drop-shadow(0 0 16px rgba(255, 157, 0, 0.15));
+    }
+
+    /*
+     * Área de texto
+     */
+    .hero-copy {
+      position: relative;
+
+      width: 100%;
+      max-width: 570px !important;
+
+      margin: 0 !important;
+      padding: 0 !important;
+
+      text-align: left;
+    }
+
+    .hero-copy .eyebrow {
+      display: inline-block;
+
+      margin-bottom: 4px !important;
+
+      color: #ffffff;
+
+      font-size: 11px !important;
+      font-weight: 900;
+      letter-spacing: 2.4px !important;
+
+      line-height: 1.2;
+    }
+
+    /*
+     * Título mais compacto
+     */
+    .hero-copy h1 {
+      margin: 2px 0 8px !important;
+
+      color: #ffb300;
+
+      font-size: clamp(40px, 5vw, 66px) !important;
+      font-weight: 950 !important;
+
+      line-height: 0.96 !important;
+
+      letter-spacing: -2.4px !important;
+
+      text-transform: uppercase;
+
+      text-shadow:
+        0 6px 22px rgba(0, 0, 0, 0.35),
+        0 0 24px rgba(255, 166, 0, 0.06);
+    }
+
+    /*
+     * Descrição
+     */
+    .hero-copy > p {
+      max-width: 520px;
+
+      margin: 0 0 13px !important;
+
+      color: #e3e3e3;
+
+      font-size: 14px !important;
+      line-height: 1.55 !important;
+    }
+
+    /*
+     * Status
+     */
+    .status-loja {
+      display: inline-flex !important;
+      align-items: center !important;
+
+      width: auto !important;
+
+      min-height: 31px;
+
+      margin: 0 0 13px !important;
+
+      padding: 6px 12px !important;
+
+      border-radius: 999px !important;
+
+      font-size: 11px !important;
+      font-weight: 800 !important;
+
+      line-height: 1 !important;
+
+      box-shadow: none !important;
+    }
+
+    .status-loja.fechado {
+      color: #ff626b !important;
+
+      background: rgba(255, 58, 68, 0.08) !important;
+
+      border: 1px solid rgba(255, 69, 79, 0.4) !important;
+    }
+
+    .status-loja.aberto {
+      color: #55e786 !important;
+
+      background: rgba(42, 210, 93, 0.08) !important;
+
+      border: 1px solid rgba(65, 230, 111, 0.4) !important;
+    }
+
+    /*
+     * Botões
+     */
+    .hero-actions {
+      display: flex !important;
+      align-items: center !important;
+
+      gap: 9px !important;
+
+      margin: 0 !important;
+    }
+
+    .hero-actions .hero-btn {
+      min-height: 35px !important;
+
+      padding: 9px 15px !important;
+
+      border-radius: 9px !important;
+
+      font-size: 12px !important;
+      font-weight: 800 !important;
+
+      line-height: 1 !important;
+
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+    }
+
+    .hero-actions .hero-btn:first-child {
+      color: #111 !important;
+
+      background: linear-gradient(
+        135deg,
+        #ffb300,
+        #ff7b00
+      ) !important;
+
+      border: 1px solid rgba(255, 179, 0, 0.8) !important;
+
+      box-shadow:
+        0 7px 18px rgba(255, 112, 0, 0.15) !important;
+    }
+
+    .hero-actions .hero-btn:first-child:hover {
+      transform: translateY(-1px);
+
+      box-shadow:
+        0 9px 24px rgba(255, 112, 0, 0.25) !important;
+    }
+
+    .hero-actions .secondary {
+      color: #fff !important;
+
+      background: rgba(255, 255, 255, 0.035) !important;
+
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    }
+
+    .hero-actions .secondary:hover {
+      transform: translateY(-1px);
+
+      background: rgba(255, 255, 255, 0.07) !important;
+    }
+
+    /*
+     * ==========================
+     * TABLET
+     * ==========================
+     */
+    @media (max-width: 850px) {
+
+      .hero {
+        gap: 25px !important;
+
+        padding:
+          24px
+          22px
+          26px !important;
+      }
+
+      .hero-logo {
+        width: 180px !important;
+        max-width: 180px !important;
+
+        flex-basis: 180px;
+      }
+
+      .hero-copy h1 {
+        font-size: clamp(
+          38px,
+          7vw,
+          54px
+        ) !important;
+      }
+    }
+
+    /*
+     * ==========================
+     * CELULAR
+     * ==========================
+     */
+    @media (max-width: 650px) {
+
+      .hero {
+        flex-direction: column !important;
+
+        gap: 9px !important;
+
+        padding:
+          18px
+          18px
+          20px !important;
+
+        text-align: center;
+      }
+
+      .hero-logo {
+        width: 142px !important;
+        max-width: 142px !important;
+
+        flex: none !important;
+
+        margin: 0 auto !important;
+      }
+
+      .hero-copy {
+        max-width: 100% !important;
+
+        text-align: center;
+      }
+
+      .hero-copy .eyebrow {
+        margin-bottom: 4px !important;
+
+        font-size: 9px !important;
+        letter-spacing: 1.8px !important;
+      }
+
+      .hero-copy h1 {
+        margin:
+          1px
+          0
+          7px !important;
+
+        font-size: clamp(
+          38px,
+          11vw,
+          50px
+        ) !important;
+
+        letter-spacing: -1.5px !important;
+      }
+
+      .hero-copy > p {
+        max-width: 430px;
+
+        margin:
+          0
+          auto
+          11px !important;
+
+        font-size: 13px !important;
+        line-height: 1.45 !important;
+      }
+
+      .status-loja {
+        margin:
+          0
+          auto
+          12px !important;
+
+        font-size: 10px !important;
+      }
+
+      .hero-actions {
+        justify-content: center !important;
+
+        width: 100%;
+
+        gap: 8px !important;
+      }
+
+      .hero-actions .hero-btn {
+        min-height: 36px !important;
+
+        padding:
+          9px
+          14px !important;
+
+        font-size: 11px !important;
+      }
+    }
+
+    /*
+     * Celulares bem pequenos
+     */
+    @media (max-width: 390px) {
+
+      .hero {
+        padding:
+          16px
+          14px
+          18px !important;
+      }
+
+      .hero-logo {
+        width: 128px !important;
+        max-width: 128px !important;
+      }
+
+      .hero-copy h1 {
+        font-size: 37px !important;
+      }
+
+      .hero-copy > p {
+        font-size: 12px !important;
+      }
+
+      .hero-actions {
+        flex-direction: row !important;
+      }
+
+      .hero-actions .hero-btn {
+        flex: 1;
+
+        max-width: 150px;
+      }
+    }
+  </style>
 </head>
+
 <body>
+
+<!-- =====================================================
+     HERO
+     ===================================================== -->
 <header class="hero">
+
   <div class="hero-glow"></div>
-  <img class="hero-logo" src="img/le-lanches-logo.png" alt="Lê Lanches">
+
+  <img
+    class="hero-logo"
+    src="img/le-lanches-logo.png"
+    alt="Lê Lanches"
+  >
+
   <div class="hero-copy">
-    <span class="eyebrow">PRENSADOS • SMASH • FRITAS</span>
+
+    <span class="eyebrow">
+      PRENSADOS • SMASH • FRITAS
+    </span>
+
     <h1>Lê Lanches</h1>
-    <p>Seu lanche caprichado em Sorocaba. Escolha, monte o carrinho e finalize pelo WhatsApp.</p>
-    <div id="statusLoja" class="status-loja fechado">🔴 Fechado no momento</div>
-    <div class="hero-actions">
-      <a class="btn hero-btn" href="#cardapio">Ver cardápio</a>
-      <a class="btn hero-btn secondary" href="https://wa.me/5515996314700" target="_blank" rel="noopener">WhatsApp</a>
+
+    <p>
+      Seu lanche caprichado em Sorocaba.
+      Escolha, monte o carrinho e finalize pelo WhatsApp.
+    </p>
+
+    <div
+      id="statusLoja"
+      class="status-loja fechado"
+    >
+      🔴 Fechado no momento
     </div>
+
+    <div class="hero-actions">
+
+      <a
+        class="btn hero-btn"
+        href="#cardapio"
+      >
+        Ver cardápio
+      </a>
+
+      <a
+        class="btn hero-btn secondary"
+        href="https://wa.me/5515996314700"
+        target="_blank"
+        rel="noopener"
+      >
+        WhatsApp
+      </a>
+
+    </div>
+
   </div>
+
 </header>
 
-<nav class="categoria-nav" aria-label="Categorias do cardápio">
-  <a href="#hot-dog">Hot Dog</a><a href="#burguer">Burguer</a><a href="#smash-burguer">Smash</a><a href="#fritas">Fritas</a><a href="#bebidas">Bebidas</a>
+
+<!-- =====================================================
+     CATEGORIAS
+     ===================================================== -->
+<nav
+  class="categoria-nav"
+  aria-label="Categorias do cardápio"
+>
+  <a href="#hot-dog">Hot Dog</a>
+  <a href="#burguer">Burguer</a>
+  <a href="#smash-burguer">Smash</a>
+  <a href="#fritas">Fritas</a>
+  <a href="#bebidas">Bebidas</a>
 </nav>
 
-<main class="container" id="cardapio">
+
+<main
+  class="container"
+  id="cardapio"
+>
+
+  <!-- ===================================================
+       INFORMAÇÕES DA LOJA
+       =================================================== -->
   <section class="info-loja">
-    <div><strong>📍 Endereço</strong><span>R. Firmino Mineli, 315 - Jardim Hungares, Sorocaba - SP, 18075-700</span></div>
-    <div><strong>🕖 Horário</strong><span>Quarta a domingo • 19:00 às 23:00</span></div>
-    <div><strong>📲 Pedidos</strong><span>(15) 99631-4700</span></div>
-    <div><strong>📸 Instagram</strong><span>@lelan_ches2025</span></div>
+
+    <div>
+      <strong>📍 Endereço</strong>
+      <span>
+        R. Firmino Mineli, 315 -
+        Jardim Hungares,
+        Sorocaba - SP,
+        18075-700
+      </span>
+    </div>
+
+    <div>
+      <strong>🕖 Horário</strong>
+      <span>
+        Quarta a domingo •
+        19:00 às 23:00
+      </span>
+    </div>
+
+    <div>
+      <strong>📲 Pedidos</strong>
+      <span>
+        (15) 99631-4700
+      </span>
+    </div>
+
+    <div>
+      <strong>📸 Instagram</strong>
+      <span>
+        @lelan_ches2025
+      </span>
+    </div>
+
   </section>
-<section class="secao" id="hot-dog">
-    <div class="secao-titulo"><span>🌭</span><h2>Hot Dog</h2></div>
-    <div class="grid"><article class="item">
-      <div class="codigo">HD01</div>
-      <h3>Simples</h3>
-      <p>Pão, salsicha, batata palha, purê de batata, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 17,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Simples%20-%20R%24%2017%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Simples', 17)">+ Carrinho</button>
+
+
+  <!-- ===================================================
+       HOT DOG
+       =================================================== -->
+  <section
+    class="secao"
+    id="hot-dog"
+  >
+
+    <div class="secao-titulo">
+      <span>🌭</span>
+      <h2>Hot Dog</h2>
+    </div>
+
+    <div class="grid">
+
+      <article class="item">
+
+        <div class="codigo">
+          HD01
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">HD02</div>
-      <h3>Duplo</h3>
-      <p>Pão, 2 salsichas, batata palha, purê de batata, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 19,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Duplo%20-%20R%24%2019%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Duplo', 19)">+ Carrinho</button>
+
+        <h3>Simples</h3>
+
+        <p>
+          Pão, salsicha, batata palha,
+          purê de batata, tomate, cebola,
+          alface, milho, ketchup,
+          maionese temperada, mostarda.
+        </p>
+
+        <div class="rodape-item">
+
+          <div class="preco">
+            R$ 17,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Simples%20-%20R%24%2017%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('Simples', 17)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
+
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">HD03</div>
-      <h3>Especial</h3>
-      <p>Pão, 2 salsichas, calabresa, bacon, muçarela, catupiry ou cheddar, batata palha, purê de batata, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 26,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Especial%20-%20R%24%2026%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Especial', 26)">+ Carrinho</button>
+
+      </article>
+
+
+      <article class="item">
+
+        <div class="codigo">
+          HD02
         </div>
-      </div>
-    </article></div>
+
+        <h3>Duplo</h3>
+
+        <p>
+          Pão, 2 salsichas,
+          batata palha,
+          purê de batata,
+          tomate, cebola,
+          alface, milho,
+          ketchup,
+          maionese temperada,
+          mostarda.
+        </p>
+
+        <div class="rodape-item">
+
+          <div class="preco">
+            R$ 19,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Duplo%20-%20R%24%2019%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('Duplo', 19)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <article class="item">
+
+        <div class="codigo">
+          HD03
+        </div>
+
+        <h3>Especial</h3>
+
+        <p>
+          Pão, 2 salsichas,
+          calabresa, bacon,
+          muçarela,
+          catupiry ou cheddar,
+          batata palha,
+          purê de batata,
+          tomate, cebola,
+          alface, milho,
+          ketchup,
+          maionese temperada,
+          mostarda.
+        </p>
+
+        <div class="rodape-item">
+
+          <div class="preco">
+            R$ 26,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Especial%20-%20R%24%2026%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('Especial', 26)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
+
+        </div>
+
+      </article>
+
+    </div>
+
   </section>
-<section class="secao" id="burguer">
-    <div class="secao-titulo"><span>🍔</span><h2>Burguer</h2></div>
-    <div class="grid"><article class="item">
-      <div class="codigo">B01</div>
-      <h3>X-Burguer</h3>
-      <p>Pão, hambúrguer, muçarela, catupiry, batata palha, tomate, cebola, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 22,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Burguer%20-%20R%24%2022%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('X-Burguer', 22)">+ Carrinho</button>
+
+
+  <!-- ===================================================
+       BURGUER
+       =================================================== -->
+  <section
+    class="secao"
+    id="burguer"
+  >
+
+    <div class="secao-titulo">
+      <span>🍔</span>
+      <h2>Burguer</h2>
+    </div>
+
+    <div class="grid">
+
+      <article class="item">
+        <div class="codigo">B01</div>
+        <h3>X-Burguer</h3>
+
+        <p>
+          Pão, hambúrguer, muçarela,
+          catupiry, batata palha,
+          tomate, cebola, ketchup,
+          maionese temperada, mostarda.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 22,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Burguer%20-%20R%24%2022%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('X-Burguer', 22)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">B02</div>
-      <h3>X-Salada</h3>
-      <p>Pão, hambúrguer, presunto, muçarela, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 23,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Salada%20-%20R%24%2023%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('X-Salada', 23)">+ Carrinho</button>
+      </article>
+
+
+      <article class="item">
+        <div class="codigo">B02</div>
+        <h3>X-Salada</h3>
+
+        <p>
+          Pão, hambúrguer, presunto,
+          muçarela, batata palha,
+          tomate, cebola, alface,
+          milho, ketchup,
+          maionese temperada, mostarda.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 23,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Salada%20-%20R%24%2023%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('X-Salada', 23)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">B03</div>
-      <h3>X-Egg</h3>
-      <p>Pão, hambúrguer, ovo, presunto, muçarela, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 28,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Egg%20-%20R%24%2028%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('X-Egg', 28)">+ Carrinho</button>
+      </article>
+
+
+      <article class="item">
+        <div class="codigo">B03</div>
+        <h3>X-Egg</h3>
+
+        <p>
+          Pão, hambúrguer, ovo,
+          presunto, muçarela,
+          batata palha, tomate,
+          cebola, alface, milho,
+          ketchup, maionese temperada,
+          mostarda.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 28,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Egg%20-%20R%24%2028%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('X-Egg', 28)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">B04</div>
-      <h3>X-Bacon</h3>
-      <p>Pão, hambúrguer, bacon, muçarela, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 27,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Bacon%20-%20R%24%2027%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('X-Bacon', 27)">+ Carrinho</button>
+      </article>
+
+
+      <article class="item">
+        <div class="codigo">B04</div>
+        <h3>X-Bacon</h3>
+
+        <p>
+          Pão, hambúrguer, bacon,
+          muçarela, batata palha,
+          tomate, cebola, alface,
+          milho, ketchup,
+          maionese temperada, mostarda.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 27,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Bacon%20-%20R%24%2027%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('X-Bacon', 27)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">B05</div>
-      <h3>X-Calabresa</h3>
-      <p>Pão, hambúrguer, calabresa, muçarela, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 27,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Calabresa%20-%20R%24%2027%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('X-Calabresa', 27)">+ Carrinho</button>
+      </article>
+
+
+      <article class="item">
+        <div class="codigo">B05</div>
+        <h3>X-Calabresa</h3>
+
+        <p>
+          Pão, hambúrguer, calabresa,
+          muçarela, batata palha,
+          tomate, cebola, alface,
+          milho, ketchup,
+          maionese temperada, mostarda.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 27,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Calabresa%20-%20R%24%2027%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('X-Calabresa', 27)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">B06</div>
-      <h3>X-Frango</h3>
-      <p>Pão, frango desfiado, muçarela, catupiry, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 28,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Frango%20-%20R%24%2028%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('X-Frango', 28)">+ Carrinho</button>
+      </article>
+
+
+      <article class="item">
+        <div class="codigo">B06</div>
+        <h3>X-Frango</h3>
+
+        <p>
+          Pão, frango desfiado,
+          muçarela, catupiry,
+          tomate, cebola, alface,
+          milho, ketchup,
+          maionese temperada, mostarda.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 28,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Frango%20-%20R%24%2028%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('X-Frango', 28)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">B07</div>
-      <h3>X-Tudo</h3>
-      <p>Pão, hambúrguer, salsicha, ovo, calabresa, bacon, presunto, muçarela, catupiry, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 35,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Tudo%20-%20R%24%2035%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('X-Tudo', 35)">+ Carrinho</button>
+      </article>
+
+
+      <article class="item">
+        <div class="codigo">B07</div>
+        <h3>X-Tudo</h3>
+
+        <p>
+          Pão, hambúrguer, salsicha,
+          ovo, calabresa, bacon,
+          presunto, muçarela,
+          catupiry, batata palha,
+          tomate, cebola, alface,
+          milho, ketchup,
+          maionese temperada, mostarda.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 35,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Tudo%20-%20R%24%2035%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('X-Tudo', 35)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">B08</div>
-      <h3>Calabacon</h3>
-      <p>Pão, hambúrguer, calabresa, bacon, muçarela, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 29,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Calabacon%20-%20R%24%2029%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Calabacon', 29)">+ Carrinho</button>
+      </article>
+
+
+      <article class="item">
+        <div class="codigo">B08</div>
+        <h3>Calabacon</h3>
+
+        <p>
+          Pão, hambúrguer, calabresa,
+          bacon, muçarela,
+          batata palha, tomate,
+          cebola, alface, milho,
+          ketchup, maionese temperada,
+          mostarda.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 29,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Calabacon%20-%20R%24%2029%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('Calabacon', 29)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">B09</div>
-      <h3>Franbacon</h3>
-      <p>Pão, frango desfiado, bacon, muçarela, catupiry, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 30,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Franbacon%20-%20R%24%2030%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Franbacon', 30)">+ Carrinho</button>
+      </article>
+
+
+      <article class="item">
+        <div class="codigo">B09</div>
+        <h3>Franbacon</h3>
+
+        <p>
+          Pão, frango desfiado,
+          bacon, muçarela, catupiry,
+          tomate, cebola, alface,
+          milho, ketchup,
+          maionese temperada, mostarda.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 30,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Franbacon%20-%20R%24%2030%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('Franbacon', 30)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">B10</div>
-      <h3>Calafrango</h3>
-      <p>Pão, frango desfiado, calabresa, muçarela, catupiry, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 30,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Calafrango%20-%20R%24%2030%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Calafrango', 30)">+ Carrinho</button>
+      </article>
+
+
+      <article class="item">
+        <div class="codigo">B10</div>
+        <h3>Calafrango</h3>
+
+        <p>
+          Pão, frango desfiado,
+          calabresa, muçarela,
+          catupiry, tomate,
+          cebola, alface, milho,
+          ketchup, maionese temperada,
+          mostarda.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 30,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Calafrango%20-%20R%24%2030%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('Calafrango', 30)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">B11</div>
-      <h3>X-Costela</h3>
-      <p>Pão, costela desfiada, muçarela, batata palha, tomate, cebola, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 35,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Costela%20-%20R%24%2035%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('X-Costela', 35)">+ Carrinho</button>
+      </article>
+
+
+      <article class="item">
+        <div class="codigo">B11</div>
+        <h3>X-Costela</h3>
+
+        <p>
+          Pão, costela desfiada,
+          muçarela, batata palha,
+          tomate, cebola, ketchup,
+          maionese temperada, mostarda.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 35,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Costela%20-%20R%24%2035%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('X-Costela', 35)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article></div>
+      </article>
+
+    </div>
+
   </section>
-<section class="secao" id="smash-burguer">
-    <div class="secao-titulo"><span>🔥</span><h2>Smash Burguer</h2></div>
-    <div class="grid"><article class="item">
-      <div class="codigo">S01</div>
-      <h3>Smash Salada</h3>
-      <p>Pão brioche selado, 2 smash de 60g cada, queijo cheddar, alface, tomate, picles, cebola, maionese temperada.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 35,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Smash%20Salada%20-%20R%24%2035%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Smash Salada', 35)">+ Carrinho</button>
+
+
+  <!-- ===================================================
+       SMASH
+       =================================================== -->
+  <section
+    class="secao"
+    id="smash-burguer"
+  >
+
+    <div class="secao-titulo">
+      <span>🔥</span>
+      <h2>Smash Burguer</h2>
+    </div>
+
+    <div class="grid">
+
+      <article class="item">
+        <div class="codigo">S01</div>
+        <h3>Smash Salada</h3>
+
+        <p>
+          Pão brioche selado,
+          2 smash de 60g cada,
+          queijo cheddar,
+          alface, tomate,
+          picles, cebola,
+          maionese temperada.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 35,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Smash%20Salada%20-%20R%24%2035%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('Smash Salada', 35)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">S02</div>
-      <h3>Smash Oklahoma</h3>
-      <p>Pão brioche selado, 2 smash de 60g cada dourado com cebola na chapa, queijo cheddar, picles, maionese temperada.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 35,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Smash%20Oklahoma%20-%20R%24%2035%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Smash Oklahoma', 35)">+ Carrinho</button>
+      </article>
+
+
+      <article class="item">
+        <div class="codigo">S02</div>
+        <h3>Smash Oklahoma</h3>
+
+        <p>
+          Pão brioche selado,
+          2 smash de 60g cada
+          dourado com cebola na chapa,
+          queijo cheddar,
+          picles,
+          maionese temperada.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 35,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Smash%20Oklahoma%20-%20R%24%2035%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('Smash Oklahoma', 35)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">S03</div>
-      <h3>Smash Bacon</h3>
-      <p>Pão brioche selado na chapa, 2 smash de 60g cada, bacon, queijo cheddar, maionese temperada.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 38,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Smash%20Bacon%20-%20R%24%2038%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Smash Bacon', 38)">+ Carrinho</button>
+      </article>
+
+
+      <article class="item">
+        <div class="codigo">S03</div>
+        <h3>Smash Bacon</h3>
+
+        <p>
+          Pão brioche selado na chapa,
+          2 smash de 60g cada,
+          bacon, queijo cheddar,
+          maionese temperada.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 38,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Smash%20Bacon%20-%20R%24%2038%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('Smash Bacon', 38)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article></div>
+      </article>
+
+    </div>
+
   </section>
-<section class="secao" id="fritas">
-    <div class="secao-titulo"><span>🍟</span><h2>Fritas</h2></div>
-    <div class="grid"><article class="item">
-      <div class="codigo">F01</div>
-      <h3>Fritas Simples</h3>
-      <p>200g de batata ondulada.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 14,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Fritas%20Simples%20-%20R%24%2014%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Fritas Simples', 14)">+ Carrinho</button>
+
+
+  <!-- ===================================================
+       FRITAS
+       =================================================== -->
+  <section
+    class="secao"
+    id="fritas"
+  >
+
+    <div class="secao-titulo">
+      <span>🍟</span>
+      <h2>Fritas</h2>
+    </div>
+
+    <div class="grid">
+
+      <article class="item">
+        <div class="codigo">F01</div>
+        <h3>Fritas Simples</h3>
+
+        <p>
+          200g de batata ondulada.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 14,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Fritas%20Simples%20-%20R%24%2014%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('Fritas Simples', 14)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">F02</div>
-      <h3>Fritas Especial</h3>
-      <p>200g de batata ondulada com cheddar e bacon.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 18,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Fritas%20Especial%20-%20R%24%2018%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Fritas Especial', 18)">+ Carrinho</button>
+      </article>
+
+
+      <article class="item">
+        <div class="codigo">F02</div>
+        <h3>Fritas Especial</h3>
+
+        <p>
+          200g de batata ondulada
+          com cheddar e bacon.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 18,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Fritas%20Especial%20-%20R%24%2018%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('Fritas Especial', 18)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">F03</div>
-      <h3>Fritas Elite</h3>
-      <p>200g de batata ondulada com cheddar, catupiry e bacon.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 20,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Fritas%20Elite%20-%20R%24%2020%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Fritas Elite', 20)">+ Carrinho</button>
+      </article>
+
+
+      <article class="item">
+        <div class="codigo">F03</div>
+        <h3>Fritas Elite</h3>
+
+        <p>
+          200g de batata ondulada
+          com cheddar,
+          catupiry e bacon.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 20,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Fritas%20Elite%20-%20R%24%2020%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('Fritas Elite', 20)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article></div>
+      </article>
+
+    </div>
+
   </section>
-<section class="secao" id="bebidas">
-    <div class="secao-titulo"><span>🥤</span><h2>Bebidas</h2></div>
-    <div class="grid"><article class="item">
-      <div class="codigo">R01</div>
-      <h3>Coca-Cola 350ml</h3>
-      <p>Lata 350ml.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 6,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Coca-Cola%20350ml%20-%20R%24%206%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Coca-Cola 350ml', 6)">+ Carrinho</button>
+
+
+  <!-- ===================================================
+       BEBIDAS
+       =================================================== -->
+  <section
+    class="secao"
+    id="bebidas"
+  >
+
+    <div class="secao-titulo">
+      <span>🥤</span>
+      <h2>Bebidas</h2>
+    </div>
+
+    <div class="grid">
+
+      <article class="item">
+        <div class="codigo">R01</div>
+        <h3>Coca-Cola 350ml</h3>
+
+        <p>
+          Lata 350ml.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 6,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Coca-Cola%20350ml%20-%20R%24%206%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('Coca-Cola 350ml', 6)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">R02</div>
-      <h3>Coca-Cola 2 litros</h3>
-      <p>Garrafa 2 litros.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 16,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Coca-Cola%202%20litros%20-%20R%24%2016%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Coca-Cola 2 litros', 16)">+ Carrinho</button>
+      </article>
+
+
+      <article class="item">
+        <div class="codigo">R02</div>
+        <h3>Coca-Cola 2 litros</h3>
+
+        <p>
+          Garrafa 2 litros.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 16,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Coca-Cola%202%20litros%20-%20R%24%2016%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('Coca-Cola 2 litros', 16)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">R03</div>
-      <h3>Guaraná 350ml</h3>
-      <p>Lata 350ml.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 6,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Guaran%C3%A1%20350ml%20-%20R%24%206%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Guaraná 350ml', 6)">+ Carrinho</button>
+      </article>
+
+
+      <article class="item">
+        <div class="codigo">R03</div>
+        <h3>Guaraná 350ml</h3>
+
+        <p>
+          Lata 350ml.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 6,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Guaran%C3%A1%20350ml%20-%20R%24%206%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('Guaraná 350ml', 6)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">R04</div>
-      <h3>Guaraná Antarctica 2 litros</h3>
-      <p>Garrafa 2 litros.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 16,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Guaran%C3%A1%20Antarctica%202%20litros%20-%20R%24%2016%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Guaraná Antarctica 2 litros', 16)">+ Carrinho</button>
+      </article>
+
+
+      <article class="item">
+        <div class="codigo">R04</div>
+        <h3>Guaraná Antarctica 2 litros</h3>
+
+        <p>
+          Garrafa 2 litros.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 16,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Guaran%C3%A1%20Antarctica%202%20litros%20-%20R%24%2016%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('Guaraná Antarctica 2 litros', 16)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">R05</div>
-      <h3>Fanta 350ml</h3>
-      <p>Lata 350ml - sabores.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 6,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Fanta%20350ml%20-%20R%24%206%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Fanta 350ml', 6)">+ Carrinho</button>
+      </article>
+
+
+      <article class="item">
+        <div class="codigo">R05</div>
+        <h3>Fanta 350ml</h3>
+
+        <p>
+          Lata 350ml - sabores.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 6,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Fanta%20350ml%20-%20R%24%206%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('Fanta 350ml', 6)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">R06</div>
-      <h3>Fanta 2 litros</h3>
-      <p>Garrafa 2 litros - sabores.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 16,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Fanta%202%20litros%20-%20R%24%2016%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Fanta 2 litros', 16)">+ Carrinho</button>
+      </article>
+
+
+      <article class="item">
+        <div class="codigo">R06</div>
+        <h3>Fanta 2 litros</h3>
+
+        <p>
+          Garrafa 2 litros - sabores.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 16,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Fanta%202%20litros%20-%20R%24%2016%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('Fanta 2 litros', 16)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">R07</div>
-      <h3>Sprite 350ml</h3>
-      <p>Lata 350ml.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 6,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Sprite%20350ml%20-%20R%24%206%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Sprite 350ml', 6)">+ Carrinho</button>
+      </article>
+
+
+      <article class="item">
+        <div class="codigo">R07</div>
+        <h3>Sprite 350ml</h3>
+
+        <p>
+          Lata 350ml.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 6,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Sprite%20350ml%20-%20R%24%206%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('Sprite 350ml', 6)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">R08</div>
-      <h3>Sprite 2 litros</h3>
-      <p>Garrafa 2 litros.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 16,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Sprite%202%20litros%20-%20R%24%2016%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Sprite 2 litros', 16)">+ Carrinho</button>
+      </article>
+
+
+      <article class="item">
+        <div class="codigo">R08</div>
+        <h3>Sprite 2 litros</h3>
+
+        <p>
+          Garrafa 2 litros.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 16,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Sprite%202%20litros%20-%20R%24%2016%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('Sprite 2 litros', 16)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">R09</div>
-      <h3>Vedete 2 litros</h3>
-      <p>Garrafa 2 litros - sabores.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 11,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Vedete%202%20litros%20-%20R%24%2011%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Vedete 2 litros', 11)">+ Carrinho</button>
+      </article>
+
+
+      <article class="item">
+        <div class="codigo">R09</div>
+        <h3>Vedete 2 litros</h3>
+
+        <p>
+          Garrafa 2 litros - sabores.
+        </p>
+
+        <div class="rodape-item">
+          <div class="preco">
+            R$ 11,00
+          </div>
+
+          <div class="acoes-item">
+
+            <a
+              class="btn btn-pedir"
+              href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Vedete%202%20litros%20-%20R%24%2011%2C00"
+              target="_blank"
+              rel="noopener"
+            >
+              Pedir direto
+            </a>
+
+            <button
+              class="btn btn-add"
+              onclick="adicionarAoCarrinho('Vedete 2 litros', 11)"
+            >
+              + Carrinho
+            </button>
+
+          </div>
         </div>
-      </div>
-    </article></div>
+      </article>
+
+    </div>
+
   </section>
+
 </main>
 
-<button class="carrinho-flutuante" onclick="abrirCarrinho()">🛒 Carrinho (<span id="cartCount">0</span>)</button>
 
-<div class="modal" id="modalCarrinho">
+<!-- =====================================================
+     CARRINHO FLUTUANTE
+     ===================================================== -->
+<button
+  class="carrinho-flutuante"
+  onclick="abrirCarrinho()"
+>
+  🛒 Carrinho
+  (<span id="cartCount">0</span>)
+</button>
+
+
+<!-- =====================================================
+     MODAL CARRINHO
+     ===================================================== -->
+<div
+  class="modal"
+  id="modalCarrinho"
+>
+
   <div class="modal-conteudo">
-    <div class="modal-topo"><h3>Seu pedido</h3><button class="fechar" onclick="fecharCarrinho()">×</button></div>
-    <div class="modal-corpo">
-      <div id="listaCarrinho"></div>
-      <div class="resumo">
-        <div class="linha-resumo"><span>Itens</span><strong id="resumoItens">0</strong></div>
-        <div class="linha-resumo"><span>Subtotal</span><strong id="resumoSubtotal">R$ 0,00</strong></div>
-        <div class="linha-resumo"><span>Taxa de entrega</span><strong id="resumoTaxaEntrega">A confirmar</strong></div>
-        <div class="linha-resumo total"><span>Total dos itens</span><strong id="resumoTotal">R$ 0,00</strong></div>
-      </div>
-      <div class="dados-pedido">
-        <div class="campo"><label for="nomeCliente">Seu nome</label><input type="text" id="nomeCliente" placeholder="Digite seu nome"></div>
-        <div class="campo"><label for="tipoEntrega">Tipo do pedido</label><select id="tipoEntrega" onchange="atualizarEntrega()"><option value="retirada">Retirada no local</option><option value="delivery">Delivery</option></select></div>
-        <div class="entrega-box">
-          <div id="camposEntrega" style="display:none;">
-            <div class="campo"><label for="cepEntrega">CEP</label><input type="text" id="cepEntrega" placeholder="00000-000" maxlength="9" autocomplete="postal-code"></div>
-            <div class="campo"><label for="ruaEntrega">Rua</label><input type="text" id="ruaEntrega" placeholder="Nome da rua" autocomplete="address-line1"></div>
-            <div class="campo"><label for="numeroEntrega">Número</label><input type="text" id="numeroEntrega" placeholder="Ex.: 315"></div>
-            <div class="campo"><label for="bairroEntrega">Bairro</label><input type="text" id="bairroEntrega" placeholder="Bairro"></div>
-            <div class="campo"><label for="cidadeEntrega">Cidade</label><input type="text" id="cidadeEntrega" value="Sorocaba" placeholder="Cidade"></div>
-            <div class="campo"><label for="complementoEntrega">Complemento</label><input type="text" id="complementoEntrega" placeholder="Casa, ap, referência..."></div>
-          </div>
-          <div class="aviso-entrega" id="avisoEntrega">Retirada no local sem taxa de entrega.</div>
-        </div>
-        <div class="campo"><label for="formaPagamento">Forma de pagamento</label><select id="formaPagamento" onchange="atualizarPagamento()"><option value="">Selecione</option><option value="Dinheiro">Dinheiro</option><option value="Cartão">Cartão</option></select><div id="boxPix" style="display:none"><b id="chavePixTexto"></b></div></div>
-        <div class="campo"><label for="observacoes">Observações do pedido</label><textarea id="observacoes" rows="4" placeholder="Ex.: sem cebola, sem milho, troco para R$ 50..."></textarea></div>
-      </div>
-      <div class="acoes-final"><button class="btn btn-limpar" onclick="limparCarrinho()">Limpar carrinho</button><button class="btn btn-finalizar" id="btnFinalizarWhatsapp" onclick="finalizarPedido(true)">Finalizar no WhatsApp</button><button class="btn btn-finalizar ghost" id="btnFinalizar" onclick="finalizarPedido(false)">Salvar pedido</button></div>
-      <div class="obs">Para delivery, a taxa deve ser confirmada com a loja pelo WhatsApp.</div>
+
+    <div class="modal-topo">
+
+      <h3>
+        Seu pedido
+      </h3>
+
+      <button
+        class="fechar"
+        onclick="fecharCarrinho()"
+      >
+        ×
+      </button>
+
     </div>
+
+    <div class="modal-corpo">
+
+      <div id="listaCarrinho"></div>
+
+
+      <div class="resumo">
+
+        <div class="linha-resumo">
+          <span>Itens</span>
+          <strong id="resumoItens">
+            0
+          </strong>
+        </div>
+
+        <div class="linha-resumo">
+          <span>Subtotal</span>
+          <strong id="resumoSubtotal">
+            R$ 0,00
+          </strong>
+        </div>
+
+        <div class="linha-resumo">
+          <span>Taxa de entrega</span>
+          <strong id="resumoTaxaEntrega">
+            A confirmar
+          </strong>
+        </div>
+
+        <div class="linha-resumo total">
+          <span>Total dos itens</span>
+          <strong id="resumoTotal">
+            R$ 0,00
+          </strong>
+        </div>
+
+      </div>
+
+
+      <!-- ===============================================
+           DADOS DO PEDIDO
+           =============================================== -->
+      <div class="dados-pedido">
+
+        <div class="campo">
+
+          <label for="nomeCliente">
+            Seu nome
+          </label>
+
+          <input
+            type="text"
+            id="nomeCliente"
+            placeholder="Digite seu nome"
+          >
+
+        </div>
+
+
+        <div class="campo">
+
+          <label for="tipoEntrega">
+            Tipo do pedido
+          </label>
+
+          <select
+            id="tipoEntrega"
+            onchange="atualizarEntrega()"
+          >
+            <option value="retirada">
+              Retirada no local
+            </option>
+
+            <option value="delivery">
+              Delivery
+            </option>
+          </select>
+
+        </div>
+
+
+        <!-- =============================================
+             ENTREGA
+             ============================================= -->
+        <div class="entrega-box">
+
+          <div
+            id="camposEntrega"
+            style="display:none;"
+          >
+
+            <div class="campo">
+
+              <label for="cepEntrega">
+                CEP
+              </label>
+
+              <input
+                type="text"
+                id="cepEntrega"
+                placeholder="00000-000"
+                maxlength="9"
+                autocomplete="postal-code"
+              >
+
+            </div>
+
+
+            <div class="campo">
+
+              <label for="ruaEntrega">
+                Rua
+              </label>
+
+              <input
+                type="text"
+                id="ruaEntrega"
+                placeholder="Nome da rua"
+                autocomplete="address-line1"
+              >
+
+            </div>
+
+
+            <div class="campo">
+
+              <label for="numeroEntrega">
+                Número
+              </label>
+
+              <input
+                type="text"
+                id="numeroEntrega"
+                placeholder="Ex.: 315"
+              >
+
+            </div>
+
+
+            <div class="campo">
+
+              <label for="bairroEntrega">
+                Bairro
+              </label>
+
+              <input
+                type="text"
+                id="bairroEntrega"
+                placeholder="Bairro"
+              >
+
+            </div>
+
+
+            <div class="campo">
+
+              <label for="cidadeEntrega">
+                Cidade
+              </label>
+
+              <input
+                type="text"
+                id="cidadeEntrega"
+                value="Sorocaba"
+                placeholder="Cidade"
+              >
+
+            </div>
+
+
+            <div class="campo">
+
+              <label for="complementoEntrega">
+                Complemento
+              </label>
+
+              <input
+                type="text"
+                id="complementoEntrega"
+                placeholder="Casa, ap, referência..."
+              >
+
+            </div>
+
+          </div>
+
+
+          <div
+            class="aviso-entrega"
+            id="avisoEntrega"
+          >
+            Retirada no local sem taxa de entrega.
+          </div>
+
+        </div>
+
+
+        <!-- =============================================
+             PAGAMENTO
+             ============================================= -->
+        <div class="campo">
+
+          <label for="formaPagamento">
+            Forma de pagamento
+          </label>
+
+          <select
+            id="formaPagamento"
+            onchange="atualizarPagamento()"
+          >
+
+            <option value="">
+              Selecione
+            </option>
+
+            <option value="Dinheiro">
+              Dinheiro
+            </option>
+
+            <option value="Cartão">
+              Cartão
+            </option>
+
+          </select>
+
+
+          <div
+            id="boxPix"
+            style="display:none"
+          >
+            <b id="chavePixTexto"></b>
+          </div>
+
+        </div>
+
+
+        <!-- =============================================
+             OBSERVAÇÕES
+             ============================================= -->
+        <div class="campo">
+
+          <label for="observacoes">
+            Observações do pedido
+          </label>
+
+          <textarea
+            id="observacoes"
+            rows="4"
+            placeholder="Ex.: sem cebola, sem milho, troco para R$ 50..."
+          ></textarea>
+
+        </div>
+
+      </div>
+
+
+      <!-- ===============================================
+           AÇÕES FINAIS
+           =============================================== -->
+      <div class="acoes-final">
+
+        <button
+          class="btn btn-limpar"
+          onclick="limparCarrinho()"
+        >
+          Limpar carrinho
+        </button>
+
+        <button
+          class="btn btn-finalizar"
+          id="btnFinalizarWhatsapp"
+          onclick="finalizarPedido(true)"
+        >
+          Finalizar no WhatsApp
+        </button>
+
+        <button
+          class="btn btn-finalizar ghost"
+          id="btnFinalizar"
+          onclick="finalizarPedido(false)"
+        >
+          Salvar pedido
+        </button>
+
+      </div>
+
+
+      <div class="obs">
+        Para delivery, a taxa deve ser
+        confirmada com a loja pelo WhatsApp.
+      </div>
+
+    </div>
+
   </div>
+
 </div>
 
-<div class="modal" id="modalOpcoesProduto" style="display:none;">
-  <div class="modal-conteudo"><div class="modal-topo"><h3 id="tituloOpcoesProduto">Personalize seu item</h3><button class="fechar" onclick="fecharOpcoesProduto()">×</button></div><div class="modal-corpo"><div id="descricaoOpcoesProduto"></div><div id="listaOpcoesProduto"></div><div class="acoes-final"><button class="btn btn-limpar" onclick="fecharOpcoesProduto()">Cancelar</button><button class="btn btn-finalizar" onclick="confirmarOpcoesProduto()">Adicionar ao carrinho</button></div></div></div>
+
+<!-- =====================================================
+     MODAL PERSONALIZAÇÃO
+     ===================================================== -->
+<div
+  class="modal"
+  id="modalOpcoesProduto"
+  style="display:none;"
+>
+
+  <div class="modal-conteudo">
+
+    <div class="modal-topo">
+
+      <h3 id="tituloOpcoesProduto">
+        Personalize seu item
+      </h3>
+
+      <button
+        class="fechar"
+        onclick="fecharOpcoesProduto()"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div class="modal-corpo">
+
+      <div id="descricaoOpcoesProduto"></div>
+
+      <div id="listaOpcoesProduto"></div>
+
+
+      <div class="acoes-final">
+
+        <button
+          class="btn btn-limpar"
+          onclick="fecharOpcoesProduto()"
+        >
+          Cancelar
+        </button>
+
+        <button
+          class="btn btn-finalizar"
+          onclick="confirmarOpcoesProduto()"
+        >
+          Adicionar ao carrinho
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
 </div>
 
+
+<!-- =====================================================
+     RODAPÉ
+     ===================================================== -->
 <footer>
-  <img src="img/le-lanches-logo.png" alt="Lê Lanches">
-  <p><strong>Lê Lanches</strong> • Prensados • Smash • Fritas</p>
-  <p>Quarta a domingo, 19h às 23h • (15) 99631-4700</p>
-  <p>R. Firmino Mineli, 315 - Jardim Hungares, Sorocaba - SP</p>
-  <p class="dev">Desenvolvido por <strong>SMATech</strong> – Criação de Sites e Sistemas personalizados • <a href="https://wa.me/5515998363325?text=Olá,%20quero%20um%20orçamento" target="_blank">(15) 99836-3325</a></p>
+
+  <img
+    src="img/le-lanches-logo.png"
+    alt="Lê Lanches"
+  >
+
+  <p>
+    <strong>Lê Lanches</strong>
+    • Prensados
+    • Smash
+    • Fritas
+  </p>
+
+  <p>
+    Quarta a domingo,
+    19h às 23h
+    • (15) 99631-4700
+  </p>
+
+  <p>
+    R. Firmino Mineli, 315 -
+    Jardim Hungares,
+    Sorocaba - SP
+  </p>
+
+  <p class="dev">
+    Desenvolvido por
+    <strong>SMATech</strong>
+    – Criação de Sites e Sistemas personalizados
+    •
+
+    <a
+      href="https://wa.me/5515998363325?text=Olá,%20quero%20um%20orçamento"
+      target="_blank"
+      rel="noopener"
+    >
+      (15) 99836-3325
+    </a>
+
+  </p>
+
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/config.js?v=20260818-lelanches"></script>
-<script src="js/app.js?v=20260818-lelanches"></script>
+
+<!-- =====================================================
+     SCRIPTS
+     ===================================================== -->
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<script
+  src="js/config.js?v=20260818-lelanches"
+></script>
+
+<script
+  src="js/app.js?v=20260818-lelanches"
+></script>
+
 </body>
 </html>
