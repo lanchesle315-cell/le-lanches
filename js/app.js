@@ -42,28 +42,107 @@ let produtoOpcoesAtual = null;
 let adicionalPendente = null;
 let coordenadaClienteCache = null;
 let produtoPersonalizacaoAtual = null;
+let timeoutToastLeLanches = null;
 
-const INGREDIENTES_REMOVIVEIS_PADRAO = ['Tomate','Cebola','Alface','Milho','Ketchup','Maionese temperada','Mostarda','Batata palha'];
+const INGREDIENTES_REMOVIVEIS_PADRAO = [
+  'Tomate',
+  'Cebola',
+  'Alface',
+  'Milho',
+  'Ketchup',
+  'Maionese temperada',
+  'Mostarda',
+  'Batata palha'
+];
 
 const INGREDIENTES_POR_LANCHE = {
-  'simples': ['Batata palha','Purê de batata','Tomate','Cebola','Alface','Milho','Ketchup','Maionese temperada','Mostarda'],
-  'duplo': ['Batata palha','Purê de batata','Tomate','Cebola','Alface','Milho','Ketchup','Maionese temperada','Mostarda'],
-  'especial': ['Batata palha','Purê de batata','Tomate','Cebola','Alface','Milho','Ketchup','Maionese temperada','Mostarda'],
-  'x-burguer': ['Batata palha','Tomate','Cebola','Ketchup','Maionese temperada','Mostarda'],
-  'x-salada': ['Batata palha','Tomate','Cebola','Alface','Milho','Ketchup','Maionese temperada','Mostarda'],
-  'x-egg': ['Batata palha','Tomate','Cebola','Alface','Milho','Ketchup','Maionese temperada','Mostarda'],
-  'x-bacon': ['Batata palha','Tomate','Cebola','Alface','Milho','Ketchup','Maionese temperada','Mostarda'],
-  'x-calabresa': ['Batata palha','Tomate','Cebola','Alface','Milho','Ketchup','Maionese temperada','Mostarda'],
-  'x-frango': ['Tomate','Cebola','Alface','Milho','Ketchup','Maionese temperada','Mostarda'],
-  'x-tudo': ['Batata palha','Tomate','Cebola','Alface','Milho','Ketchup','Maionese temperada','Mostarda'],
-  'calabacon': ['Batata palha','Tomate','Cebola','Alface','Milho','Ketchup','Maionese temperada','Mostarda'],
-  'franbacon': ['Tomate','Cebola','Alface','Milho','Ketchup','Maionese temperada','Mostarda'],
-  'calafrango': ['Tomate','Cebola','Alface','Milho','Ketchup','Maionese temperada','Mostarda'],
-  'x-costela': ['Batata palha','Tomate','Cebola','Ketchup','Maionese temperada','Mostarda'],
-  'smash salada': ['Alface','Tomate','Picles','Cebola','Maionese temperada'],
-  'smash oklahoma': ['Cebola','Picles','Maionese temperada'],
-  'smash bacon': ['Maionese temperada']
+  'simples': [
+    'Batata palha','Purê de batata','Tomate','Cebola',
+    'Alface','Milho','Ketchup','Maionese temperada','Mostarda'
+  ],
+
+  'duplo': [
+    'Batata palha','Purê de batata','Tomate','Cebola',
+    'Alface','Milho','Ketchup','Maionese temperada','Mostarda'
+  ],
+
+  'especial': [
+    'Batata palha','Purê de batata','Tomate','Cebola',
+    'Alface','Milho','Ketchup','Maionese temperada','Mostarda'
+  ],
+
+  'x-burguer': [
+    'Batata palha','Tomate','Cebola',
+    'Ketchup','Maionese temperada','Mostarda'
+  ],
+
+  'x-salada': [
+    'Batata palha','Tomate','Cebola','Alface',
+    'Milho','Ketchup','Maionese temperada','Mostarda'
+  ],
+
+  'x-egg': [
+    'Batata palha','Tomate','Cebola','Alface',
+    'Milho','Ketchup','Maionese temperada','Mostarda'
+  ],
+
+  'x-bacon': [
+    'Batata palha','Tomate','Cebola','Alface',
+    'Milho','Ketchup','Maionese temperada','Mostarda'
+  ],
+
+  'x-calabresa': [
+    'Batata palha','Tomate','Cebola','Alface',
+    'Milho','Ketchup','Maionese temperada','Mostarda'
+  ],
+
+  'x-frango': [
+    'Tomate','Cebola','Alface','Milho',
+    'Ketchup','Maionese temperada','Mostarda'
+  ],
+
+  'x-tudo': [
+    'Batata palha','Tomate','Cebola','Alface',
+    'Milho','Ketchup','Maionese temperada','Mostarda'
+  ],
+
+  'calabacon': [
+    'Batata palha','Tomate','Cebola','Alface',
+    'Milho','Ketchup','Maionese temperada','Mostarda'
+  ],
+
+  'franbacon': [
+    'Tomate','Cebola','Alface','Milho',
+    'Ketchup','Maionese temperada','Mostarda'
+  ],
+
+  'calafrango': [
+    'Tomate','Cebola','Alface','Milho',
+    'Ketchup','Maionese temperada','Mostarda'
+  ],
+
+  'x-costela': [
+    'Batata palha','Tomate','Cebola',
+    'Ketchup','Maionese temperada','Mostarda'
+  ],
+
+  'smash salada': [
+    'Alface','Tomate','Picles','Cebola','Maionese temperada'
+  ],
+
+  'smash oklahoma': [
+    'Cebola','Picles','Maionese temperada'
+  ],
+
+  'smash bacon': [
+    'Maionese temperada'
+  ]
 };
+
+
+/* =========================================================
+   UTILITÁRIOS
+========================================================= */
 
 function formatarPreco(valor) {
   return Number(valor || 0).toLocaleString('pt-BR', {
@@ -92,82 +171,286 @@ function escaparHtml(texto) {
 }
 
 function formatarTipoEntregaTexto(tipo) {
-  return tipo === 'delivery' ? 'Delivery' : 'Retirada no local';
-}
-
-function isIOS() {
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-}
-
-function abrirWhatsapp(url) {
-  const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-  if (mobile) {
-    window.location.href = url;
-  } else {
-    window.open(url, '_blank');
-  }
+  return tipo === 'delivery'
+    ? 'Delivery'
+    : 'Retirada no local';
 }
 
 function byId(id) {
   return document.getElementById(id);
 }
 
-function garantirModalOpcoesForaDoCarrinho() {
-  const modalOpcoes = byId('modalOpcoesProduto');
 
-  if (modalOpcoes && modalOpcoes.parentElement !== document.body) {
-    document.body.appendChild(modalOpcoes);
+/* =========================================================
+   TOAST
+========================================================= */
+
+function mostrarToastLeLanches(mensagem) {
+  const toast = byId('llToast');
+  const texto = byId('llToastTexto');
+
+  if (!toast || !texto) {
+    return;
+  }
+
+  texto.innerText =
+    mensagem || 'Item adicionado ao carrinho.';
+
+  toast.classList.add('ativo');
+
+  clearTimeout(timeoutToastLeLanches);
+
+  timeoutToastLeLanches = setTimeout(() => {
+    toast.classList.remove('ativo');
+  }, 2200);
+}
+
+
+/* =========================================================
+   BUSCA DO CARDÁPIO
+========================================================= */
+
+function filtrarCardapio() {
+  const campo = byId('buscaCardapio');
+  const mensagemVazia = byId('mensagemBuscaVazia');
+
+  if (!campo) {
+    return;
+  }
+
+  const termo = removerAcentos(
+    campo.value.trim().toLowerCase()
+  );
+
+  const cards = Array.from(
+    document.querySelectorAll('.ll-product-col')
+  );
+
+  let visiveis = 0;
+
+  cards.forEach(card => {
+
+    const texto = removerAcentos(
+      String(
+        card.dataset.search ||
+        card.innerText ||
+        ''
+      ).toLowerCase()
+    );
+
+    const mostrar =
+      !termo ||
+      texto.includes(termo);
+
+    card.classList.toggle(
+      'd-none',
+      !mostrar
+    );
+
+    if (mostrar) {
+      visiveis += 1;
+    }
+  });
+
+  document
+    .querySelectorAll('.ll-section')
+    .forEach(secao => {
+
+      const temProdutoVisivel = Array
+        .from(
+          secao.querySelectorAll(
+            '.ll-product-col'
+          )
+        )
+        .some(
+          card =>
+            !card.classList.contains(
+              'd-none'
+            )
+        );
+
+      secao.classList.toggle(
+        'd-none',
+        !temProdutoVisivel
+      );
+    });
+
+  if (mensagemVazia) {
+    mensagemVazia.classList.toggle(
+      'd-none',
+      visiveis > 0
+    );
   }
 }
 
+function limparBuscaCardapio() {
+  const campo = byId('buscaCardapio');
+
+  if (!campo) {
+    return;
+  }
+
+  campo.value = '';
+
+  filtrarCardapio();
+
+  campo.focus();
+}
+
+
+/* =========================================================
+   WHATSAPP
+========================================================= */
+
+function abrirWhatsapp(url) {
+
+  const mobile =
+    /Android|iPhone|iPad|iPod/i.test(
+      navigator.userAgent
+    );
+
+  if (mobile) {
+    window.location.href = url;
+  } else {
+    window.open(
+      url,
+      '_blank'
+    );
+  }
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+function garantirModalOpcoesForaDoCarrinho() {
+
+  const modalOpcoes =
+    byId('modalOpcoesProduto');
+
+  if (
+    modalOpcoes &&
+    modalOpcoes.parentElement !== document.body
+  ) {
+    document.body.appendChild(
+      modalOpcoes
+    );
+  }
+}
+
+
+/* =========================================================
+   PAGAMENTO
+========================================================= */
+
 function atualizarPagamento() {
-  const pagamento = byId('formaPagamento')?.value || '';
-  const boxPix = byId('boxPix');
 
-  if (!boxPix) return;
+  const pagamento =
+    byId('formaPagamento')?.value || '';
 
-  boxPix.style.display = pagamento.toLowerCase() === 'pix' ? 'block' : 'none';
+  const boxPix =
+    byId('boxPix');
+
+  if (!boxPix) {
+    return;
+  }
+
+  boxPix.style.display =
+    pagamento.toLowerCase() === 'pix'
+      ? 'block'
+      : 'none';
 }
 
 function copiarPix() {
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(CHAVE_PIX)
+
+  if (
+    navigator.clipboard &&
+    navigator.clipboard.writeText
+  ) {
+
+    navigator.clipboard
+      .writeText(CHAVE_PIX)
       .then(() => {
-        alert('Chave PIX copiada com sucesso!');
+        alert(
+          'Chave PIX copiada com sucesso!'
+        );
       })
       .catch(() => {
-        alert('Não foi possível copiar automaticamente. Chave PIX: ' + CHAVE_PIX);
+        alert(
+          'Não foi possível copiar automaticamente. Chave PIX: ' +
+          CHAVE_PIX
+        );
       });
+
   } else {
-    alert('Chave PIX: ' + CHAVE_PIX);
+
+    alert(
+      'Chave PIX: ' +
+      CHAVE_PIX
+    );
   }
 }
 
+
+/* =========================================================
+   STATUS DA LOJA
+========================================================= */
+
 function obterElementoStatusLoja() {
-  return byId('statusLoja') || byId('status-loja');
+  return (
+    byId('statusLoja') ||
+    byId('status-loja')
+  );
 }
 
+
+/* =========================================================
+   ENDEREÇO
+========================================================= */
+
 function obterCamposEndereco() {
+
   return {
     cep: byId('cepEntrega'),
     rua: byId('ruaEntrega'),
     numero: byId('numeroEntrega'),
     bairro: byId('bairroEntrega'),
     cidade: byId('cidadeEntrega'),
-    complemento: byId('complementoEntrega')
+    complemento:
+      byId('complementoEntrega')
   };
 }
 
 function definirBloqueioCampos() {
-  const { cep, rua, numero, bairro, cidade } = obterCamposEndereco();
 
-  if (cep) cep.readOnly = false;
-  if (rua) rua.readOnly = true;
-  if (bairro) bairro.readOnly = true;
-  if (cidade) cidade.readOnly = true;
-  if (numero) numero.readOnly = false;
+  const {
+    cep,
+    rua,
+    numero,
+    bairro,
+    cidade
+  } = obterCamposEndereco();
+
+  if (cep) {
+    cep.readOnly = false;
+  }
+
+  if (rua) {
+    rua.readOnly = true;
+  }
+
+  if (bairro) {
+    bairro.readOnly = true;
+  }
+
+  if (cidade) {
+    cidade.readOnly = true;
+  }
+
+  if (numero) {
+    numero.readOnly = false;
+  }
 }
 
 function limparBloqueiosEndereco() {
@@ -179,160 +462,388 @@ function limparCacheCoordenadaCliente() {
 }
 
 function obterEnderecoAtualComoChave() {
-  const rua = byId('ruaEntrega')?.value.trim() || '';
-  const numero = byId('numeroEntrega')?.value.trim() || '';
-  const bairro = byId('bairroEntrega')?.value.trim() || '';
-  const cidade = byId('cidadeEntrega')?.value.trim() || 'Sorocaba';
-  const cep = byId('cepEntrega')?.value.trim() || '';
 
-  return [rua, numero, bairro, cidade, cep].join('|').toLowerCase();
+  const rua =
+    byId('ruaEntrega')?.value.trim() || '';
+
+  const numero =
+    byId('numeroEntrega')?.value.trim() || '';
+
+  const bairro =
+    byId('bairroEntrega')?.value.trim() || '';
+
+  const cidade =
+    byId('cidadeEntrega')?.value.trim() ||
+    'Sorocaba';
+
+  const cep =
+    byId('cepEntrega')?.value.trim() || '';
+
+  return [
+    rua,
+    numero,
+    bairro,
+    cidade,
+    cep
+  ]
+    .join('|')
+    .toLowerCase();
 }
 
-function salvarCoordenadaClienteNoCache(coordenada) {
-  if (!coordenada) return;
+function salvarCoordenadaClienteNoCache(
+  coordenada
+) {
+
+  if (!coordenada) {
+    return;
+  }
 
   coordenadaClienteCache = {
-    chave: obterEnderecoAtualComoChave(),
-    valor: coordenada
+    chave:
+      obterEnderecoAtualComoChave(),
+
+    valor:
+      coordenada
   };
 }
 
 function obterCoordenadaClienteDoCache() {
-  const chaveAtual = obterEnderecoAtualComoChave();
 
-  if (coordenadaClienteCache && coordenadaClienteCache.chave === chaveAtual) {
+  const chaveAtual =
+    obterEnderecoAtualComoChave();
+
+  if (
+    coordenadaClienteCache &&
+    coordenadaClienteCache.chave ===
+      chaveAtual
+  ) {
     return coordenadaClienteCache.valor;
   }
 
   return null;
 }
 
-function obterIngredientesRemoviveisPorLanche(nome) {
-  const nomeNormalizado = removerAcentos(String(nome || '').toLowerCase());
 
-  const chavesOrdenadas = Object.keys(INGREDIENTES_POR_LANCHE)
-    .sort((a, b) => b.length - a.length);
+/* =========================================================
+   INGREDIENTES
+========================================================= */
 
-  for (const chave of chavesOrdenadas) {
-    const chaveNormalizada = removerAcentos(chave.toLowerCase());
+function obterIngredientesRemoviveisPorLanche(
+  nome
+) {
 
-    if (nomeNormalizado.includes(chaveNormalizada)) {
-      return INGREDIENTES_POR_LANCHE[chave];
+  const nomeNormalizado =
+    removerAcentos(
+      String(nome || '').toLowerCase()
+    );
+
+  const chavesOrdenadas =
+    Object
+      .keys(INGREDIENTES_POR_LANCHE)
+      .sort(
+        (a, b) =>
+          b.length - a.length
+      );
+
+  for (
+    const chave of chavesOrdenadas
+  ) {
+
+    const chaveNormalizada =
+      removerAcentos(
+        chave.toLowerCase()
+      );
+
+    if (
+      nomeNormalizado.includes(
+        chaveNormalizada
+      )
+    ) {
+      return (
+        INGREDIENTES_POR_LANCHE[
+          chave
+        ]
+      );
     }
   }
 
-  return INGREDIENTES_REMOVIVEIS_PADRAO;
+  return (
+    INGREDIENTES_REMOVIVEIS_PADRAO
+  );
 }
 
+
+/* =========================================================
+   CEP
+========================================================= */
+
 function aplicarMascaraCep() {
-  const input = byId('cepEntrega');
-  if (!input) return;
 
-  input.addEventListener('input', function () {
-    let valor = somenteNumeros(input.value).slice(0, 8);
+  const input =
+    byId('cepEntrega');
 
-    if (valor.length > 5) {
-      valor = valor.slice(0, 5) + '-' + valor.slice(5);
+  if (!input) {
+    return;
+  }
+
+  input.addEventListener(
+    'input',
+    function () {
+
+      let valor =
+        somenteNumeros(
+          input.value
+        ).slice(0, 8);
+
+      if (valor.length > 5) {
+        valor =
+          valor.slice(0, 5) +
+          '-' +
+          valor.slice(5);
+      }
+
+      input.value = valor;
+
+      limparCacheCoordenadaCliente();
+
+      if (
+        somenteNumeros(
+          input.value
+        ).length === 8
+      ) {
+
+        buscarCepEntrega();
+
+      } else {
+
+        agendarCalculoEntrega();
+      }
     }
+  );
 
-    input.value = valor;
-    limparCacheCoordenadaCliente();
-
-    if (somenteNumeros(input.value).length === 8) {
-      buscarCepEntrega();
-    } else {
-      agendarCalculoEntrega();
-    }
-  });
-
-  input.addEventListener('blur', buscarCepEntrega);
+  input.addEventListener(
+    'blur',
+    buscarCepEntrega
+  );
 }
 
 function aplicarEventosEntrega() {
-  ['numeroEntrega', 'complementoEntrega'].forEach(id => {
+
+  [
+    'numeroEntrega',
+    'complementoEntrega'
+  ].forEach(id => {
+
     const campo = byId(id);
-    if (!campo) return;
 
-    campo.addEventListener('input', () => {
-      limparCacheCoordenadaCliente();
-      agendarCalculoEntrega();
-    });
+    if (!campo) {
+      return;
+    }
 
-    campo.addEventListener('change', () => {
-      limparCacheCoordenadaCliente();
-      agendarCalculoEntrega();
-    });
+    campo.addEventListener(
+      'input',
+      () => {
 
-    campo.addEventListener('blur', () => {
-      agendarCalculoEntrega();
-    });
+        limparCacheCoordenadaCliente();
+
+        agendarCalculoEntrega();
+      }
+    );
+
+    campo.addEventListener(
+      'change',
+      () => {
+
+        limparCacheCoordenadaCliente();
+
+        agendarCalculoEntrega();
+      }
+    );
+
+    campo.addEventListener(
+      'blur',
+      () => {
+
+        agendarCalculoEntrega();
+      }
+    );
   });
 }
 
 function agendarCalculoEntrega() {
-  clearTimeout(timeoutCalculoEntrega);
-  timeoutCalculoEntrega = setTimeout(() => {
-    calcularEntregaAutomaticamente();
-  }, 700);
+
+  clearTimeout(
+    timeoutCalculoEntrega
+  );
+
+  timeoutCalculoEntrega =
+    setTimeout(
+      () => {
+
+        calcularEntregaAutomaticamente();
+
+      },
+      700
+    );
 }
 
 function montarEnderecoCompletoCliente() {
-  const rua = byId('ruaEntrega')?.value.trim() || '';
-  const numero = byId('numeroEntrega')?.value.trim() || '';
-  const bairro = byId('bairroEntrega')?.value.trim() || '';
-  const cidade = byId('cidadeEntrega')?.value.trim() || 'Sorocaba';
-  const cep = byId('cepEntrega')?.value.trim() || '';
+
+  const rua =
+    byId('ruaEntrega')?.value.trim() || '';
+
+  const numero =
+    byId('numeroEntrega')?.value.trim() || '';
+
+  const bairro =
+    byId('bairroEntrega')?.value.trim() || '';
+
+  const cidade =
+    byId('cidadeEntrega')?.value.trim() ||
+    'Sorocaba';
+
+  const cep =
+    byId('cepEntrega')?.value.trim() || '';
 
   const partes = [];
 
-  if (rua) partes.push(rua);
-  if (numero) partes.push(numero);
-  if (bairro) partes.push(bairro);
-  if (cidade) partes.push(cidade);
+  if (rua) {
+    partes.push(rua);
+  }
+
+  if (numero) {
+    partes.push(numero);
+  }
+
+  if (bairro) {
+    partes.push(bairro);
+  }
+
+  if (cidade) {
+    partes.push(cidade);
+  }
+
   partes.push('SP');
-  if (cep) partes.push(cep);
+
+  if (cep) {
+    partes.push(cep);
+  }
+
   partes.push('Brasil');
 
   return partes.join(', ');
 }
 
 function enderecoClienteTextoHumano() {
-  const rua = byId('ruaEntrega')?.value.trim() || '';
-  const numero = byId('numeroEntrega')?.value.trim() || '';
-  const bairro = byId('bairroEntrega')?.value.trim() || '';
-  const cidade = byId('cidadeEntrega')?.value.trim() || 'Sorocaba';
-  const cep = byId('cepEntrega')?.value.trim() || '';
-  const complemento = byId('complementoEntrega')?.value.trim() || '';
+
+  const rua =
+    byId('ruaEntrega')?.value.trim() || '';
+
+  const numero =
+    byId('numeroEntrega')?.value.trim() || '';
+
+  const bairro =
+    byId('bairroEntrega')?.value.trim() || '';
+
+  const cidade =
+    byId('cidadeEntrega')?.value.trim() ||
+    'Sorocaba';
+
+  const cep =
+    byId('cepEntrega')?.value.trim() || '';
+
+  const complemento =
+    byId('complementoEntrega')?.value.trim() ||
+    '';
 
   const partes = [];
 
-  if (rua) partes.push(rua);
-  if (numero) partes.push(numero);
-  if (bairro) partes.push(bairro);
-  if (cidade) partes.push(cidade);
-  if (cep) partes.push(`CEP ${cep}`);
-  if (complemento) partes.push(complemento);
+  if (rua) {
+    partes.push(rua);
+  }
+
+  if (numero) {
+    partes.push(numero);
+  }
+
+  if (bairro) {
+    partes.push(bairro);
+  }
+
+  if (cidade) {
+    partes.push(cidade);
+  }
+
+  if (cep) {
+    partes.push(
+      `CEP ${cep}`
+    );
+  }
+
+  if (complemento) {
+    partes.push(
+      complemento
+    );
+  }
 
   return partes.join(', ');
 }
 
+
+/* =========================================================
+   BUSCAR CEP
+========================================================= */
+
 async function buscarCepEntrega() {
-  const campoCep = byId('cepEntrega');
-  const avisoEntrega = byId('avisoEntrega');
-  const ruaCampo = byId('ruaEntrega');
-  const bairroCampo = byId('bairroEntrega');
-  const cidadeCampo = byId('cidadeEntrega');
-  const numeroCampo = byId('numeroEntrega');
 
-  if (!campoCep || !avisoEntrega) return;
+  const campoCep =
+    byId('cepEntrega');
 
-  const cep = somenteNumeros(campoCep.value);
+  const avisoEntrega =
+    byId('avisoEntrega');
+
+  const ruaCampo =
+    byId('ruaEntrega');
+
+  const bairroCampo =
+    byId('bairroEntrega');
+
+  const cidadeCampo =
+    byId('cidadeEntrega');
+
+  const numeroCampo =
+    byId('numeroEntrega');
+
+  if (
+    !campoCep ||
+    !avisoEntrega
+  ) {
+    return;
+  }
+
+  const cep =
+    somenteNumeros(
+      campoCep.value
+    );
 
   if (!cep) {
-    if (ruaCampo) ruaCampo.value = '';
-    if (bairroCampo) bairroCampo.value = '';
-    if (cidadeCampo) cidadeCampo.value = 'Sorocaba';
-    if (numeroCampo) numeroCampo.value = '';
+
+    if (ruaCampo) {
+      ruaCampo.value = '';
+    }
+
+    if (bairroCampo) {
+      bairroCampo.value = '';
+    }
+
+    if (cidadeCampo) {
+      cidadeCampo.value =
+        'Sorocaba';
+    }
+
+    if (numeroCampo) {
+      numeroCampo.value = '';
+    }
 
     taxaEntrega = 0;
     distanciaEntregaKm = null;
@@ -341,33 +852,61 @@ async function buscarCepEntrega() {
     limparBloqueiosEndereco();
     limparCacheCoordenadaCliente();
 
-    avisoEntrega.innerText = 'Digite o CEP para buscar o endereço.';
+    avisoEntrega.innerText =
+      'Digite o CEP para buscar o endereço.';
+
     renderizarCarrinho();
+
     return;
   }
 
   if (cep.length !== 8) {
+
     taxaEntrega = 0;
     distanciaEntregaKm = null;
     tempoEntregaTexto = null;
 
-    avisoEntrega.innerText = 'Digite um CEP válido com 8 números.';
+    avisoEntrega.innerText =
+      'Digite um CEP válido com 8 números.';
+
     limparCacheCoordenadaCliente();
+
     renderizarCarrinho();
+
     return;
   }
 
   try {
-    avisoEntrega.innerText = 'Consultando CEP...';
 
-    const resposta = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-    const dados = await resposta.json();
+    avisoEntrega.innerText =
+      'Consultando CEP...';
+
+    const resposta =
+      await fetch(
+        `https://viacep.com.br/ws/${cep}/json/`
+      );
+
+    const dados =
+      await resposta.json();
 
     if (dados.erro) {
-      if (ruaCampo) ruaCampo.value = '';
-      if (bairroCampo) bairroCampo.value = '';
-      if (cidadeCampo) cidadeCampo.value = 'Sorocaba';
-      if (numeroCampo) numeroCampo.value = '';
+
+      if (ruaCampo) {
+        ruaCampo.value = '';
+      }
+
+      if (bairroCampo) {
+        bairroCampo.value = '';
+      }
+
+      if (cidadeCampo) {
+        cidadeCampo.value =
+          'Sorocaba';
+      }
+
+      if (numeroCampo) {
+        numeroCampo.value = '';
+      }
 
       taxaEntrega = 0;
       distanciaEntregaKm = null;
@@ -376,26 +915,49 @@ async function buscarCepEntrega() {
       limparBloqueiosEndereco();
       limparCacheCoordenadaCliente();
 
-      avisoEntrega.innerText = 'CEP não encontrado. Confira o número digitado.';
+      avisoEntrega.innerText =
+        'CEP não encontrado. Confira o número digitado.';
+
       renderizarCarrinho();
+
       return;
     }
 
-    if (ruaCampo) ruaCampo.value = dados.logradouro || '';
-    if (bairroCampo) bairroCampo.value = dados.bairro || '';
-    if (cidadeCampo) cidadeCampo.value = dados.localidade || 'Sorocaba';
+    if (ruaCampo) {
+      ruaCampo.value =
+        dados.logradouro || '';
+    }
+
+    if (bairroCampo) {
+      bairroCampo.value =
+        dados.bairro || '';
+    }
+
+    if (cidadeCampo) {
+      cidadeCampo.value =
+        dados.localidade ||
+        'Sorocaba';
+    }
 
     limparCacheCoordenadaCliente();
+
     definirBloqueioCampos();
 
     if (numeroCampo) {
-      numeroCampo.readOnly = false;
+
+      numeroCampo.readOnly =
+        false;
+
       numeroCampo.focus();
     }
 
-    avisoEntrega.innerText = 'CEP localizado. Informe somente o número.';
+    avisoEntrega.innerText =
+      'CEP localizado. Informe somente o número.';
+
     agendarCalculoEntrega();
+
   } catch (erro) {
+
     console.error(erro);
 
     taxaEntrega = 0;
@@ -405,7 +967,9 @@ async function buscarCepEntrega() {
     limparBloqueiosEndereco();
     limparCacheCoordenadaCliente();
 
-    avisoEntrega.innerText = 'Não foi possível consultar o CEP agora.';
+    avisoEntrega.innerText =
+      'Não foi possível consultar o CEP agora.';
+
     renderizarCarrinho();
   }
 }
@@ -414,19 +978,38 @@ async function buscarCepPorEndereco() {
   return;
 }
 
+
+/* =========================================================
+   CARRINHO
+========================================================= */
+
 function atualizarContadores() {
-  const totalItens = carrinho.reduce((acc, item) => acc + item.quantidade, 0);
-  const cartCount = byId('cartCount');
+
+  const totalItens =
+    carrinho.reduce(
+      (acc, item) =>
+        acc + item.quantidade,
+      0
+    );
+
+  const cartCount =
+    byId('cartCount');
 
   if (cartCount) {
-    cartCount.innerText = totalItens;
+    cartCount.innerText =
+      totalItens;
   }
 }
 
 function ehLanche(nome) {
-  const n = removerAcentos(String(nome || '').toLowerCase());
 
-  return !n.includes('coca') &&
+  const n =
+    removerAcentos(
+      String(nome || '').toLowerCase()
+    );
+
+  return (
+    !n.includes('coca') &&
     !n.includes('sprite') &&
     !n.includes('fanta') &&
     !n.includes('guarana') &&
@@ -434,20 +1017,46 @@ function ehLanche(nome) {
     !n.includes('suco') &&
     !n.includes('refrigerante') &&
     !n.includes('fritas') &&
-    !n.includes('batata');
+    !n.includes('batata')
+  );
 }
 
-function gerarChaveItem(nome, preco, observacao = '') {
-  return `${nome}||${preco}||${observacao}`;
+function gerarChaveItem(
+  nome,
+  preco,
+  observacao = ''
+) {
+
+  return (
+    `${nome}||${preco}||${observacao}`
+  );
 }
 
-function adicionarItemFinalAoCarrinho(nome, preco, observacao = '') {
-  const chave = gerarChaveItem(nome, preco, observacao);
-  const itemExistente = carrinho.find(item => item.chave === chave);
+function adicionarItemFinalAoCarrinho(
+  nome,
+  preco,
+  observacao = ''
+) {
+
+  const chave =
+    gerarChaveItem(
+      nome,
+      preco,
+      observacao
+    );
+
+  const itemExistente =
+    carrinho.find(
+      item =>
+        item.chave === chave
+    );
 
   if (itemExistente) {
+
     itemExistente.quantidade += 1;
+
   } else {
+
     carrinho.push({
       chave,
       nome,
@@ -458,93 +1067,251 @@ function adicionarItemFinalAoCarrinho(nome, preco, observacao = '') {
   }
 
   atualizarContadores();
+
   renderizarCarrinho();
+
+  mostrarToastLeLanches(
+    `${nome} adicionado ao carrinho.`
+  );
 }
 
-function adicionarAoCarrinho(nome, preco, observacao = '') {
+function adicionarAoCarrinho(
+  nome,
+  preco,
+  observacao = ''
+) {
+
   if (ehLanche(nome)) {
+
     abrirPersonalizacaoLanche({
       nome,
       preco,
-      observacaoBase: observacao
+      observacaoBase:
+        observacao
     });
+
     return;
   }
 
-  adicionarItemFinalAoCarrinho(nome, preco, observacao);
+  adicionarItemFinalAoCarrinho(
+    nome,
+    preco,
+    observacao
+  );
 }
 
-function abrirPersonalizacaoLanche(produto) {
+
+/* =========================================================
+   PERSONALIZAÇÃO DO LANCHE
+========================================================= */
+
+function abrirPersonalizacaoLanche(
+  produto
+) {
+
   garantirModalOpcoesForaDoCarrinho();
 
-  produtoPersonalizacaoAtual = produto;
+  produtoPersonalizacaoAtual =
+    produto;
+
   produtoOpcoesAtual = null;
   adicionalPendente = null;
 
-  const modal = byId('modalOpcoesProduto');
-  const titulo = byId('tituloOpcoesProduto');
-  const descricao = byId('descricaoOpcoesProduto');
-  const lista = byId('listaOpcoesProduto');
+  const modal =
+    byId('modalOpcoesProduto');
 
-  if (!modal || !titulo || !descricao || !lista) return;
+  const titulo =
+    byId('tituloOpcoesProduto');
 
-  const ingredientes = obterIngredientesRemoviveisPorLanche(produto.nome);
+  const descricao =
+    byId('descricaoOpcoesProduto');
 
-  titulo.innerText = produto.nome;
-  descricao.innerText = 'Deseja remover algum ingrediente?';
+  const lista =
+    byId('listaOpcoesProduto');
+
+  if (
+    !modal ||
+    !titulo ||
+    !descricao ||
+    !lista
+  ) {
+    return;
+  }
+
+  const ingredientes =
+    obterIngredientesRemoviveisPorLanche(
+      produto.nome
+    );
+
+  titulo.innerText =
+    produto.nome;
+
+  descricao.innerText =
+    'Deseja remover algum ingrediente?';
 
   lista.innerHTML = `
-    <div style="display:grid; gap:10px; padding-bottom:15px;">
-      ${ingredientes.map(ingrediente => `
-        <label style="display:flex; align-items:center; gap:10px; padding:12px; border:1px solid rgba(255,255,255,0.12); border-radius:12px; cursor:pointer;">
-          <input type="checkbox" name="ingredienteRemover" value="${escaparHtml(ingrediente)}">
-          <span>Sem ${escaparHtml(ingrediente)}</span>
-        </label>
-      `).join('')}
+    <div style="
+      display:grid;
+      gap:10px;
+      padding-bottom:15px;
+    ">
 
-      <label style="display:block; margin-top:8px;">
-        <span style="display:block; margin-bottom:6px;">Observação do lanche:</span>
-        <textarea id="observacaoItemLanche" placeholder="Ex: carne bem passada, pouco molho..." style="width:100%; min-height:70px; border-radius:12px; padding:10px; box-sizing:border-box;"></textarea>
+      ${ingredientes
+        .map(
+          ingrediente => `
+
+          <label style="
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding:12px;
+            border:1px solid rgba(255,255,255,0.12);
+            border-radius:12px;
+            cursor:pointer;
+          ">
+
+            <input
+              type="checkbox"
+              name="ingredienteRemover"
+              value="${escaparHtml(ingrediente)}"
+            >
+
+            <span>
+              Sem ${escaparHtml(ingrediente)}
+            </span>
+
+          </label>
+
+        `
+        )
+        .join('')}
+
+      <label style="
+        display:block;
+        margin-top:8px;
+      ">
+
+        <span style="
+          display:block;
+          margin-bottom:6px;
+        ">
+          Observação do lanche:
+        </span>
+
+        <textarea
+          id="observacaoItemLanche"
+          placeholder="Ex: carne bem passada, pouco molho..."
+          style="
+            width:100%;
+            min-height:70px;
+            border-radius:12px;
+            padding:10px;
+            box-sizing:border-box;
+          "
+        ></textarea>
+
       </label>
+
     </div>
   `;
 
-  modal.style.display = 'flex';
-  modal.classList.add('ativo');
+  modal.style.display =
+    'flex';
+
+  modal.classList.add(
+    'ativo'
+  );
 }
 
-function abrirOpcoesProduto(produtoId) {
+function abrirOpcoesProduto(
+  produtoId
+) {
+
   garantirModalOpcoesForaDoCarrinho();
 
-  const produto = PRODUTOS_COM_OPCOES[produtoId];
-  const modal = byId('modalOpcoesProduto');
-  const titulo = byId('tituloOpcoesProduto');
-  const descricao = byId('descricaoOpcoesProduto');
-  const lista = byId('listaOpcoesProduto');
+  const produto =
+    PRODUTOS_COM_OPCOES[
+      produtoId
+    ];
 
-  if (!produto || !modal || !titulo || !descricao || !lista) return;
+  const modal =
+    byId('modalOpcoesProduto');
+
+  const titulo =
+    byId('tituloOpcoesProduto');
+
+  const descricao =
+    byId('descricaoOpcoesProduto');
+
+  const lista =
+    byId('listaOpcoesProduto');
+
+  if (
+    !produto ||
+    !modal ||
+    !titulo ||
+    !descricao ||
+    !lista
+  ) {
+    return;
+  }
 
   adicionalPendente = null;
   produtoPersonalizacaoAtual = null;
   produtoOpcoesAtual = produto;
 
-  titulo.innerText = produto.titulo;
-  descricao.innerText = produto.descricao;
+  titulo.innerText =
+    produto.titulo;
 
-  lista.innerHTML = produto.opcoes.map(opcao => `
-    <label style="display:flex; align-items:center; gap:10px; padding:12px; border:1px solid rgba(255,255,255,0.12); border-radius:12px; cursor:pointer;">
-      <input type="radio" name="opcaoProdutoAtual" value="${escaparHtml(opcao)}">
-      <span>${escaparHtml(opcao)}</span>
-    </label>
-  `).join('');
+  descricao.innerText =
+    produto.descricao;
 
-  modal.style.display = 'flex';
-  modal.classList.add('ativo');
+  lista.innerHTML =
+    produto.opcoes
+      .map(
+        opcao => `
+
+        <label style="
+          display:flex;
+          align-items:center;
+          gap:10px;
+          padding:12px;
+          border:1px solid rgba(255,255,255,0.12);
+          border-radius:12px;
+          cursor:pointer;
+        ">
+
+          <input
+            type="radio"
+            name="opcaoProdutoAtual"
+            value="${escaparHtml(opcao)}"
+          >
+
+          <span>
+            ${escaparHtml(opcao)}
+          </span>
+
+        </label>
+
+      `
+      )
+      .join('');
+
+  modal.style.display =
+    'flex';
+
+  modal.classList.add(
+    'ativo'
+  );
 }
 
 function fecharOpcoesProduto() {
-  const modal = byId('modalOpcoesProduto');
-  const lista = byId('listaOpcoesProduto');
+
+  const modal =
+    byId('modalOpcoesProduto');
+
+  const lista =
+    byId('listaOpcoesProduto');
 
   produtoOpcoesAtual = null;
   adicionalPendente = null;
@@ -555,23 +1322,51 @@ function fecharOpcoesProduto() {
   }
 
   if (modal) {
-    modal.classList.remove('ativo');
-    modal.style.display = 'none';
+
+    modal.classList.remove(
+      'ativo'
+    );
+
+    modal.style.display =
+      'none';
   }
 }
 
 function confirmarOpcoesProduto() {
-  if (produtoPersonalizacaoAtual) {
-    const removidos = Array.from(document.querySelectorAll('input[name="ingredienteRemover"]:checked'))
-      .map(input => `Sem ${input.value}`);
 
-    const observacaoItem = byId('observacaoItemLanche')?.value.trim() || '';
+  if (
+    produtoPersonalizacaoAtual
+  ) {
+
+    const removidos =
+      Array
+        .from(
+          document.querySelectorAll(
+            'input[name="ingredienteRemover"]:checked'
+          )
+        )
+        .map(
+          input =>
+            `Sem ${input.value}`
+        );
+
+    const observacaoItem =
+      byId(
+        'observacaoItemLanche'
+      )?.value.trim() || '';
 
     const observacoesFinais = [
-      produtoPersonalizacaoAtual.observacaoBase || '',
+      produtoPersonalizacaoAtual
+        .observacaoBase || '',
+
       ...removidos,
-      observacaoItem ? `Obs: ${observacaoItem}` : ''
-    ].filter(Boolean).join(' | ');
+
+      observacaoItem
+        ? `Obs: ${observacaoItem}`
+        : ''
+    ]
+      .filter(Boolean)
+      .join(' | ');
 
     adicionarItemFinalAoCarrinho(
       produtoPersonalizacaoAtual.nome,
@@ -580,15 +1375,28 @@ function confirmarOpcoesProduto() {
     );
 
     fecharOpcoesProduto();
+
     return;
   }
 
   if (adicionalPendente) {
-    if (adicionalPendente.etapa === 'escolher_opcao') {
-      const opcaoSelecionada = document.querySelector('input[name="opcaoAdicional"]:checked');
+
+    if (
+      adicionalPendente.etapa ===
+      'escolher_opcao'
+    ) {
+
+      const opcaoSelecionada =
+        document.querySelector(
+          'input[name="opcaoAdicional"]:checked'
+        );
 
       if (!opcaoSelecionada) {
-        alert('Selecione uma opção.');
+
+        alert(
+          'Selecione uma opção.'
+        );
+
         return;
       }
 
@@ -600,1037 +1408,2068 @@ function confirmarOpcoesProduto() {
       return;
     }
 
-    const selecionado = document.querySelector('input[name="lancheAdicional"]:checked');
+    const selecionado =
+      document.querySelector(
+        'input[name="lancheAdicional"]:checked'
+      );
 
     if (!selecionado) {
-      alert('Selecione um lanche para adicionar o item.');
+
+      alert(
+        'Selecione um lanche para adicionar o item.'
+      );
+
       return;
     }
 
-    const index = Number(selecionado.value);
-    const lanche = carrinho[index];
+    const index =
+      Number(
+        selecionado.value
+      );
+
+    const lanche =
+      carrinho[index];
 
     if (!lanche) {
-      alert('Lanche não encontrado.');
+
+      alert(
+        'Lanche não encontrado.'
+      );
+
       return;
     }
 
-    lanche.preco = Number(lanche.preco || 0) + Number(adicionalPendente.preco || 0);
+    lanche.preco =
+      Number(
+        lanche.preco || 0
+      ) +
+      Number(
+        adicionalPendente.preco || 0
+      );
 
-    lanche.observacao = lanche.observacao
-      ? lanche.observacao + ' | Adicional: ' + adicionalPendente.nome
-      : 'Adicional: ' + adicionalPendente.nome;
+    lanche.observacao =
+      lanche.observacao
+
+        ? lanche.observacao +
+          ' | Adicional: ' +
+          adicionalPendente.nome
+
+        : 'Adicional: ' +
+          adicionalPendente.nome;
 
     adicionalPendente = null;
 
     fecharOpcoesProduto();
+
     renderizarCarrinho();
+
     return;
   }
 
-  if (!produtoOpcoesAtual) return;
-
-  const selecionado = document.querySelector('input[name="opcaoProdutoAtual"]:checked');
-
-  if (produtoOpcoesAtual.obrigatorio && !selecionado) {
-    alert('Selecione uma opção para continuar.');
+  if (!produtoOpcoesAtual) {
     return;
   }
 
-  const valorSelecionado = selecionado ? selecionado.value : '';
-  const observacao = valorSelecionado
-    ? `${produtoOpcoesAtual.grupoLabel}: ${valorSelecionado}`
-    : '';
+  const selecionado =
+    document.querySelector(
+      'input[name="opcaoProdutoAtual"]:checked'
+    );
+
+  if (
+    produtoOpcoesAtual.obrigatorio &&
+    !selecionado
+  ) {
+
+    alert(
+      'Selecione uma opção para continuar.'
+    );
+
+    return;
+  }
+
+  const valorSelecionado =
+    selecionado
+      ? selecionado.value
+      : '';
+
+  const observacao =
+    valorSelecionado
+
+      ? `${produtoOpcoesAtual.grupoLabel}: ${valorSelecionado}`
+
+      : '';
 
   abrirPersonalizacaoLanche({
-    nome: produtoOpcoesAtual.nome,
-    preco: produtoOpcoesAtual.preco,
-    observacaoBase: observacao
+    nome:
+      produtoOpcoesAtual.nome,
+
+    preco:
+      produtoOpcoesAtual.preco,
+
+    observacaoBase:
+      observacao
   });
 }
 
-function abrirAdicionalParaLanche(nomeAdicional, precoAdicional) {
-  const nomeNormalizado = removerAcentos(String(nomeAdicional || '').toLowerCase());
+
+/* =========================================================
+   ADICIONAIS
+========================================================= */
+
+function abrirAdicionalParaLanche(
+  nomeAdicional,
+  precoAdicional
+) {
+
+  const nomeNormalizado =
+    removerAcentos(
+      String(
+        nomeAdicional || ''
+      ).toLowerCase()
+    );
 
   const precisaEscolherOpcao =
-    nomeNormalizado.includes('catupiry') ||
-    nomeNormalizado.includes('cheddar') ||
-    nomeNormalizado.includes('muçarela') ||
-    nomeNormalizado.includes('calabresa') ||
-    nomeNormalizado.includes('bacon') ||
-    nomeNormalizado.includes('ovo') ||
-    nomeNormalizado.includes('salsicha');
+    nomeNormalizado.includes(
+      'catupiry'
+    ) ||
+    nomeNormalizado.includes(
+      'cheddar'
+    ) ||
+    nomeNormalizado.includes(
+      'muçarela'
+    ) ||
+    nomeNormalizado.includes(
+      'calabresa'
+    ) ||
+    nomeNormalizado.includes(
+      'bacon'
+    ) ||
+    nomeNormalizado.includes(
+      'ovo'
+    ) ||
+    nomeNormalizado.includes(
+      'salsicha'
+    );
 
   if (precisaEscolherOpcao) {
-    abrirEscolhaOpcaoAdicional(nomeAdicional, precoAdicional);
+
+    abrirEscolhaOpcaoAdicional(
+      nomeAdicional,
+      precoAdicional
+    );
+
     return;
   }
 
-  abrirEscolhaLancheParaAdicional(nomeAdicional, precoAdicional);
+  abrirEscolhaLancheParaAdicional(
+    nomeAdicional,
+    precoAdicional
+  );
 }
 
-function abrirEscolhaOpcaoAdicional(nomeAdicional, precoAdicional) {
+function abrirEscolhaOpcaoAdicional(
+  nomeAdicional,
+  precoAdicional
+) {
+
   garantirModalOpcoesForaDoCarrinho();
 
-  const nomeNormalizado = removerAcentos(String(nomeAdicional || '').toLowerCase());
+  const nomeNormalizado =
+    removerAcentos(
+      String(
+        nomeAdicional || ''
+      ).toLowerCase()
+    );
 
-  let opcoes = ['Catupiry', 'Cheddar', 'Muçarela'];
+  let opcoes = [
+    'Catupiry',
+    'Cheddar',
+    'Muçarela'
+  ];
 
-  if (nomeNormalizado.includes('calabresa') || nomeNormalizado.includes('bacon')) {
-    opcoes = ['Calabresa', 'Bacon'];
+  if (
+    nomeNormalizado.includes(
+      'calabresa'
+    ) ||
+    nomeNormalizado.includes(
+      'bacon'
+    )
+  ) {
+
+    opcoes = [
+      'Calabresa',
+      'Bacon'
+    ];
   }
 
-  if (nomeNormalizado.includes('ovo') || nomeNormalizado.includes('salsicha')) {
-    opcoes = ['Ovo', 'Salsicha'];
+  if (
+    nomeNormalizado.includes(
+      'ovo'
+    ) ||
+    nomeNormalizado.includes(
+      'salsicha'
+    )
+  ) {
+
+    opcoes = [
+      'Ovo',
+      'Salsicha'
+    ];
   }
 
   adicionalPendente = {
     nome: '',
-    preco: Number(precoAdicional || 0),
-    etapa: 'escolher_opcao'
+    preco:
+      Number(
+        precoAdicional || 0
+      ),
+    etapa:
+      'escolher_opcao'
   };
 
   produtoOpcoesAtual = null;
   produtoPersonalizacaoAtual = null;
 
-  const modal = byId('modalOpcoesProduto');
-  const titulo = byId('tituloOpcoesProduto');
-  const descricao = byId('descricaoOpcoesProduto');
-  const lista = byId('listaOpcoesProduto');
+  const modal =
+    byId('modalOpcoesProduto');
 
-  if (!modal || !titulo || !descricao || !lista) return;
+  const titulo =
+    byId('tituloOpcoesProduto');
 
-  titulo.innerText = 'Escolha uma opção';
-  descricao.innerText = 'Escolha o adicional para colocar no lanche:';
+  const descricao =
+    byId('descricaoOpcoesProduto');
 
-  lista.innerHTML = opcoes.map(opcao => `
-    <label style="display:flex; align-items:center; gap:10px; padding:12px; border:1px solid rgba(255,255,255,0.12); border-radius:12px; cursor:pointer;">
-      <input type="radio" name="opcaoAdicional" value="${escaparHtml(opcao)}">
-      <span>${escaparHtml(opcao)}</span>
-    </label>
-  `).join('');
+  const lista =
+    byId('listaOpcoesProduto');
 
-  modal.style.display = 'flex';
-  modal.classList.add('ativo');
+  if (
+    !modal ||
+    !titulo ||
+    !descricao ||
+    !lista
+  ) {
+    return;
+  }
+
+  titulo.innerText =
+    'Escolha uma opção';
+
+  descricao.innerText =
+    'Escolha o adicional para colocar no lanche:';
+
+  lista.innerHTML =
+    opcoes
+      .map(
+        opcao => `
+
+        <label style="
+          display:flex;
+          align-items:center;
+          gap:10px;
+          padding:12px;
+          border:1px solid rgba(255,255,255,0.12);
+          border-radius:12px;
+          cursor:pointer;
+        ">
+
+          <input
+            type="radio"
+            name="opcaoAdicional"
+            value="${escaparHtml(opcao)}"
+          >
+
+          <span>
+            ${escaparHtml(opcao)}
+          </span>
+
+        </label>
+
+      `
+      )
+      .join('');
+
+  modal.style.display =
+    'flex';
+
+  modal.classList.add(
+    'ativo'
+  );
 }
 
-function abrirEscolhaLancheParaAdicional(nomeAdicional, precoAdicional) {
+function abrirEscolhaLancheParaAdicional(
+  nomeAdicional,
+  precoAdicional
+) {
+
   garantirModalOpcoesForaDoCarrinho();
 
-  const lanches = carrinho
-    .map((item, index) => ({ ...item, indexOriginal: index }))
-    .filter(item => ehLanche(item.nome));
+  const lanches =
+    carrinho
+      .map(
+        (item, index) => ({
+          ...item,
+          indexOriginal: index
+        })
+      )
+      .filter(
+        item =>
+          ehLanche(item.nome)
+      );
 
   if (lanches.length === 0) {
-    alert('Escolha um lanche primeiro para adicionar este item.');
+
+    alert(
+      'Escolha um lanche primeiro para adicionar este item.'
+    );
+
     return;
   }
 
   adicionalPendente = {
-    nome: nomeAdicional,
-    preco: Number(precoAdicional || 0),
-    etapa: 'escolher_lanche'
+    nome:
+      nomeAdicional,
+
+    preco:
+      Number(
+        precoAdicional || 0
+      ),
+
+    etapa:
+      'escolher_lanche'
   };
 
   produtoOpcoesAtual = null;
   produtoPersonalizacaoAtual = null;
 
-  const modal = byId('modalOpcoesProduto');
-  const titulo = byId('tituloOpcoesProduto');
-  const descricao = byId('descricaoOpcoesProduto');
-  const lista = byId('listaOpcoesProduto');
+  const modal =
+    byId('modalOpcoesProduto');
 
-  if (!modal || !titulo || !descricao || !lista) return;
+  const titulo =
+    byId('tituloOpcoesProduto');
 
-  titulo.innerText = 'Adicionar ' + nomeAdicional;
-  descricao.innerText = 'Escolha em qual lanche será adicionado:';
+  const descricao =
+    byId('descricaoOpcoesProduto');
 
-  lista.innerHTML = lanches.map(item => `
-    <label style="display:flex; align-items:center; gap:10px; padding:12px; border:1px solid rgba(255,255,255,0.12); border-radius:12px; cursor:pointer;">
-      <input type="radio" name="lancheAdicional" value="${item.indexOriginal}">
-      <span>${escaparHtml(item.nome)}</span>
-    </label>
-  `).join('');
+  const lista =
+    byId('listaOpcoesProduto');
 
-  modal.style.display = 'flex';
-  modal.classList.add('ativo');
+  if (
+    !modal ||
+    !titulo ||
+    !descricao ||
+    !lista
+  ) {
+    return;
+  }
+
+  titulo.innerText =
+    'Adicionar ' +
+    nomeAdicional;
+
+  descricao.innerText =
+    'Escolha em qual lanche será adicionado:';
+
+  lista.innerHTML =
+    lanches
+      .map(
+        item => `
+
+        <label style="
+          display:flex;
+          align-items:center;
+          gap:10px;
+          padding:12px;
+          border:1px solid rgba(255,255,255,0.12);
+          border-radius:12px;
+          cursor:pointer;
+        ">
+
+          <input
+            type="radio"
+            name="lancheAdicional"
+            value="${item.indexOriginal}"
+          >
+
+          <span>
+            ${escaparHtml(item.nome)}
+          </span>
+
+        </label>
+
+      `
+      )
+      .join('');
+
+  modal.style.display =
+    'flex';
+
+  modal.classList.add(
+    'ativo'
+  );
 }
 
+
+/* =========================================================
+   QUANTIDADES
+========================================================= */
+
 function aumentarQuantidade(index) {
+
   carrinho[index].quantidade += 1;
+
   renderizarCarrinho();
 }
 
 function diminuirQuantidade(index) {
+
   carrinho[index].quantidade -= 1;
 
-  if (carrinho[index].quantidade <= 0) {
-    carrinho.splice(index, 1);
+  if (
+    carrinho[index].quantidade <= 0
+  ) {
+    carrinho.splice(
+      index,
+      1
+    );
   }
 
   renderizarCarrinho();
 }
 
 function removerItem(index) {
-  carrinho.splice(index, 1);
+
+  carrinho.splice(
+    index,
+    1
+  );
+
   renderizarCarrinho();
 }
 
 function calcularSubtotal() {
-  return carrinho.reduce((acc, item) => acc + (Number(item.preco || 0) * Number(item.quantidade || 0)), 0);
+
+  return carrinho.reduce(
+    (acc, item) =>
+      acc +
+      (
+        Number(item.preco || 0) *
+        Number(item.quantidade || 0)
+      ),
+    0
+  );
 }
 
 function calcularTotal() {
-  return calcularSubtotal() + Number(taxaEntrega || 0);
+
+  return (
+    calcularSubtotal() +
+    Number(taxaEntrega || 0)
+  );
 }
 
-function converterHorarioParaMinutos(horario) {
-  if (!horario) return null;
 
-  const partes = String(horario).split(':');
-  const hora = Number(partes[0] || 0);
-  const minuto = Number(partes[1] || 0);
+/* =========================================================
+   HORÁRIO DA LOJA
+========================================================= */
 
-  return (hora * 60) + minuto;
+function converterHorarioParaMinutos(
+  horario
+) {
+
+  if (!horario) {
+    return null;
+  }
+
+  const partes =
+    String(horario)
+      .split(':');
+
+  const hora =
+    Number(
+      partes[0] || 0
+    );
+
+  const minuto =
+    Number(
+      partes[1] || 0
+    );
+
+  return (
+    hora * 60
+  ) + minuto;
 }
 
 function obterDiasPermitidosLoja() {
-  return [0, 3, 4, 5, 6];
+
+  return [
+    0,
+    3,
+    4,
+    5,
+    6
+  ];
 }
 
-function lojaAbertaPorHorario(config = null) {
-  const agora = new Date();
-  const dia = agora.getDay();
+function lojaAbertaPorHorario(
+  config = null
+) {
 
-  if (!obterDiasPermitidosLoja().includes(dia)) {
+  const agora =
+    new Date();
+
+  const dia =
+    agora.getDay();
+
+  if (
+    !obterDiasPermitidosLoja()
+      .includes(dia)
+  ) {
     return false;
   }
 
-  const minutosAgora = agora.getHours() * 60 + agora.getMinutes();
+  const minutosAgora =
+    agora.getHours() * 60 +
+    agora.getMinutes();
 
-  const abre = converterHorarioParaMinutos(config?.open_time) ?? (19 * 60);
-  const fecha = converterHorarioParaMinutos(config?.close_time) ?? (23 * 60);
+  const abre =
+    converterHorarioParaMinutos(
+      config?.open_time
+    ) ??
+    (19 * 60);
 
-  return minutosAgora >= abre && minutosAgora < fecha;
+  const fecha =
+    converterHorarioParaMinutos(
+      config?.close_time
+    ) ??
+    (23 * 60);
+
+  return (
+    minutosAgora >= abre &&
+    minutosAgora < fecha
+  );
 }
 
 function obterConfiguracaoLojaPadrao() {
+
   return {
     id: 1,
-    store_name: nomeLoja,
-    whatsapp_number: numeroWhatsapp,
-    store_address: ENDERECO_LOJA_PADRAO,
+
+    store_name:
+      nomeLoja,
+
+    whatsapp_number:
+      numeroWhatsapp,
+
+    store_address:
+      ENDERECO_LOJA_PADRAO,
+
     store_lat: null,
     store_lng: null,
-    open_time: '19:00:00',
-    close_time: '23:00:00',
-    auto_open: true,
-    manual_force_open: false,
-    manual_force_closed: false
+
+    open_time:
+      '19:00:00',
+
+    close_time:
+      '23:00:00',
+
+    auto_open:
+      true,
+
+    manual_force_open:
+      false,
+
+    manual_force_closed:
+      false
   };
 }
 
 async function carregarConfiguracaoLoja() {
+
   if (!supabaseClient) {
-    configuracaoLoja = obterConfiguracaoLojaPadrao();
+
+    configuracaoLoja =
+      obterConfiguracaoLojaPadrao();
+
     return configuracaoLoja;
   }
 
   try {
-    const { data, error } = await supabaseClient
-      .from('store_settings')
-      .select('*')
-      .eq('id', 1)
-      .single();
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from('store_settings')
+        .select('*')
+        .eq('id', 1)
+        .single();
 
     if (error) {
-      console.error('Erro ao carregar configuração da loja:', error);
-      configuracaoLoja = obterConfiguracaoLojaPadrao();
+
+      console.error(
+        'Erro ao carregar configuração da loja:',
+        error
+      );
+
+      configuracaoLoja =
+        obterConfiguracaoLojaPadrao();
+
       return configuracaoLoja;
     }
 
-    configuracaoLoja = data || obterConfiguracaoLojaPadrao();
+    configuracaoLoja =
+      data ||
+      obterConfiguracaoLojaPadrao();
+
     return configuracaoLoja;
+
   } catch (erro) {
-    console.error('Falha ao carregar configuração:', erro);
-    configuracaoLoja = obterConfiguracaoLojaPadrao();
+
+    console.error(
+      'Falha ao carregar configuração:',
+      erro
+    );
+
+    configuracaoLoja =
+      obterConfiguracaoLojaPadrao();
+
     return configuracaoLoja;
   }
 }
 
 async function atualizarConfiguracaoLojaStatus() {
+
   if (!supabaseClient) {
+
     if (!configuracaoLoja) {
-      configuracaoLoja = obterConfiguracaoLojaPadrao();
+
+      configuracaoLoja =
+        obterConfiguracaoLojaPadrao();
     }
 
     return configuracaoLoja;
   }
 
   try {
-    const { data, error } = await supabaseClient
-      .from('store_settings')
-      .select('id, open_time, close_time, auto_open, manual_force_open, manual_force_closed')
-      .eq('id', 1)
-      .single();
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from('store_settings')
+        .select(
+          'id, open_time, close_time, auto_open, manual_force_open, manual_force_closed'
+        )
+        .eq('id', 1)
+        .single();
 
     if (error) {
-      console.error('Erro ao atualizar status da loja:', error);
-      return configuracaoLoja || obterConfiguracaoLojaPadrao();
+
+      console.error(
+        'Erro ao atualizar status da loja:',
+        error
+      );
+
+      return (
+        configuracaoLoja ||
+        obterConfiguracaoLojaPadrao()
+      );
     }
 
     configuracaoLoja = {
-      ...(configuracaoLoja || obterConfiguracaoLojaPadrao()),
+      ...(
+        configuracaoLoja ||
+        obterConfiguracaoLojaPadrao()
+      ),
       ...data
     };
 
     return configuracaoLoja;
+
   } catch (erro) {
-    console.error('Falha ao atualizar status da loja:', erro);
-    return configuracaoLoja || obterConfiguracaoLojaPadrao();
+
+    console.error(
+      'Falha ao atualizar status da loja:',
+      erro
+    );
+
+    return (
+      configuracaoLoja ||
+      obterConfiguracaoLojaPadrao()
+    );
   }
 }
 
 async function lojaAbertaAgora() {
-  const config = await atualizarConfiguracaoLojaStatus();
 
-  if (!config) return false;
+  const config =
+    await atualizarConfiguracaoLojaStatus();
 
-  if (config.manual_force_open === true) {
-    return true;
-  }
-
-  if (config.manual_force_closed === true) {
+  if (!config) {
     return false;
   }
 
-  if (config.auto_open === true) {
-    return lojaAbertaPorHorario(config);
+  if (
+    config.manual_force_open === true
+  ) {
+    return true;
+  }
+
+  if (
+    config.manual_force_closed === true
+  ) {
+    return false;
+  }
+
+  if (
+    config.auto_open === true
+  ) {
+    return lojaAbertaPorHorario(
+      config
+    );
   }
 
   return false;
 }
 
 async function atualizarStatusLoja() {
-  const statusLoja = obterElementoStatusLoja();
-  const btnFinalizar = byId('btnFinalizar');
-  const btnFinalizarWhatsapp = byId('btnFinalizarWhatsapp');
-  const aberta = await lojaAbertaAgora();
+
+  const statusLoja =
+    obterElementoStatusLoja();
+
+  const btnFinalizar =
+    byId('btnFinalizar');
+
+  const btnFinalizarWhatsapp =
+    byId('btnFinalizarWhatsapp');
+
+  const aberta =
+    await lojaAbertaAgora();
 
   if (statusLoja) {
+
     if (aberta) {
-      statusLoja.classList.remove('fechado');
-      statusLoja.classList.add('aberto');
-      statusLoja.innerText = '🟢 Aberto agora';
+
+      statusLoja.classList.remove(
+        'fechado'
+      );
+
+      statusLoja.classList.add(
+        'aberto'
+      );
+
+      statusLoja.innerText =
+        '🟢 Aberto agora';
+
     } else {
-      statusLoja.classList.remove('aberto');
-      statusLoja.classList.add('fechado');
-      statusLoja.innerText = '🔴 Fechado no momento';
+
+      statusLoja.classList.remove(
+        'aberto'
+      );
+
+      statusLoja.classList.add(
+        'fechado'
+      );
+
+      statusLoja.innerText =
+        '🔴 Fechado no momento';
     }
   }
 
   if (btnFinalizar) {
-    btnFinalizar.disabled = !aberta;
+
+    btnFinalizar.disabled =
+      !aberta;
   }
 
   if (btnFinalizarWhatsapp) {
-    btnFinalizarWhatsapp.disabled = !aberta;
+
+    btnFinalizarWhatsapp.disabled =
+      !aberta;
   }
 }
-function atualizarEntrega() {
-  const tipoEntrega = byId('tipoEntrega')?.value || 'retirada';
-  const camposEntrega = byId('camposEntrega');
-  const avisoEntrega = byId('avisoEntrega');
 
-  if (tipoEntrega !== 'delivery') {
+
+/* =========================================================
+   ENTREGA
+========================================================= */
+
+function atualizarEntrega() {
+
+  const tipoEntrega =
+    byId('tipoEntrega')?.value ||
+    'retirada';
+
+  const camposEntrega =
+    byId('camposEntrega');
+
+  const avisoEntrega =
+    byId('avisoEntrega');
+
+  if (
+    tipoEntrega !== 'delivery'
+  ) {
+
     taxaEntrega = 0;
     distanciaEntregaKm = null;
     tempoEntregaTexto = null;
 
-    clearTimeout(timeoutCalculoEntrega);
+    clearTimeout(
+      timeoutCalculoEntrega
+    );
 
     if (camposEntrega) {
-      camposEntrega.style.display = 'none';
+
+      camposEntrega.style.display =
+        'none';
     }
 
     if (avisoEntrega) {
-      avisoEntrega.innerText = 'Retirada no local sem taxa de entrega.';
+
+      avisoEntrega.innerText =
+        'Retirada no local sem taxa de entrega.';
     }
 
     renderizarCarrinho();
+
     return;
   }
 
   if (camposEntrega) {
-    camposEntrega.style.display = 'grid';
+
+    camposEntrega.style.display =
+      'grid';
   }
 
   definirBloqueioCampos();
 
-  const cep = byId('cepEntrega')?.value.trim() || '';
-  const rua = byId('ruaEntrega')?.value.trim() || '';
-  const numero = byId('numeroEntrega')?.value.trim() || '';
-  const bairro = byId('bairroEntrega')?.value.trim() || '';
-  const cidade = byId('cidadeEntrega')?.value.trim() || '';
+  const cep =
+    byId('cepEntrega')?.value.trim() ||
+    '';
 
-  if (!cep || !rua || !numero || !bairro || !cidade) {
+  const rua =
+    byId('ruaEntrega')?.value.trim() ||
+    '';
+
+  const numero =
+    byId('numeroEntrega')?.value.trim() ||
+    '';
+
+  const bairro =
+    byId('bairroEntrega')?.value.trim() ||
+    '';
+
+  const cidade =
+    byId('cidadeEntrega')?.value.trim() ||
+    '';
+
+  if (
+    !cep ||
+    !rua ||
+    !numero ||
+    !bairro ||
+    !cidade
+  ) {
+
     taxaEntrega = 0;
     distanciaEntregaKm = null;
     tempoEntregaTexto = null;
 
     if (avisoEntrega) {
-      avisoEntrega.innerText = 'Digite o CEP e depois informe o número para calcular a entrega.';
+
+      avisoEntrega.innerText =
+        'Digite o CEP e depois informe o número para calcular a entrega.';
     }
 
     renderizarCarrinho();
+
     return;
   }
 
   agendarCalculoEntrega();
+
   renderizarCarrinho();
 }
 
+
+/* =========================================================
+   RENDERIZAR CARRINHO
+========================================================= */
+
 function renderizarCarrinho() {
-  const lista = byId('listaCarrinho');
-  const subtotal = calcularSubtotal();
-  const total = calcularTotal();
+
+  const lista =
+    byId('listaCarrinho');
+
+  const subtotal =
+    calcularSubtotal();
+
+  const total =
+    calcularTotal();
 
   if (lista) {
-    if (carrinho.length === 0) {
-      lista.innerHTML = '<div class="carrinho-vazio">Seu carrinho está vazio.</div>';
-    } else {
-      lista.innerHTML = `
-        <div class="lista-carrinho">
-          ${carrinho.map((item, index) => `
-            <div class="item-carrinho">
-              <div>
-                <strong>${escaparHtml(item.nome)}</strong>
-                ${item.observacao ? `<small style="display:block; margin-top:4px;">${escaparHtml(item.observacao)}</small>` : ''}
-                <small>${formatarPreco(item.preco)} cada</small>
-              </div>
 
-              <div class="acoes-carrinho">
-                <div class="qtd-box">
-                  <button class="qtd-btn" onclick="diminuirQuantidade(${index})">-</button>
-                  <strong>${item.quantidade}</strong>
-                  <button class="qtd-btn" onclick="aumentarQuantidade(${index})">+</button>
+    if (
+      carrinho.length === 0
+    ) {
+
+      lista.innerHTML =
+        '<div class="carrinho-vazio">Seu carrinho está vazio.</div>';
+
+    } else {
+
+      lista.innerHTML = `
+
+        <div class="lista-carrinho">
+
+          ${carrinho
+            .map(
+              (item, index) => `
+
+              <div class="item-carrinho">
+
+                <div>
+
+                  <strong>
+                    ${escaparHtml(item.nome)}
+                  </strong>
+
+                  ${
+                    item.observacao
+                      ? `
+                        <small style="
+                          display:block;
+                          margin-top:4px;
+                        ">
+                          ${escaparHtml(item.observacao)}
+                        </small>
+                      `
+                      : ''
+                  }
+
+                  <small>
+                    ${formatarPreco(item.preco)} cada
+                  </small>
+
                 </div>
 
-                <strong>${formatarPreco(item.preco * item.quantidade)}</strong>
-                <button class="btn-remover" onclick="removerItem(${index})">Remover</button>
+                <div class="acoes-carrinho">
+
+                  <div class="qtd-box">
+
+                    <button
+                      class="qtd-btn"
+                      onclick="diminuirQuantidade(${index})"
+                    >
+                      -
+                    </button>
+
+                    <strong>
+                      ${item.quantidade}
+                    </strong>
+
+                    <button
+                      class="qtd-btn"
+                      onclick="aumentarQuantidade(${index})"
+                    >
+                      +
+                    </button>
+
+                  </div>
+
+                  <strong>
+                    ${formatarPreco(
+                      item.preco *
+                      item.quantidade
+                    )}
+                  </strong>
+
+                  <button
+                    class="btn-remover"
+                    onclick="removerItem(${index})"
+                  >
+                    Remover
+                  </button>
+
+                </div>
+
               </div>
-            </div>
-          `).join('')}
+
+            `
+            )
+            .join('')}
+
         </div>
       `;
     }
   }
 
   if (byId('resumoItens')) {
-    byId('resumoItens').innerText = carrinho.reduce((acc, item) => acc + item.quantidade, 0);
+
+    byId('resumoItens').innerText =
+      carrinho.reduce(
+        (acc, item) =>
+          acc + item.quantidade,
+        0
+      );
   }
 
   if (byId('resumoSubtotal')) {
-    byId('resumoSubtotal').innerText = formatarPreco(subtotal);
+
+    byId(
+      'resumoSubtotal'
+    ).innerText =
+      formatarPreco(
+        subtotal
+      );
   }
 
   if (byId('resumoTaxaEntrega')) {
-    byId('resumoTaxaEntrega').innerText = formatarPreco(taxaEntrega);
+
+    byId(
+      'resumoTaxaEntrega'
+    ).innerText =
+      formatarPreco(
+        taxaEntrega
+      );
   }
 
   if (byId('resumoTotal')) {
-    byId('resumoTotal').innerText = formatarPreco(total);
+
+    byId(
+      'resumoTotal'
+    ).innerText =
+      formatarPreco(
+        total
+      );
   }
 
   atualizarContadores();
+
   atualizarStatusLoja();
 }
 
+
+/* =========================================================
+   ABRIR / FECHAR CARRINHO
+========================================================= */
+
 function abrirCarrinho() {
+
   renderizarCarrinho();
 
-  const modal = byId('modalCarrinho');
+  const modal =
+    byId('modalCarrinho');
 
   if (modal) {
-    modal.classList.add('ativo');
+
+    modal.classList.add(
+      'ativo'
+    );
   }
 }
 
 function fecharCarrinho() {
-  const modal = byId('modalCarrinho');
+
+  const modal =
+    byId('modalCarrinho');
 
   if (modal) {
-    modal.classList.remove('ativo');
+
+    modal.classList.remove(
+      'ativo'
+    );
   }
 }
 
 function limparCarrinho() {
+
   carrinho = [];
+
   taxaEntrega = 0;
   distanciaEntregaKm = null;
   tempoEntregaTexto = null;
+
   produtoOpcoesAtual = null;
   adicionalPendente = null;
   produtoPersonalizacaoAtual = null;
 
-  if (byId('nomeCliente')) byId('nomeCliente').value = '';
-  if (byId('tipoEntrega')) byId('tipoEntrega').value = 'retirada';
-  if (byId('cepEntrega')) byId('cepEntrega').value = '';
-  if (byId('ruaEntrega')) byId('ruaEntrega').value = '';
-  if (byId('numeroEntrega')) byId('numeroEntrega').value = '';
-  if (byId('bairroEntrega')) byId('bairroEntrega').value = '';
-  if (byId('cidadeEntrega')) byId('cidadeEntrega').value = 'Sorocaba';
-  if (byId('complementoEntrega')) byId('complementoEntrega').value = '';
-  if (byId('formaPagamento')) byId('formaPagamento').value = '';
-  if (byId('observacoes')) byId('observacoes').value = '';
+  if (byId('nomeCliente')) {
+    byId('nomeCliente').value = '';
+  }
+
+  if (byId('tipoEntrega')) {
+    byId('tipoEntrega').value =
+      'retirada';
+  }
+
+  if (byId('cepEntrega')) {
+    byId('cepEntrega').value = '';
+  }
+
+  if (byId('ruaEntrega')) {
+    byId('ruaEntrega').value = '';
+  }
+
+  if (byId('numeroEntrega')) {
+    byId('numeroEntrega').value = '';
+  }
+
+  if (byId('bairroEntrega')) {
+    byId('bairroEntrega').value = '';
+  }
+
+  if (byId('cidadeEntrega')) {
+    byId('cidadeEntrega').value =
+      'Sorocaba';
+  }
+
+  if (byId('complementoEntrega')) {
+    byId('complementoEntrega').value =
+      '';
+  }
+
+  if (byId('formaPagamento')) {
+    byId('formaPagamento').value =
+      '';
+  }
+
+  if (byId('observacoes')) {
+    byId('observacoes').value = '';
+  }
 
   atualizarPagamento();
+
   limparBloqueiosEndereco();
+
   limparCacheCoordenadaCliente();
 
   atualizarEntrega();
+
   renderizarCarrinho();
 }
 
+
+/* =========================================================
+   REGRAS DE ENTREGA
+========================================================= */
+
 async function carregarRegrasEntrega() {
+
   if (!supabaseClient) {
-    regrasEntrega = [...REGRAS_ENTREGA_PADRAO];
+
+    regrasEntrega = [
+      ...REGRAS_ENTREGA_PADRAO
+    ];
+
     return;
   }
 
   try {
-    const { data, error } = await supabaseClient
-      .from('delivery_rules')
-      .select('*')
-      .eq('active', true)
-      .order('km_min', { ascending: true });
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from('delivery_rules')
+        .select('*')
+        .eq('active', true)
+        .order(
+          'km_min',
+          {
+            ascending: true
+          }
+        );
 
     if (error) {
-      console.error('Erro ao carregar regras de entrega:', error);
-      regrasEntrega = [...REGRAS_ENTREGA_PADRAO];
+
+      console.error(
+        'Erro ao carregar regras de entrega:',
+        error
+      );
+
+      regrasEntrega = [
+        ...REGRAS_ENTREGA_PADRAO
+      ];
+
       return;
     }
 
-    regrasEntrega = data && data.length > 0 ? data : [...REGRAS_ENTREGA_PADRAO];
+    regrasEntrega =
+      data &&
+      data.length > 0
+
+        ? data
+
+        : [
+            ...REGRAS_ENTREGA_PADRAO
+          ];
+
   } catch (erro) {
-    console.error('Falha ao carregar regras:', erro);
-    regrasEntrega = [...REGRAS_ENTREGA_PADRAO];
-  }
-}
 
-async function geocodificarEnderecoOpenStreetMap(endereco) {
-  return new Promise((resolve, reject) => {
-    if (!window.google || !google.maps) {
-      reject(new Error('Google Maps não carregado'));
-      return;
-    }
-
-    const geocoder = new google.maps.Geocoder();
-
-    geocoder.geocode(
-      {
-        address: endereco,
-        region: 'BR'
-      },
-
-      (results, status) => {
-        if (status !== 'OK' || !results.length) {
-          resolve(null);
-          return;
-        }
-
-        resolve({
-          lat: results[0].geometry.location.lat(),
-          lng: results[0].geometry.location.lng(),
-          display_name: results[0].formatted_address
-        });
-      }
+    console.error(
+      'Falha ao carregar regras:',
+      erro
     );
-  });
-}
 
-function gerarTentativasEndereco(endereco) {
-  const base = String(endereco || '').trim();
-  const semAcentos = removerAcentos(base);
-
-  const tentativas = [
-    base,
-    base.replace(/,\s*\d+\s*,/g, ', '),
-    base.replace(/,\s*\d{5}-?\d{3}/g, ''),
-    base.replace(/,\s*Brasil/gi, ''),
-    base
-      .replace(/,\s*\d+\s*,/g, ', ')
-      .replace(/,\s*\d{5}-?\d{3}/g, ''),
-    base
-      .replace(/,\s*\d+\s*,/g, ', ')
-      .replace(/,\s*\d{5}-?\d{3}/g, '')
-      .replace(/,\s*Brasil/gi, ''),
-    (() => {
-      const partes = base.split(',').map(p => p.trim()).filter(Boolean);
-      if (partes.length >= 4) {
-        const rua = partes[0] || '';
-        const bairro = partes[2] || '';
-        const cidade = partes[3] || '';
-        return [rua, bairro, cidade, 'SP'].filter(Boolean).join(', ');
-      }
-      return base;
-    })(),
-    (() => {
-      const partes = base.split(',').map(p => p.trim()).filter(Boolean);
-      if (partes.length >= 4) {
-        const rua = partes[0] || '';
-        const cidade = partes[3] || '';
-        return [rua, cidade, 'SP'].filter(Boolean).join(', ');
-      }
-      return base;
-    })(),
-    (() => {
-      const cep = (base.match(/\d{5}-?\d{3}/) || [])[0];
-      return cep || '';
-    })(),
-    semAcentos,
-    semAcentos
-      .replace(/,\s*\d+\s*,/g, ', ')
-      .replace(/,\s*\d{5}-?\d{3}/g, '')
-      .replace(/,\s*Brasil/gi, '')
-  ];
-
-  const unicas = [];
-  const vistos = new Set();
-
-  for (const tentativa of tentativas) {
-    const texto = String(tentativa || '')
-      .replace(/\s+,/g, ',')
-      .replace(/,\s*,/g, ',')
-      .replace(/,\s*$/, '')
-      .trim();
-
-    if (!texto) continue;
-
-    const chave = texto.toLowerCase();
-
-    if (vistos.has(chave)) continue;
-
-    vistos.add(chave);
-    unicas.push(texto);
+    regrasEntrega = [
+      ...REGRAS_ENTREGA_PADRAO
+    ];
   }
-
-  return unicas;
 }
 
-async function geocodificarEnderecoProfissional(endereco) {
-  const tentativas = gerarTentativasEndereco(endereco);
 
-  for (const texto of tentativas) {
-    try {
-      console.log('Tentando geocodificar:', texto);
+/* =========================================================
+   DURAÇÃO / TAXA
+========================================================= */
 
-      const resultado = await geocodificarEnderecoOpenStreetMap(texto);
+function formatarDuracao(
+  segundos
+) {
 
-      if (resultado) {
-        return resultado;
-      }
-    } catch (erro) {
-      console.warn('Falhou ao geocodificar:', texto, erro.message);
-    }
-  }
-
-  return null;
-}
-
-async function calcularRotaRealOSRM(origem, destino) {
-  return new Promise((resolve, reject) => {
-    if (!window.google || !google.maps) {
-      reject(new Error('Google Maps não carregado'));
-      return;
-    }
-
-    const service = new google.maps.DirectionsService();
-
-    service.route(
-      {
-        origin: {
-          lat: Number(origem.lat),
-          lng: Number(origem.lng)
-        },
-
-        destination: {
-          lat: Number(destino.lat),
-          lng: Number(destino.lng)
-        },
-
-        travelMode: 'DRIVING'
-      },
-
-      (result, status) => {
-        if (status !== 'OK') {
-          reject(new Error('Erro rota google'));
-          return;
-        }
-
-        const leg = result.routes[0].legs[0];
-
-        resolve({
-          distanciaMetros: leg.distance.value,
-          distanciaTexto: leg.distance.text,
-          duracaoSegundos: leg.duration.value,
-          duracaoTexto: leg.duration.text
-        });
-      }
+  const totalMin =
+    Math.round(
+      Number(segundos || 0) /
+      60
     );
-  });
-}
-
-function formatarDuracao(segundos) {
-  const totalMin = Math.round(Number(segundos || 0) / 60);
 
   if (totalMin < 60) {
+
     return `${totalMin} min`;
   }
 
-  const horas = Math.floor(totalMin / 60);
-  const minutos = totalMin % 60;
+  const horas =
+    Math.floor(
+      totalMin / 60
+    );
+
+  const minutos =
+    totalMin % 60;
 
   if (minutos === 0) {
+
     return `${horas}h`;
   }
 
-  return `${horas}h ${minutos}min`;
+  return (
+    `${horas}h ${minutos}min`
+  );
 }
 
-function somarTempoPreparoComEntrega(segundosEntrega) {
-  const minutosEntrega = Math.round(Number(segundosEntrega || 0) / 60);
-  const minutosTotais = TEMPO_PREPARO_FIXO_MINUTOS + minutosEntrega;
+function somarTempoPreparoComEntrega(
+  segundosEntrega
+) {
 
-  return formatarDuracao(minutosTotais * 60);
+  const minutosEntrega =
+    Math.round(
+      Number(
+        segundosEntrega || 0
+      ) / 60
+    );
+
+  const minutosTotais =
+    TEMPO_PREPARO_FIXO_MINUTOS +
+    minutosEntrega;
+
+  return formatarDuracao(
+    minutosTotais * 60
+  );
 }
 
-function descobrirTaxaPorDistancia(distanciaKm) {
-  if (!Number.isFinite(distanciaKm) || distanciaKm <= 0) {
+function descobrirTaxaPorDistancia(
+  distanciaKm
+) {
+
+  if (
+    !Number.isFinite(
+      distanciaKm
+    ) ||
+    distanciaKm <= 0
+  ) {
     return 0;
   }
 
-  if (regrasEntrega && regrasEntrega.length > 0) {
-    const regra = regrasEntrega.find(r => {
-      const min = Number(r.km_min);
-      const max = Number(r.km_max);
+  if (
+    regrasEntrega &&
+    regrasEntrega.length > 0
+  ) {
 
-      return distanciaKm >= min && distanciaKm <= max;
-    });
+    const regra =
+      regrasEntrega.find(
+        r => {
+
+          const min =
+            Number(r.km_min);
+
+          const max =
+            Number(r.km_max);
+
+          return (
+            distanciaKm >= min &&
+            distanciaKm <= max
+          );
+        }
+      );
 
     if (regra) {
-      return Number(regra.fee);
+
+      return Number(
+        regra.fee
+      );
     }
   }
 
-  if (distanciaKm <= 3) {
+  if (
+    distanciaKm <= 3
+  ) {
     return 4;
   }
 
-  return 4 + Math.ceil(distanciaKm - 3);
+  return (
+    4 +
+    Math.ceil(
+      distanciaKm - 3
+    )
+  );
 }
+
+
+/* =========================================================
+   ENTREGA ATUAL
+========================================================= */
 
 async function calcularEntregaAutomaticamente() {
-  const tipoEntrega = byId('tipoEntrega')?.value || 'retirada';
-  const aviso = byId('avisoEntrega');
-  if (tipoEntrega !== 'delivery') {
-    taxaEntrega = 0; distanciaEntregaKm = null; tempoEntregaTexto = null;
-    if (aviso) aviso.innerText = 'Retirada no local sem taxa de entrega.';
-    atualizarResumoCarrinho();
+
+  const tipoEntrega =
+    byId('tipoEntrega')?.value ||
+    'retirada';
+
+  const aviso =
+    byId('avisoEntrega');
+
+  if (
+    tipoEntrega !== 'delivery'
+  ) {
+
+    taxaEntrega = 0;
+    distanciaEntregaKm = null;
+    tempoEntregaTexto = null;
+
+    if (aviso) {
+
+      aviso.innerText =
+        'Retirada no local sem taxa de entrega.';
+    }
+
+    renderizarCarrinho();
+
     return;
   }
+
   taxaEntrega = 0;
+
+  /*
+   * Mantemos 0 para permitir a conclusão do
+   * pedido. A taxa será confirmada pela loja
+   * via WhatsApp.
+   */
   distanciaEntregaKm = 0;
+
   tempoEntregaTexto = null;
-  if (aviso) aviso.innerText = 'Delivery: taxa e prazo serão confirmados pela loja no WhatsApp.';
-  atualizarResumoCarrinho();
+
+  if (aviso) {
+
+    aviso.innerText =
+      'Delivery: taxa e prazo serão confirmados pela loja no WhatsApp.';
+  }
+
+  renderizarCarrinho();
 }
 
-async function salvarPedidoNoBanco(payload) {
+
+/* =========================================================
+   SALVAR PEDIDO
+========================================================= */
+
+async function salvarPedidoNoBanco(
+  payload
+) {
+
   if (!supabaseClient) {
-    const pedido = { ...payload, id: Date.now(), created_at: new Date().toISOString() };
-    const chave = 'le_lanches_pedidos';
+
+    const pedido = {
+      ...payload,
+      id: Date.now(),
+      created_at:
+        new Date().toISOString()
+    };
+
+    const chave =
+      'le_lanches_pedidos';
+
     let lista = [];
-    try { lista = JSON.parse(localStorage.getItem(chave) || '[]'); } catch (e) { lista = []; }
-    lista.push(pedido);
-    localStorage.setItem(chave, JSON.stringify(lista));
+
+    try {
+
+      lista =
+        JSON.parse(
+          localStorage.getItem(
+            chave
+          ) || '[]'
+        );
+
+    } catch (e) {
+
+      lista = [];
+    }
+
+    lista.push(
+      pedido
+    );
+
+    localStorage.setItem(
+      chave,
+      JSON.stringify(lista)
+    );
+
     return pedido;
   }
 
-  const { data, error } = await supabaseClient
-    .from('orders')
-    .insert([payload])
-    .select()
-    .single();
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from('orders')
+      .insert([payload])
+      .select()
+      .single();
 
   if (error) {
-    console.error('Erro ao salvar pedido:', error);
+
+    console.error(
+      'Erro ao salvar pedido:',
+      error
+    );
+
     throw error;
   }
 
   return data;
 }
 
-async function finalizarPedido(enviarWhatsapp = true) {
-  if (carrinho.length === 0) {
-    alert('Seu carrinho está vazio.');
+
+/* =========================================================
+   FINALIZAR PEDIDO
+========================================================= */
+
+async function finalizarPedido(
+  enviarWhatsapp = true
+) {
+
+  if (
+    carrinho.length === 0
+  ) {
+
+    alert(
+      'Seu carrinho está vazio.'
+    );
+
     return;
   }
 
-  if (!(await lojaAbertaAgora())) {
-    alert('A loja está fechada no momento.');
+  if (
+    !(await lojaAbertaAgora())
+  ) {
+
+    alert(
+      'A loja está fechada no momento.'
+    );
+
     return;
   }
 
-  const nome = byId('nomeCliente')?.value.trim() || '';
-  const tipoEntrega = byId('tipoEntrega')?.value;
-  const pagamento = byId('formaPagamento')?.value || '';
-  const observacoes = byId('observacoes')?.value.trim() || '';
-  const avisoEntrega = byId('avisoEntrega');
-  const btnFinalizar = enviarWhatsapp ? byId('btnFinalizarWhatsapp') : byId('btnFinalizar');
+  const nome =
+    byId('nomeCliente')?.value.trim() ||
+    '';
 
-  const endereco = enderecoClienteTextoHumano();
+  const tipoEntrega =
+    byId('tipoEntrega')?.value;
+
+  const pagamento =
+    byId('formaPagamento')?.value ||
+    '';
+
+  const observacoes =
+    byId('observacoes')?.value.trim() ||
+    '';
+
+  const avisoEntrega =
+    byId('avisoEntrega');
+
+  const btnFinalizar =
+    enviarWhatsapp
+
+      ? byId(
+          'btnFinalizarWhatsapp'
+        )
+
+      : byId(
+          'btnFinalizar'
+        );
+
+  const endereco =
+    enderecoClienteTextoHumano();
 
   if (!nome) {
-    alert('Digite seu nome.');
+
+    alert(
+      'Digite seu nome.'
+    );
+
     return;
   }
 
   if (!pagamento) {
-    alert('Selecione a forma de pagamento.');
+
+    alert(
+      'Selecione a forma de pagamento.'
+    );
+
     return;
   }
 
-  if (tipoEntrega === 'delivery') {
-    const cep = byId('cepEntrega')?.value.trim() || '';
-    const rua = byId('ruaEntrega')?.value.trim() || '';
-    const numero = byId('numeroEntrega')?.value.trim() || '';
-    const bairro = byId('bairroEntrega')?.value.trim() || '';
-    const cidade = byId('cidadeEntrega')?.value.trim() || '';
+  if (
+    tipoEntrega === 'delivery'
+  ) {
 
-    if (!cep || !rua || !numero || !bairro || !cidade) {
-      alert('Digite o CEP e informe o número.');
+    const cep =
+      byId('cepEntrega')?.value.trim() ||
+      '';
+
+    const rua =
+      byId('ruaEntrega')?.value.trim() ||
+      '';
+
+    const numero =
+      byId('numeroEntrega')?.value.trim() ||
+      '';
+
+    const bairro =
+      byId('bairroEntrega')?.value.trim() ||
+      '';
+
+    const cidade =
+      byId('cidadeEntrega')?.value.trim() ||
+      '';
+
+    if (
+      !cep ||
+      !rua ||
+      !numero ||
+      !bairro ||
+      !cidade
+    ) {
+
+      alert(
+        'Digite o CEP e informe o número.'
+      );
+
       return;
     }
 
-    if (distanciaEntregaKm === null) {
+    if (
+      distanciaEntregaKm === null
+    ) {
+
       await calcularEntregaAutomaticamente();
     }
 
-    if (distanciaEntregaKm === null) {
-      alert('Não foi possível calcular a entrega. Verifique o CEP e o número.');
+    if (
+      distanciaEntregaKm === null
+    ) {
+
+      alert(
+        'Não foi possível calcular a entrega. Verifique o CEP e o número.'
+      );
+
       return;
     }
   }
 
-  const subtotal = calcularSubtotal();
-  const total = calcularTotal();
+  const subtotal =
+    calcularSubtotal();
+
+  const total =
+    calcularTotal();
 
   const payload = {
-    customer_name: nome,
-    customer_phone: '',
-    order_type: tipoEntrega,
-    customer_address: tipoEntrega === 'delivery' ? endereco : null,
-    customer_neighborhood: tipoEntrega === 'delivery' ? byId('bairroEntrega').value.trim() : null,
-    customer_city: tipoEntrega === 'delivery' ? byId('cidadeEntrega').value.trim() : 'Sorocaba',
+
+    customer_name:
+      nome,
+
+    customer_phone:
+      '',
+
+    order_type:
+      tipoEntrega,
+
+    customer_address:
+      tipoEntrega === 'delivery'
+        ? endereco
+        : null,
+
+    customer_neighborhood:
+      tipoEntrega === 'delivery'
+        ? byId(
+            'bairroEntrega'
+          ).value.trim()
+        : null,
+
+    customer_city:
+      tipoEntrega === 'delivery'
+        ? byId(
+            'cidadeEntrega'
+          ).value.trim()
+        : 'Sorocaba',
+
     customer_notes: [
-      pagamento ? `Pagamento: ${pagamento}` : '',
-      pagamento.toLowerCase() === 'pix' ? `Chave PIX: ${CHAVE_PIX}` : '',
-      observacoes ? `Observações: ${observacoes}` : '',
-      tipoEntrega === 'delivery' && byId('complementoEntrega').value.trim()
-        ? `Complemento: ${byId('complementoEntrega').value.trim()}`
+
+      pagamento
+        ? `Pagamento: ${pagamento}`
         : '',
-      tipoEntrega === 'delivery' && tempoEntregaTexto
+
+      pagamento.toLowerCase() === 'pix'
+        ? `Chave PIX: ${CHAVE_PIX}`
+        : '',
+
+      observacoes
+        ? `Observações: ${observacoes}`
+        : '',
+
+      tipoEntrega === 'delivery' &&
+      byId(
+        'complementoEntrega'
+      ).value.trim()
+
+        ? `Complemento: ${
+            byId(
+              'complementoEntrega'
+            ).value.trim()
+          }`
+
+        : '',
+
+      tipoEntrega === 'delivery' &&
+      tempoEntregaTexto
+
         ? `Tempo estimado: ${tempoEntregaTexto}`
+
         : ''
-    ].filter(Boolean).join(' | '),
-    items: carrinho.map(item => ({
-      nome: item.nome,
-      preco: item.preco,
-      quantidade: item.quantidade,
-      observacao: item.observacao || ''
-    })),
-    subtotal: subtotal,
-    delivery_fee: taxaEntrega,
-    total: total,
-    delivery_distance_km: tipoEntrega === 'delivery' ? distanciaEntregaKm : null,
-    status: 'novo'
+
+    ]
+      .filter(Boolean)
+      .join(' | '),
+
+    items:
+      carrinho.map(
+        item => ({
+          nome:
+            item.nome,
+
+          preco:
+            item.preco,
+
+          quantidade:
+            item.quantidade,
+
+          observacao:
+            item.observacao || ''
+        })
+      ),
+
+    subtotal:
+      subtotal,
+
+    delivery_fee:
+      taxaEntrega,
+
+    total:
+      total,
+
+    delivery_distance_km:
+      tipoEntrega === 'delivery'
+        ? distanciaEntregaKm
+        : null,
+
+    status:
+      'novo'
   };
 
-try {
-  if (btnFinalizar) {
-    btnFinalizar.disabled = true;
-    btnFinalizar.innerText = 'Salvando pedido...';
-  }
+  try {
 
-  const pedidoSalvo = await salvarPedidoNoBanco(payload);
+    if (btnFinalizar) {
 
-  let mensagem = `🍔 *Pedido - ${nomeLoja}*
+      btnFinalizar.disabled =
+        true;
+
+      btnFinalizar.innerText =
+        'Salvando pedido...';
+    }
+
+    const pedidoSalvo =
+      await salvarPedidoNoBanco(
+        payload
+      );
+
+    let mensagem =
+`🍔 *Pedido - ${nomeLoja}*
 
 📦 *Pedido:* #${pedidoSalvo.id}
 👤 *Cliente:* ${nome}
 🏠 *Tipo do pedido:* ${formatarTipoEntregaTexto(tipoEntrega)}`;
 
-  if (tipoEntrega === 'delivery') {
-    mensagem += `
+    if (
+      tipoEntrega === 'delivery'
+    ) {
+
+      mensagem += `
 📍 *Endereço:* ${endereco}`;
 
-    if (tempoEntregaTexto) {
-      mensagem += `
-⏱️ *Tempo estimado:* ${tempoEntregaTexto}`;
-    }
-  } else {
-    mensagem += `
-⏱️ *Tempo estimado:* ${formatarDuracao(TEMPO_PREPARO_FIXO_MINUTOS * 60)}`;
-  }
+      if (
+        tempoEntregaTexto
+      ) {
 
-  mensagem += `
+        mensagem += `
+⏱️ *Tempo estimado:* ${tempoEntregaTexto}`;
+      }
+
+    } else {
+
+      mensagem += `
+⏱️ *Tempo estimado:* ${formatarDuracao(
+        TEMPO_PREPARO_FIXO_MINUTOS *
+        60
+      )}`;
+    }
+
+    mensagem += `
 
 🍔 *Itens do pedido:*`;
 
-  payload.items.forEach(item => {
-    const nomeItem = item.nome || 'Item';
-    const quantidadeItem = Number(item.quantidade || 1);
-    const precoItem = Number(item.preco || 0);
-    const obsItem = item.observacao || '';
+    payload.items.forEach(
+      item => {
 
-    mensagem += `
+        const nomeItem =
+          item.nome ||
+          'Item';
+
+        const quantidadeItem =
+          Number(
+            item.quantidade || 1
+          );
+
+        const precoItem =
+          Number(
+            item.preco || 0
+          );
+
+        const obsItem =
+          item.observacao ||
+          '';
+
+        mensagem += `
 ━━━━━━━━━━━━━━
 🍟 *${quantidadeItem}x ${nomeItem}*
-💰 ${formatarPreco(precoItem * quantidadeItem)}`;
+💰 ${formatarPreco(
+          precoItem *
+          quantidadeItem
+        )}`;
 
-    if (obsItem) {
-      mensagem += `
+        if (obsItem) {
+
+          mensagem += `
 📝 ${obsItem}`;
-    }
-  });
+        }
+      }
+    );
 
-  mensagem += `
+    mensagem += `
 
 ━━━━━━━━━━━━━━
 💵 *Subtotal:* ${formatarPreco(subtotal)}
-🚚 *Taxa de entrega:* ${tipoEntrega === 'delivery' ? 'A confirmar' : formatarPreco(taxaEntrega)}
+🚚 *Taxa de entrega:* ${
+      tipoEntrega === 'delivery'
+        ? 'A confirmar'
+        : formatarPreco(taxaEntrega)
+    }
 💲 *Total:* ${formatarPreco(total)}`;
 
-  if (pagamento) {
-    mensagem += `
+    if (pagamento) {
+
+      mensagem += `
 💳 *Pagamento:* ${pagamento}`;
 
-    if (pagamento.toLowerCase() === 'pix') {
-      mensagem += `
+      if (
+        pagamento.toLowerCase() ===
+        'pix'
+      ) {
+
+        mensagem += `
 📲 *Chave PIX:* ${CHAVE_PIX}`;
+      }
     }
-  }
 
-  if (observacoes) {
-    mensagem += `
+    if (observacoes) {
+
+      mensagem += `
 📌 *Observações:* ${observacoes}`;
-  }
+    }
 
-  const urlWhatsapp = `https://api.whatsapp.com/send?phone=${numeroWhatsapp}&text=${encodeURIComponent(mensagem)}`;
+    const urlWhatsapp =
+      `https://api.whatsapp.com/send?phone=${numeroWhatsapp}&text=${encodeURIComponent(mensagem)}`;
 
-  carrinho = [];
-  taxaEntrega = 0;
-  distanciaEntregaKm = null;
-  tempoEntregaTexto = null;
-  produtoOpcoesAtual = null;
-  adicionalPendente = null;
-  produtoPersonalizacaoAtual = null;
+    carrinho = [];
 
-    if (byId('nomeCliente')) byId('nomeCliente').value = '';
-    if (byId('tipoEntrega')) byId('tipoEntrega').value = 'retirada';
-    if (byId('cepEntrega')) byId('cepEntrega').value = '';
-    if (byId('ruaEntrega')) byId('ruaEntrega').value = '';
-    if (byId('numeroEntrega')) byId('numeroEntrega').value = '';
-    if (byId('bairroEntrega')) byId('bairroEntrega').value = '';
-    if (byId('cidadeEntrega')) byId('cidadeEntrega').value = 'Sorocaba';
-    if (byId('complementoEntrega')) byId('complementoEntrega').value = '';
-    if (byId('formaPagamento')) byId('formaPagamento').value = '';
-    if (byId('observacoes')) byId('observacoes').value = '';
+    taxaEntrega = 0;
+    distanciaEntregaKm = null;
+    tempoEntregaTexto = null;
+
+    produtoOpcoesAtual = null;
+    adicionalPendente = null;
+    produtoPersonalizacaoAtual = null;
+
+    if (byId('nomeCliente')) {
+      byId('nomeCliente').value = '';
+    }
+
+    if (byId('tipoEntrega')) {
+      byId('tipoEntrega').value =
+        'retirada';
+    }
+
+    if (byId('cepEntrega')) {
+      byId('cepEntrega').value = '';
+    }
+
+    if (byId('ruaEntrega')) {
+      byId('ruaEntrega').value = '';
+    }
+
+    if (byId('numeroEntrega')) {
+      byId('numeroEntrega').value = '';
+    }
+
+    if (byId('bairroEntrega')) {
+      byId('bairroEntrega').value = '';
+    }
+
+    if (byId('cidadeEntrega')) {
+      byId('cidadeEntrega').value =
+        'Sorocaba';
+    }
+
+    if (byId('complementoEntrega')) {
+      byId('complementoEntrega').value =
+        '';
+    }
+
+    if (byId('formaPagamento')) {
+      byId('formaPagamento').value =
+        '';
+    }
+
+    if (byId('observacoes')) {
+      byId('observacoes').value = '';
+    }
 
     atualizarPagamento();
+
     limparBloqueiosEndereco();
+
     limparCacheCoordenadaCliente();
 
     if (avisoEntrega) {
-      avisoEntrega.innerText = 'Retirada no local sem taxa de entrega.';
+
+      avisoEntrega.innerText =
+        'Retirada no local sem taxa de entrega.';
     }
 
     fecharCarrinho();
+
     fecharOpcoesProduto();
+
     renderizarCarrinho();
 
-if (enviarWhatsapp) {
-  setTimeout(() => {
-    abrirWhatsapp(urlWhatsapp);
-  }, 150);
-} else {
-  alert('Pedido finalizado com sucesso!');
-}
+    if (enviarWhatsapp) {
+
+      setTimeout(
+        () => {
+
+          abrirWhatsapp(
+            urlWhatsapp
+          );
+
+        },
+        150
+      );
+
+    } else {
+
+      alert(
+        'Pedido finalizado com sucesso!'
+      );
+    }
+
   } catch (erro) {
-    alert('Erro ao salvar o pedido. Verifique a configuração do Supabase.');
-    console.error(erro);
+
+    alert(
+      'Erro ao salvar o pedido. Verifique a configuração do Supabase.'
+    );
+
+    console.error(
+      erro
+    );
+
   } finally {
-  if (btnFinalizar) {
-  btnFinalizar.innerText = enviarWhatsapp ? 'Finalizar Pedido WhatsApp' : 'Finalizar';
-  btnFinalizar.disabled = !(await lojaAbertaAgora());
+
+    if (btnFinalizar) {
+
+      btnFinalizar.innerText =
+        enviarWhatsapp
+          ? 'Finalizar no WhatsApp'
+          : 'Salvar pedido';
+
+      btnFinalizar.disabled =
+        !(await lojaAbertaAgora());
     }
   }
 }
 
-window.onclick = function (event) {
-  const modalCarrinho = byId('modalCarrinho');
-  const modalOpcoes = byId('modalOpcoesProduto');
 
-  if (event.target === modalCarrinho) {
-    fecharCarrinho();
-  }
+/* =========================================================
+   CLIQUE FORA DOS MODAIS
+========================================================= */
 
-  if (event.target === modalOpcoes) {
-    fecharOpcoesProduto();
-  }
-};
+window.onclick =
+  function (event) {
+
+    const modalCarrinho =
+      byId('modalCarrinho');
+
+    const modalOpcoes =
+      byId('modalOpcoesProduto');
+
+    if (
+      event.target === modalCarrinho
+    ) {
+
+      fecharCarrinho();
+    }
+
+    if (
+      event.target === modalOpcoes
+    ) {
+
+      fecharOpcoesProduto();
+    }
+  };
+
+
+/* =========================================================
+   INICIALIZAÇÃO
+========================================================= */
 
 async function iniciarSistema() {
+
   await carregarConfiguracaoLoja();
+
   await carregarRegrasEntrega();
 
   garantirModalOpcoesForaDoCarrinho();
+
   aplicarMascaraCep();
+
   aplicarEventosEntrega();
+
   atualizarContadores();
+
   atualizarEntrega();
+
   atualizarPagamento();
+
   limparBloqueiosEndereco();
+
+  filtrarCardapio();
 
   await atualizarStatusLoja();
 
-  setInterval(async () => {
-    await atualizarStatusLoja();
-  }, 5000);
+  setInterval(
+    async () => {
 
-  console.log('Sistema iniciado com CEP via ViaCEP + rota OSRM + PIX copia e cola.');
+      await atualizarStatusLoja();
+
+    },
+    5000
+  );
+
+  console.log(
+    'Lê Lanches 2.0 iniciado.'
+  );
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-  const tipoEntrega = byId('tipoEntrega');
-  const camposEntrega = byId('camposEntrega');
-  const formaPagamento = byId('formaPagamento');
 
-  if (tipoEntrega) {
-    tipoEntrega.value = 'retirada';
+/* =========================================================
+   DOM READY
+========================================================= */
+
+document.addEventListener(
+  'DOMContentLoaded',
+  function () {
+
+    const tipoEntrega =
+      byId('tipoEntrega');
+
+    const camposEntrega =
+      byId('camposEntrega');
+
+    const formaPagamento =
+      byId('formaPagamento');
+
+    if (tipoEntrega) {
+
+      tipoEntrega.value =
+        'retirada';
+    }
+
+    if (camposEntrega) {
+
+      camposEntrega.style.display =
+        'none';
+    }
+
+    if (formaPagamento) {
+
+      formaPagamento.addEventListener(
+        'change',
+        atualizarPagamento
+      );
+    }
+
+    garantirModalOpcoesForaDoCarrinho();
+
+    atualizarPagamento();
+
+    filtrarCardapio();
   }
+);
 
-  if (camposEntrega) {
-    camposEntrega.style.display = 'none';
-  }
 
-  if (formaPagamento) {
-    formaPagamento.addEventListener('change', atualizarPagamento);
-  }
-
-  garantirModalOpcoesForaDoCarrinho();
-  atualizarPagamento();
-});
+/* =========================================================
+   START
+========================================================= */
 
 iniciarSistema();
