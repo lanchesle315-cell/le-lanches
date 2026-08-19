@@ -363,16 +363,11 @@ function carregarGoogleMapsApi() {
     );
   }
 
-  if (
-    googleMapsCarregamentoPromise
-  ) {
+  if (googleMapsCarregamentoPromise) {
     return googleMapsCarregamentoPromise;
   }
 
-  if (
-    !GOOGLE_MAPS_API_KEY
-  ) {
-
+  if (!GOOGLE_MAPS_API_KEY) {
     return Promise.reject(
       new Error(
         'Google Maps API Key não configurada.'
@@ -381,78 +376,15 @@ function carregarGoogleMapsApi() {
   }
 
   googleMapsCarregamentoPromise =
-    new Promise(
-      (resolve, reject) => {
+    new Promise((resolve, reject) => {
 
-        const existente =
-          document.querySelector(
-            'script[data-le-lanches-google-maps="true"]'
-          );
+      const callbackName =
+        '__leLanchesGoogleMapsReady';
 
-        if (existente) {
+      window[callbackName] =
+        function () {
 
-          existente.addEventListener(
-            'load',
-            () => {
-
-              if (
-                window.google?.maps
-              ) {
-                resolve(
-                  window.google.maps
-                );
-              } else {
-                reject(
-                  new Error(
-                    'Google Maps não ficou disponível.'
-                  )
-                );
-              }
-            },
-            {
-              once: true
-            }
-          );
-
-          existente.addEventListener(
-            'error',
-            () => {
-              reject(
-                new Error(
-                  'Erro ao carregar Google Maps.'
-                )
-              );
-            },
-            {
-              once: true
-            }
-          );
-
-          return;
-        }
-
-        const script =
-          document.createElement(
-            'script'
-          );
-
-        script.dataset.leLanchesGoogleMaps =
-          'true';
-
-        script.async = true;
-
-        script.defer = true;
-
-        script.src =
-          'https://maps.googleapis.com/maps/api/js' +
-          '?key=' +
-          encodeURIComponent(
-            GOOGLE_MAPS_API_KEY
-          ) +
-          '&loading=async&v=weekly';
-
-        script.onload =
-          () => {
+          try {
 
             if (
               window.google &&
@@ -460,39 +392,90 @@ function carregarGoogleMapsApi() {
               window.google.maps.DirectionsService
             ) {
 
+              console.log(
+                'Google Maps API carregada com sucesso.'
+              );
+
               resolve(
                 window.google.maps
               );
 
-              return;
+            } else {
+
+              reject(
+                new Error(
+                  'Google Maps carregou, mas DirectionsService não está disponível.'
+                )
+              );
             }
 
-            reject(
-              new Error(
-                'Google Maps carregou, mas DirectionsService não está disponível.'
-              )
-            );
-          };
+          } finally {
 
-        script.onerror =
-          () => {
+            try {
+              delete window[callbackName];
+            } catch (_) {}
+          }
+        };
 
-            reject(
-              new Error(
-                'Não foi possível carregar Google Maps JavaScript API.'
-              )
-            );
-          };
-
-        document.head.appendChild(
-          script
+      const script =
+        document.createElement(
+          'script'
         );
-      }
-    );
+
+      script.id =
+        'le-lanches-google-maps';
+
+      script.async = true;
+
+      script.defer = true;
+
+      script.src =
+        'https://maps.googleapis.com/maps/api/js' +
+        '?key=' +
+        encodeURIComponent(
+          GOOGLE_MAPS_API_KEY
+        ) +
+        '&callback=' +
+        callbackName +
+        '&v=weekly';
+
+      script.onerror =
+        function () {
+
+          reject(
+            new Error(
+              'Falha ao carregar Google Maps JavaScript API.'
+            )
+          );
+        };
+
+      document.head.appendChild(
+        script
+      );
+
+      setTimeout(
+        () => {
+
+          if (
+            !window.google ||
+            !window.google.maps ||
+            !window.google.maps.DirectionsService
+          ) {
+
+            reject(
+              new Error(
+                'Tempo limite ao carregar Google Maps.'
+              )
+            );
+          }
+
+        },
+        12000
+      );
+    });
 
   return googleMapsCarregamentoPromise;
 }
-
 
 /* =========================================================
    TOAST
