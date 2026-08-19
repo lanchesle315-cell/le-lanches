@@ -1,8 +1,26 @@
-const numeroWhatsapp = (window.APP_CONFIG && window.APP_CONFIG.whatsappNumber) || '5515996314700';
-const nomeLoja = (window.APP_CONFIG && window.APP_CONFIG.storeName) || 'Lê Lanches';
-const ENDERECO_LOJA_PADRAO = (window.APP_CONFIG && window.APP_CONFIG.storeAddress) || 'R. Firmino Mineli, 315 - Jardim Hungares, Sorocaba - SP, 18075-700';
+const numeroWhatsapp =
+  window.APP_CONFIG?.whatsappNumber ||
+  '5515996314700';
+
+const nomeLoja =
+  window.APP_CONFIG?.storeName ||
+  'Lê Lanches';
+
+const ENDERECO_LOJA_PADRAO =
+  window.APP_CONFIG?.storeAddress ||
+  'R. Firmino Mineli, 315 - Jardim Hungares, Sorocaba - SP, 18075-700';
+
+const GOOGLE_MAPS_API_KEY =
+  window.APP_CONFIG?.googleMapsApiKey || '';
+
 const TEMPO_PREPARO_FIXO_MINUTOS = 45;
+
 const CHAVE_PIX = '';
+
+
+/* =========================================================
+   REGRAS DE ENTREGA PADRÃO
+========================================================= */
 
 const REGRAS_ENTREGA_PADRAO = [
   { km_min: 0, km_max: 2, fee: 4, active: true },
@@ -15,15 +33,17 @@ const REGRAS_ENTREGA_PADRAO = [
   { km_min: 9.01, km_max: 10, fee: 15, active: true }
 ];
 
-const PRODUTOS_COM_OPCOES = {};
+
+/* =========================================================
+   SUPABASE
+========================================================= */
 
 let supabaseClient = null;
 
 if (
   window.supabase &&
-  window.APP_CONFIG &&
-  window.APP_CONFIG.supabaseUrl &&
-  window.APP_CONFIG.supabaseAnonKey
+  window.APP_CONFIG?.supabaseUrl &&
+  window.APP_CONFIG?.supabaseAnonKey
 ) {
   supabaseClient = window.supabase.createClient(
     window.APP_CONFIG.supabaseUrl,
@@ -31,18 +51,43 @@ if (
   );
 }
 
+
+/* =========================================================
+   ESTADO GLOBAL
+========================================================= */
+
 let carrinho = [];
+
 let taxaEntrega = 0;
+
 let distanciaEntregaKm = null;
+
 let tempoEntregaTexto = null;
-let regrasEntrega = [...REGRAS_ENTREGA_PADRAO];
+
+let regrasEntrega = [
+  ...REGRAS_ENTREGA_PADRAO
+];
+
 let configuracaoLoja = null;
+
 let timeoutCalculoEntrega = null;
-let produtoOpcoesAtual = null;
-let adicionalPendente = null;
-let coordenadaClienteCache = null;
-let produtoPersonalizacaoAtual = null;
+
 let timeoutToastLeLanches = null;
+
+let googleMapsCarregamentoPromise = null;
+
+let produtoPersonalizacaoAtual = null;
+
+let produtoOpcoesAtual = null;
+
+let adicionalPendente = null;
+
+let coordenadaClienteCache = null;
+
+
+/* =========================================================
+   INGREDIENTES
+========================================================= */
 
 const INGREDIENTES_REMOVIVEIS_PADRAO = [
   'Tomate',
@@ -56,82 +101,169 @@ const INGREDIENTES_REMOVIVEIS_PADRAO = [
 ];
 
 const INGREDIENTES_POR_LANCHE = {
+
   'simples': [
-    'Batata palha','Purê de batata','Tomate','Cebola',
-    'Alface','Milho','Ketchup','Maionese temperada','Mostarda'
+    'Batata palha',
+    'Purê de batata',
+    'Tomate',
+    'Cebola',
+    'Alface',
+    'Milho',
+    'Ketchup',
+    'Maionese temperada',
+    'Mostarda'
   ],
 
   'duplo': [
-    'Batata palha','Purê de batata','Tomate','Cebola',
-    'Alface','Milho','Ketchup','Maionese temperada','Mostarda'
+    'Batata palha',
+    'Purê de batata',
+    'Tomate',
+    'Cebola',
+    'Alface',
+    'Milho',
+    'Ketchup',
+    'Maionese temperada',
+    'Mostarda'
   ],
 
   'especial': [
-    'Batata palha','Purê de batata','Tomate','Cebola',
-    'Alface','Milho','Ketchup','Maionese temperada','Mostarda'
+    'Batata palha',
+    'Purê de batata',
+    'Tomate',
+    'Cebola',
+    'Alface',
+    'Milho',
+    'Ketchup',
+    'Maionese temperada',
+    'Mostarda'
   ],
 
   'x-burguer': [
-    'Batata palha','Tomate','Cebola',
-    'Ketchup','Maionese temperada','Mostarda'
+    'Batata palha',
+    'Tomate',
+    'Cebola',
+    'Ketchup',
+    'Maionese temperada',
+    'Mostarda'
   ],
 
   'x-salada': [
-    'Batata palha','Tomate','Cebola','Alface',
-    'Milho','Ketchup','Maionese temperada','Mostarda'
+    'Batata palha',
+    'Tomate',
+    'Cebola',
+    'Alface',
+    'Milho',
+    'Ketchup',
+    'Maionese temperada',
+    'Mostarda'
   ],
 
   'x-egg': [
-    'Batata palha','Tomate','Cebola','Alface',
-    'Milho','Ketchup','Maionese temperada','Mostarda'
+    'Batata palha',
+    'Tomate',
+    'Cebola',
+    'Alface',
+    'Milho',
+    'Ketchup',
+    'Maionese temperada',
+    'Mostarda'
   ],
 
   'x-bacon': [
-    'Batata palha','Tomate','Cebola','Alface',
-    'Milho','Ketchup','Maionese temperada','Mostarda'
+    'Batata palha',
+    'Tomate',
+    'Cebola',
+    'Alface',
+    'Milho',
+    'Ketchup',
+    'Maionese temperada',
+    'Mostarda'
   ],
 
   'x-calabresa': [
-    'Batata palha','Tomate','Cebola','Alface',
-    'Milho','Ketchup','Maionese temperada','Mostarda'
+    'Batata palha',
+    'Tomate',
+    'Cebola',
+    'Alface',
+    'Milho',
+    'Ketchup',
+    'Maionese temperada',
+    'Mostarda'
   ],
 
   'x-frango': [
-    'Tomate','Cebola','Alface','Milho',
-    'Ketchup','Maionese temperada','Mostarda'
+    'Tomate',
+    'Cebola',
+    'Alface',
+    'Milho',
+    'Ketchup',
+    'Maionese temperada',
+    'Mostarda'
   ],
 
   'x-tudo': [
-    'Batata palha','Tomate','Cebola','Alface',
-    'Milho','Ketchup','Maionese temperada','Mostarda'
+    'Batata palha',
+    'Tomate',
+    'Cebola',
+    'Alface',
+    'Milho',
+    'Ketchup',
+    'Maionese temperada',
+    'Mostarda'
   ],
 
   'calabacon': [
-    'Batata palha','Tomate','Cebola','Alface',
-    'Milho','Ketchup','Maionese temperada','Mostarda'
+    'Batata palha',
+    'Tomate',
+    'Cebola',
+    'Alface',
+    'Milho',
+    'Ketchup',
+    'Maionese temperada',
+    'Mostarda'
   ],
 
   'franbacon': [
-    'Tomate','Cebola','Alface','Milho',
-    'Ketchup','Maionese temperada','Mostarda'
+    'Tomate',
+    'Cebola',
+    'Alface',
+    'Milho',
+    'Ketchup',
+    'Maionese temperada',
+    'Mostarda'
   ],
 
   'calafrango': [
-    'Tomate','Cebola','Alface','Milho',
-    'Ketchup','Maionese temperada','Mostarda'
+    'Tomate',
+    'Cebola',
+    'Alface',
+    'Milho',
+    'Ketchup',
+    'Maionese temperada',
+    'Mostarda'
   ],
 
   'x-costela': [
-    'Batata palha','Tomate','Cebola',
-    'Ketchup','Maionese temperada','Mostarda'
+    'Batata palha',
+    'Tomate',
+    'Cebola',
+    'Ketchup',
+    'Maionese temperada',
+    'Mostarda'
   ],
 
   'smash salada': [
-    'Alface','Tomate','Picles','Cebola','Maionese temperada'
+    'Alface',
+    'Tomate',
+    'Picles',
+    'Cebola',
+    'Maionese temperada'
   ],
 
   'smash oklahoma': [
-    'Cebola','Picles','Maionese temperada'
+    'Cebola',
+    'Picles',
+    'Maionese temperada'
   ],
 
   'smash bacon': [
@@ -141,28 +273,64 @@ const INGREDIENTES_POR_LANCHE = {
 
 
 /* =========================================================
+   PRODUTOS COM OPÇÕES
+========================================================= */
+
+const PRODUTOS_COM_OPCOES = {};
+
+
+/* =========================================================
    UTILITÁRIOS
 ========================================================= */
 
-function formatarPreco(valor) {
-  return Number(valor || 0).toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  });
+function byId(id) {
+  return document.getElementById(id);
 }
+
+
+function formatarPreco(valor) {
+
+  return Number(
+    valor || 0
+  ).toLocaleString(
+    'pt-BR',
+    {
+      style: 'currency',
+      currency: 'BRL'
+    }
+  );
+}
+
 
 function somenteNumeros(texto) {
-  return String(texto || '').replace(/\D/g, '');
+
+  return String(
+    texto || ''
+  ).replace(
+    /\D/g,
+    ''
+  );
 }
+
 
 function removerAcentos(texto) {
-  return String(texto || '')
+
+  return String(
+    texto || ''
+  )
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
+    .replace(
+      /[\u0300-\u036f]/g,
+      ''
+    );
 }
 
+
 function escaparHtml(texto) {
-  return String(texto || '')
+
+  return String(
+    texto || ''
+  )
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -170,14 +338,159 @@ function escaparHtml(texto) {
     .replace(/'/g, '&#039;');
 }
 
+
 function formatarTipoEntregaTexto(tipo) {
+
   return tipo === 'delivery'
     ? 'Delivery'
     : 'Retirada no local';
 }
 
-function byId(id) {
-  return document.getElementById(id);
+
+/* =========================================================
+   GOOGLE MAPS
+========================================================= */
+
+function carregarGoogleMapsApi() {
+
+  if (
+    window.google &&
+    window.google.maps &&
+    window.google.maps.DirectionsService
+  ) {
+    return Promise.resolve(
+      window.google.maps
+    );
+  }
+
+  if (
+    googleMapsCarregamentoPromise
+  ) {
+    return googleMapsCarregamentoPromise;
+  }
+
+  if (
+    !GOOGLE_MAPS_API_KEY
+  ) {
+
+    return Promise.reject(
+      new Error(
+        'Google Maps API Key não configurada.'
+      )
+    );
+  }
+
+  googleMapsCarregamentoPromise =
+    new Promise(
+      (resolve, reject) => {
+
+        const existente =
+          document.querySelector(
+            'script[data-le-lanches-google-maps="true"]'
+          );
+
+        if (existente) {
+
+          existente.addEventListener(
+            'load',
+            () => {
+
+              if (
+                window.google?.maps
+              ) {
+                resolve(
+                  window.google.maps
+                );
+              } else {
+                reject(
+                  new Error(
+                    'Google Maps não ficou disponível.'
+                  )
+                );
+              }
+            },
+            {
+              once: true
+            }
+          );
+
+          existente.addEventListener(
+            'error',
+            () => {
+              reject(
+                new Error(
+                  'Erro ao carregar Google Maps.'
+                )
+              );
+            },
+            {
+              once: true
+            }
+          );
+
+          return;
+        }
+
+        const script =
+          document.createElement(
+            'script'
+          );
+
+        script.dataset.leLanchesGoogleMaps =
+          'true';
+
+        script.async = true;
+
+        script.defer = true;
+
+        script.src =
+          'https://maps.googleapis.com/maps/api/js' +
+          '?key=' +
+          encodeURIComponent(
+            GOOGLE_MAPS_API_KEY
+          ) +
+          '&loading=async&v=weekly';
+
+        script.onload =
+          () => {
+
+            if (
+              window.google &&
+              window.google.maps &&
+              window.google.maps.DirectionsService
+            ) {
+
+              resolve(
+                window.google.maps
+              );
+
+              return;
+            }
+
+            reject(
+              new Error(
+                'Google Maps carregou, mas DirectionsService não está disponível.'
+              )
+            );
+          };
+
+        script.onerror =
+          () => {
+
+            reject(
+              new Error(
+                'Não foi possível carregar Google Maps JavaScript API.'
+              )
+            );
+          };
+
+        document.head.appendChild(
+          script
+        );
+      }
+    );
+
+  return googleMapsCarregamentoPromise;
 }
 
 
@@ -185,106 +498,150 @@ function byId(id) {
    TOAST
 ========================================================= */
 
-function mostrarToastLeLanches(mensagem) {
-  const toast = byId('llToast');
-  const texto = byId('llToastTexto');
+function mostrarToastLeLanches(
+  mensagem
+) {
 
-  if (!toast || !texto) {
+  const toast =
+    byId('llToast');
+
+  const texto =
+    byId('llToastTexto');
+
+  if (
+    !toast ||
+    !texto
+  ) {
     return;
   }
 
   texto.innerText =
-    mensagem || 'Item adicionado ao carrinho.';
+    mensagem ||
+    'Item adicionado ao carrinho.';
 
-  toast.classList.add('ativo');
+  toast.classList.add(
+    'ativo'
+  );
 
-  clearTimeout(timeoutToastLeLanches);
+  clearTimeout(
+    timeoutToastLeLanches
+  );
 
-  timeoutToastLeLanches = setTimeout(() => {
-    toast.classList.remove('ativo');
-  }, 2200);
+  timeoutToastLeLanches =
+    setTimeout(
+      () => {
+
+        toast.classList.remove(
+          'ativo'
+        );
+
+      },
+      2200
+    );
 }
 
 
 /* =========================================================
-   BUSCA DO CARDÁPIO
+   BUSCA
 ========================================================= */
 
 function filtrarCardapio() {
-  const campo = byId('buscaCardapio');
-  const mensagemVazia = byId('mensagemBuscaVazia');
+
+  const campo =
+    byId('buscaCardapio');
+
+  const mensagem =
+    byId('mensagemBuscaVazia');
 
   if (!campo) {
     return;
   }
 
-  const termo = removerAcentos(
-    campo.value.trim().toLowerCase()
-  );
+  const termo =
+    removerAcentos(
+      campo.value
+        .trim()
+        .toLowerCase()
+    );
 
-  const cards = Array.from(
-    document.querySelectorAll('.ll-product-col')
-  );
+  const cards =
+    Array.from(
+      document.querySelectorAll(
+        '.ll-product-col'
+      )
+    );
 
   let visiveis = 0;
 
-  cards.forEach(card => {
+  cards.forEach(
+    card => {
 
-    const texto = removerAcentos(
-      String(
-        card.dataset.search ||
-        card.innerText ||
-        ''
-      ).toLowerCase()
-    );
-
-    const mostrar =
-      !termo ||
-      texto.includes(termo);
-
-    card.classList.toggle(
-      'd-none',
-      !mostrar
-    );
-
-    if (mostrar) {
-      visiveis += 1;
-    }
-  });
-
-  document
-    .querySelectorAll('.ll-section')
-    .forEach(secao => {
-
-      const temProdutoVisivel = Array
-        .from(
-          secao.querySelectorAll(
-            '.ll-product-col'
-          )
-        )
-        .some(
-          card =>
-            !card.classList.contains(
-              'd-none'
-            )
+      const texto =
+        removerAcentos(
+          String(
+            card.dataset.search ||
+            card.innerText ||
+            ''
+          ).toLowerCase()
         );
 
-      secao.classList.toggle(
-        'd-none',
-        !temProdutoVisivel
-      );
-    });
+      const mostrar =
+        !termo ||
+        texto.includes(
+          termo
+        );
 
-  if (mensagemVazia) {
-    mensagemVazia.classList.toggle(
+      card.classList.toggle(
+        'd-none',
+        !mostrar
+      );
+
+      if (mostrar) {
+        visiveis += 1;
+      }
+    }
+  );
+
+  document
+    .querySelectorAll(
+      '.ll-section'
+    )
+    .forEach(
+      secao => {
+
+        const possui =
+          Array.from(
+            secao.querySelectorAll(
+              '.ll-product-col'
+            )
+          ).some(
+            card =>
+              !card.classList.contains(
+                'd-none'
+              )
+          );
+
+        secao.classList.toggle(
+          'd-none',
+          !possui
+        );
+      }
+    );
+
+  if (mensagem) {
+
+    mensagem.classList.toggle(
       'd-none',
       visiveis > 0
     );
   }
 }
 
+
 function limparBuscaCardapio() {
-  const campo = byId('buscaCardapio');
+
+  const campo =
+    byId('buscaCardapio');
 
   if (!campo) {
     return;
@@ -310,8 +667,12 @@ function abrirWhatsapp(url) {
     );
 
   if (mobile) {
-    window.location.href = url;
+
+    window.location.href =
+      url;
+
   } else {
+
     window.open(
       url,
       '_blank'
@@ -326,15 +687,18 @@ function abrirWhatsapp(url) {
 
 function garantirModalOpcoesForaDoCarrinho() {
 
-  const modalOpcoes =
-    byId('modalOpcoesProduto');
+  const modal =
+    byId(
+      'modalOpcoesProduto'
+    );
 
   if (
-    modalOpcoes &&
-    modalOpcoes.parentElement !== document.body
+    modal &&
+    modal.parentElement !== document.body
   ) {
+
     document.body.appendChild(
-      modalOpcoes
+      modal
     );
   }
 }
@@ -347,10 +711,14 @@ function garantirModalOpcoesForaDoCarrinho() {
 function atualizarPagamento() {
 
   const pagamento =
-    byId('formaPagamento')?.value || '';
+    byId(
+      'formaPagamento'
+    )?.value || '';
 
   const boxPix =
-    byId('boxPix');
+    byId(
+      'boxPix'
+    );
 
   if (!boxPix) {
     return;
@@ -362,7 +730,17 @@ function atualizarPagamento() {
       : 'none';
 }
 
+
 function copiarPix() {
+
+  if (!CHAVE_PIX) {
+
+    alert(
+      'Chave PIX ainda não configurada.'
+    );
+
+    return;
+  }
 
   if (
     navigator.clipboard &&
@@ -370,26 +748,25 @@ function copiarPix() {
   ) {
 
     navigator.clipboard
-      .writeText(CHAVE_PIX)
-      .then(() => {
-        alert(
-          'Chave PIX copiada com sucesso!'
-        );
-      })
-      .catch(() => {
-        alert(
-          'Não foi possível copiar automaticamente. Chave PIX: ' +
-          CHAVE_PIX
-        );
-      });
+      .writeText(
+        CHAVE_PIX
+      )
+      .then(
+        () => {
 
-  } else {
+          alert(
+            'Chave PIX copiada!'
+          );
+        }
+      );
 
-    alert(
-      'Chave PIX: ' +
-      CHAVE_PIX
-    );
+    return;
   }
+
+  alert(
+    'Chave PIX: ' +
+    CHAVE_PIX
+  );
 }
 
 
@@ -398,1479 +775,13 @@ function copiarPix() {
 ========================================================= */
 
 function obterElementoStatusLoja() {
+
   return (
     byId('statusLoja') ||
     byId('status-loja')
   );
 }
 
-
-/* =========================================================
-   ENDEREÇO
-========================================================= */
-
-function obterCamposEndereco() {
-
-  return {
-    cep: byId('cepEntrega'),
-    rua: byId('ruaEntrega'),
-    numero: byId('numeroEntrega'),
-    bairro: byId('bairroEntrega'),
-    cidade: byId('cidadeEntrega'),
-    complemento:
-      byId('complementoEntrega')
-  };
-}
-
-function definirBloqueioCampos() {
-
-  const {
-    cep,
-    rua,
-    numero,
-    bairro,
-    cidade
-  } = obterCamposEndereco();
-
-  if (cep) {
-    cep.readOnly = false;
-  }
-
-  if (rua) {
-    rua.readOnly = true;
-  }
-
-  if (bairro) {
-    bairro.readOnly = true;
-  }
-
-  if (cidade) {
-    cidade.readOnly = true;
-  }
-
-  if (numero) {
-    numero.readOnly = false;
-  }
-}
-
-function limparBloqueiosEndereco() {
-  definirBloqueioCampos();
-}
-
-function limparCacheCoordenadaCliente() {
-  coordenadaClienteCache = null;
-}
-
-function obterEnderecoAtualComoChave() {
-
-  const rua =
-    byId('ruaEntrega')?.value.trim() || '';
-
-  const numero =
-    byId('numeroEntrega')?.value.trim() || '';
-
-  const bairro =
-    byId('bairroEntrega')?.value.trim() || '';
-
-  const cidade =
-    byId('cidadeEntrega')?.value.trim() ||
-    'Sorocaba';
-
-  const cep =
-    byId('cepEntrega')?.value.trim() || '';
-
-  return [
-    rua,
-    numero,
-    bairro,
-    cidade,
-    cep
-  ]
-    .join('|')
-    .toLowerCase();
-}
-
-function salvarCoordenadaClienteNoCache(
-  coordenada
-) {
-
-  if (!coordenada) {
-    return;
-  }
-
-  coordenadaClienteCache = {
-    chave:
-      obterEnderecoAtualComoChave(),
-
-    valor:
-      coordenada
-  };
-}
-
-function obterCoordenadaClienteDoCache() {
-
-  const chaveAtual =
-    obterEnderecoAtualComoChave();
-
-  if (
-    coordenadaClienteCache &&
-    coordenadaClienteCache.chave ===
-      chaveAtual
-  ) {
-    return coordenadaClienteCache.valor;
-  }
-
-  return null;
-}
-
-
-/* =========================================================
-   INGREDIENTES
-========================================================= */
-
-function obterIngredientesRemoviveisPorLanche(
-  nome
-) {
-
-  const nomeNormalizado =
-    removerAcentos(
-      String(nome || '').toLowerCase()
-    );
-
-  const chavesOrdenadas =
-    Object
-      .keys(INGREDIENTES_POR_LANCHE)
-      .sort(
-        (a, b) =>
-          b.length - a.length
-      );
-
-  for (
-    const chave of chavesOrdenadas
-  ) {
-
-    const chaveNormalizada =
-      removerAcentos(
-        chave.toLowerCase()
-      );
-
-    if (
-      nomeNormalizado.includes(
-        chaveNormalizada
-      )
-    ) {
-      return (
-        INGREDIENTES_POR_LANCHE[
-          chave
-        ]
-      );
-    }
-  }
-
-  return (
-    INGREDIENTES_REMOVIVEIS_PADRAO
-  );
-}
-
-
-/* =========================================================
-   CEP
-========================================================= */
-
-function aplicarMascaraCep() {
-
-  const input =
-    byId('cepEntrega');
-
-  if (!input) {
-    return;
-  }
-
-  input.addEventListener(
-    'input',
-    function () {
-
-      let valor =
-        somenteNumeros(
-          input.value
-        ).slice(0, 8);
-
-      if (valor.length > 5) {
-        valor =
-          valor.slice(0, 5) +
-          '-' +
-          valor.slice(5);
-      }
-
-      input.value = valor;
-
-      limparCacheCoordenadaCliente();
-
-      if (
-        somenteNumeros(
-          input.value
-        ).length === 8
-      ) {
-
-        buscarCepEntrega();
-
-      } else {
-
-        agendarCalculoEntrega();
-      }
-    }
-  );
-
-  input.addEventListener(
-    'blur',
-    buscarCepEntrega
-  );
-}
-
-function aplicarEventosEntrega() {
-
-  [
-    'numeroEntrega',
-    'complementoEntrega'
-  ].forEach(id => {
-
-    const campo = byId(id);
-
-    if (!campo) {
-      return;
-    }
-
-    campo.addEventListener(
-      'input',
-      () => {
-
-        limparCacheCoordenadaCliente();
-
-        agendarCalculoEntrega();
-      }
-    );
-
-    campo.addEventListener(
-      'change',
-      () => {
-
-        limparCacheCoordenadaCliente();
-
-        agendarCalculoEntrega();
-      }
-    );
-
-    campo.addEventListener(
-      'blur',
-      () => {
-
-        agendarCalculoEntrega();
-      }
-    );
-  });
-}
-
-function agendarCalculoEntrega() {
-
-  clearTimeout(
-    timeoutCalculoEntrega
-  );
-
-  timeoutCalculoEntrega =
-    setTimeout(
-      () => {
-
-        calcularEntregaAutomaticamente();
-
-      },
-      700
-    );
-}
-
-function montarEnderecoCompletoCliente() {
-
-  const rua =
-    byId('ruaEntrega')?.value.trim() || '';
-
-  const numero =
-    byId('numeroEntrega')?.value.trim() || '';
-
-  const bairro =
-    byId('bairroEntrega')?.value.trim() || '';
-
-  const cidade =
-    byId('cidadeEntrega')?.value.trim() ||
-    'Sorocaba';
-
-  const cep =
-    byId('cepEntrega')?.value.trim() || '';
-
-  const partes = [];
-
-  if (rua) {
-    partes.push(rua);
-  }
-
-  if (numero) {
-    partes.push(numero);
-  }
-
-  if (bairro) {
-    partes.push(bairro);
-  }
-
-  if (cidade) {
-    partes.push(cidade);
-  }
-
-  partes.push('SP');
-
-  if (cep) {
-    partes.push(cep);
-  }
-
-  partes.push('Brasil');
-
-  return partes.join(', ');
-}
-
-function enderecoClienteTextoHumano() {
-
-  const rua =
-    byId('ruaEntrega')?.value.trim() || '';
-
-  const numero =
-    byId('numeroEntrega')?.value.trim() || '';
-
-  const bairro =
-    byId('bairroEntrega')?.value.trim() || '';
-
-  const cidade =
-    byId('cidadeEntrega')?.value.trim() ||
-    'Sorocaba';
-
-  const cep =
-    byId('cepEntrega')?.value.trim() || '';
-
-  const complemento =
-    byId('complementoEntrega')?.value.trim() ||
-    '';
-
-  const partes = [];
-
-  if (rua) {
-    partes.push(rua);
-  }
-
-  if (numero) {
-    partes.push(numero);
-  }
-
-  if (bairro) {
-    partes.push(bairro);
-  }
-
-  if (cidade) {
-    partes.push(cidade);
-  }
-
-  if (cep) {
-    partes.push(
-      `CEP ${cep}`
-    );
-  }
-
-  if (complemento) {
-    partes.push(
-      complemento
-    );
-  }
-
-  return partes.join(', ');
-}
-
-
-/* =========================================================
-   BUSCAR CEP
-========================================================= */
-
-async function buscarCepEntrega() {
-
-  const campoCep =
-    byId('cepEntrega');
-
-  const avisoEntrega =
-    byId('avisoEntrega');
-
-  const ruaCampo =
-    byId('ruaEntrega');
-
-  const bairroCampo =
-    byId('bairroEntrega');
-
-  const cidadeCampo =
-    byId('cidadeEntrega');
-
-  const numeroCampo =
-    byId('numeroEntrega');
-
-  if (
-    !campoCep ||
-    !avisoEntrega
-  ) {
-    return;
-  }
-
-  const cep =
-    somenteNumeros(
-      campoCep.value
-    );
-
-  if (!cep) {
-
-    if (ruaCampo) {
-      ruaCampo.value = '';
-    }
-
-    if (bairroCampo) {
-      bairroCampo.value = '';
-    }
-
-    if (cidadeCampo) {
-      cidadeCampo.value =
-        'Sorocaba';
-    }
-
-    if (numeroCampo) {
-      numeroCampo.value = '';
-    }
-
-    taxaEntrega = 0;
-    distanciaEntregaKm = null;
-    tempoEntregaTexto = null;
-
-    limparBloqueiosEndereco();
-    limparCacheCoordenadaCliente();
-
-    avisoEntrega.innerText =
-      'Digite o CEP para buscar o endereço.';
-
-    renderizarCarrinho();
-
-    return;
-  }
-
-  if (cep.length !== 8) {
-
-    taxaEntrega = 0;
-    distanciaEntregaKm = null;
-    tempoEntregaTexto = null;
-
-    avisoEntrega.innerText =
-      'Digite um CEP válido com 8 números.';
-
-    limparCacheCoordenadaCliente();
-
-    renderizarCarrinho();
-
-    return;
-  }
-
-  try {
-
-    avisoEntrega.innerText =
-      'Consultando CEP...';
-
-    const resposta =
-      await fetch(
-        `https://viacep.com.br/ws/${cep}/json/`
-      );
-
-    const dados =
-      await resposta.json();
-
-    if (dados.erro) {
-
-      if (ruaCampo) {
-        ruaCampo.value = '';
-      }
-
-      if (bairroCampo) {
-        bairroCampo.value = '';
-      }
-
-      if (cidadeCampo) {
-        cidadeCampo.value =
-          'Sorocaba';
-      }
-
-      if (numeroCampo) {
-        numeroCampo.value = '';
-      }
-
-      taxaEntrega = 0;
-      distanciaEntregaKm = null;
-      tempoEntregaTexto = null;
-
-      limparBloqueiosEndereco();
-      limparCacheCoordenadaCliente();
-
-      avisoEntrega.innerText =
-        'CEP não encontrado. Confira o número digitado.';
-
-      renderizarCarrinho();
-
-      return;
-    }
-
-    if (ruaCampo) {
-      ruaCampo.value =
-        dados.logradouro || '';
-    }
-
-    if (bairroCampo) {
-      bairroCampo.value =
-        dados.bairro || '';
-    }
-
-    if (cidadeCampo) {
-      cidadeCampo.value =
-        dados.localidade ||
-        'Sorocaba';
-    }
-
-    limparCacheCoordenadaCliente();
-
-    definirBloqueioCampos();
-
-    if (numeroCampo) {
-
-      numeroCampo.readOnly =
-        false;
-
-      numeroCampo.focus();
-    }
-
-    avisoEntrega.innerText =
-      'CEP localizado. Informe somente o número.';
-
-    agendarCalculoEntrega();
-
-  } catch (erro) {
-
-    console.error(erro);
-
-    taxaEntrega = 0;
-    distanciaEntregaKm = null;
-    tempoEntregaTexto = null;
-
-    limparBloqueiosEndereco();
-    limparCacheCoordenadaCliente();
-
-    avisoEntrega.innerText =
-      'Não foi possível consultar o CEP agora.';
-
-    renderizarCarrinho();
-  }
-}
-
-async function buscarCepPorEndereco() {
-  return;
-}
-
-
-/* =========================================================
-   CARRINHO
-========================================================= */
-
-function atualizarContadores() {
-
-  const totalItens =
-    carrinho.reduce(
-      (acc, item) =>
-        acc + item.quantidade,
-      0
-    );
-
-  const cartCount =
-    byId('cartCount');
-
-  if (cartCount) {
-    cartCount.innerText =
-      totalItens;
-  }
-}
-
-function ehLanche(nome) {
-
-  const n =
-    removerAcentos(
-      String(nome || '').toLowerCase()
-    );
-
-  return (
-    !n.includes('coca') &&
-    !n.includes('sprite') &&
-    !n.includes('fanta') &&
-    !n.includes('guarana') &&
-    !n.includes('agua') &&
-    !n.includes('suco') &&
-    !n.includes('refrigerante') &&
-    !n.includes('fritas') &&
-    !n.includes('batata')
-  );
-}
-
-function gerarChaveItem(
-  nome,
-  preco,
-  observacao = ''
-) {
-
-  return (
-    `${nome}||${preco}||${observacao}`
-  );
-}
-
-function adicionarItemFinalAoCarrinho(
-  nome,
-  preco,
-  observacao = ''
-) {
-
-  const chave =
-    gerarChaveItem(
-      nome,
-      preco,
-      observacao
-    );
-
-  const itemExistente =
-    carrinho.find(
-      item =>
-        item.chave === chave
-    );
-
-  if (itemExistente) {
-
-    itemExistente.quantidade += 1;
-
-  } else {
-
-    carrinho.push({
-      chave,
-      nome,
-      preco,
-      quantidade: 1,
-      observacao
-    });
-  }
-
-  atualizarContadores();
-
-  renderizarCarrinho();
-
-  mostrarToastLeLanches(
-    `${nome} adicionado ao carrinho.`
-  );
-}
-
-function adicionarAoCarrinho(
-  nome,
-  preco,
-  observacao = ''
-) {
-
-  if (ehLanche(nome)) {
-
-    abrirPersonalizacaoLanche({
-      nome,
-      preco,
-      observacaoBase:
-        observacao
-    });
-
-    return;
-  }
-
-  adicionarItemFinalAoCarrinho(
-    nome,
-    preco,
-    observacao
-  );
-}
-
-
-/* =========================================================
-   PERSONALIZAÇÃO DO LANCHE
-========================================================= */
-
-function abrirPersonalizacaoLanche(
-  produto
-) {
-
-  garantirModalOpcoesForaDoCarrinho();
-
-  produtoPersonalizacaoAtual =
-    produto;
-
-  produtoOpcoesAtual = null;
-  adicionalPendente = null;
-
-  const modal =
-    byId('modalOpcoesProduto');
-
-  const titulo =
-    byId('tituloOpcoesProduto');
-
-  const descricao =
-    byId('descricaoOpcoesProduto');
-
-  const lista =
-    byId('listaOpcoesProduto');
-
-  if (
-    !modal ||
-    !titulo ||
-    !descricao ||
-    !lista
-  ) {
-    return;
-  }
-
-  const ingredientes =
-    obterIngredientesRemoviveisPorLanche(
-      produto.nome
-    );
-
-  titulo.innerText =
-    produto.nome;
-
-  descricao.innerText =
-    'Deseja remover algum ingrediente?';
-
-  lista.innerHTML = `
-    <div style="
-      display:grid;
-      gap:10px;
-      padding-bottom:15px;
-    ">
-
-      ${ingredientes
-        .map(
-          ingrediente => `
-
-          <label style="
-            display:flex;
-            align-items:center;
-            gap:10px;
-            padding:12px;
-            border:1px solid rgba(255,255,255,0.12);
-            border-radius:12px;
-            cursor:pointer;
-          ">
-
-            <input
-              type="checkbox"
-              name="ingredienteRemover"
-              value="${escaparHtml(ingrediente)}"
-            >
-
-            <span>
-              Sem ${escaparHtml(ingrediente)}
-            </span>
-
-          </label>
-
-        `
-        )
-        .join('')}
-
-      <label style="
-        display:block;
-        margin-top:8px;
-      ">
-
-        <span style="
-          display:block;
-          margin-bottom:6px;
-        ">
-          Observação do lanche:
-        </span>
-
-        <textarea
-          id="observacaoItemLanche"
-          placeholder="Ex: carne bem passada, pouco molho..."
-          style="
-            width:100%;
-            min-height:70px;
-            border-radius:12px;
-            padding:10px;
-            box-sizing:border-box;
-          "
-        ></textarea>
-
-      </label>
-
-    </div>
-  `;
-
-  modal.style.display =
-    'flex';
-
-  modal.classList.add(
-    'ativo'
-  );
-}
-
-function abrirOpcoesProduto(
-  produtoId
-) {
-
-  garantirModalOpcoesForaDoCarrinho();
-
-  const produto =
-    PRODUTOS_COM_OPCOES[
-      produtoId
-    ];
-
-  const modal =
-    byId('modalOpcoesProduto');
-
-  const titulo =
-    byId('tituloOpcoesProduto');
-
-  const descricao =
-    byId('descricaoOpcoesProduto');
-
-  const lista =
-    byId('listaOpcoesProduto');
-
-  if (
-    !produto ||
-    !modal ||
-    !titulo ||
-    !descricao ||
-    !lista
-  ) {
-    return;
-  }
-
-  adicionalPendente = null;
-  produtoPersonalizacaoAtual = null;
-  produtoOpcoesAtual = produto;
-
-  titulo.innerText =
-    produto.titulo;
-
-  descricao.innerText =
-    produto.descricao;
-
-  lista.innerHTML =
-    produto.opcoes
-      .map(
-        opcao => `
-
-        <label style="
-          display:flex;
-          align-items:center;
-          gap:10px;
-          padding:12px;
-          border:1px solid rgba(255,255,255,0.12);
-          border-radius:12px;
-          cursor:pointer;
-        ">
-
-          <input
-            type="radio"
-            name="opcaoProdutoAtual"
-            value="${escaparHtml(opcao)}"
-          >
-
-          <span>
-            ${escaparHtml(opcao)}
-          </span>
-
-        </label>
-
-      `
-      )
-      .join('');
-
-  modal.style.display =
-    'flex';
-
-  modal.classList.add(
-    'ativo'
-  );
-}
-
-function fecharOpcoesProduto() {
-
-  const modal =
-    byId('modalOpcoesProduto');
-
-  const lista =
-    byId('listaOpcoesProduto');
-
-  produtoOpcoesAtual = null;
-  adicionalPendente = null;
-  produtoPersonalizacaoAtual = null;
-
-  if (lista) {
-    lista.innerHTML = '';
-  }
-
-  if (modal) {
-
-    modal.classList.remove(
-      'ativo'
-    );
-
-    modal.style.display =
-      'none';
-  }
-}
-
-function confirmarOpcoesProduto() {
-
-  if (
-    produtoPersonalizacaoAtual
-  ) {
-
-    const removidos =
-      Array
-        .from(
-          document.querySelectorAll(
-            'input[name="ingredienteRemover"]:checked'
-          )
-        )
-        .map(
-          input =>
-            `Sem ${input.value}`
-        );
-
-    const observacaoItem =
-      byId(
-        'observacaoItemLanche'
-      )?.value.trim() || '';
-
-    const observacoesFinais = [
-      produtoPersonalizacaoAtual
-        .observacaoBase || '',
-
-      ...removidos,
-
-      observacaoItem
-        ? `Obs: ${observacaoItem}`
-        : ''
-    ]
-      .filter(Boolean)
-      .join(' | ');
-
-    adicionarItemFinalAoCarrinho(
-      produtoPersonalizacaoAtual.nome,
-      produtoPersonalizacaoAtual.preco,
-      observacoesFinais
-    );
-
-    fecharOpcoesProduto();
-
-    return;
-  }
-
-  if (adicionalPendente) {
-
-    if (
-      adicionalPendente.etapa ===
-      'escolher_opcao'
-    ) {
-
-      const opcaoSelecionada =
-        document.querySelector(
-          'input[name="opcaoAdicional"]:checked'
-        );
-
-      if (!opcaoSelecionada) {
-
-        alert(
-          'Selecione uma opção.'
-        );
-
-        return;
-      }
-
-      abrirEscolhaLancheParaAdicional(
-        opcaoSelecionada.value,
-        adicionalPendente.preco
-      );
-
-      return;
-    }
-
-    const selecionado =
-      document.querySelector(
-        'input[name="lancheAdicional"]:checked'
-      );
-
-    if (!selecionado) {
-
-      alert(
-        'Selecione um lanche para adicionar o item.'
-      );
-
-      return;
-    }
-
-    const index =
-      Number(
-        selecionado.value
-      );
-
-    const lanche =
-      carrinho[index];
-
-    if (!lanche) {
-
-      alert(
-        'Lanche não encontrado.'
-      );
-
-      return;
-    }
-
-    lanche.preco =
-      Number(
-        lanche.preco || 0
-      ) +
-      Number(
-        adicionalPendente.preco || 0
-      );
-
-    lanche.observacao =
-      lanche.observacao
-
-        ? lanche.observacao +
-          ' | Adicional: ' +
-          adicionalPendente.nome
-
-        : 'Adicional: ' +
-          adicionalPendente.nome;
-
-    adicionalPendente = null;
-
-    fecharOpcoesProduto();
-
-    renderizarCarrinho();
-
-    return;
-  }
-
-  if (!produtoOpcoesAtual) {
-    return;
-  }
-
-  const selecionado =
-    document.querySelector(
-      'input[name="opcaoProdutoAtual"]:checked'
-    );
-
-  if (
-    produtoOpcoesAtual.obrigatorio &&
-    !selecionado
-  ) {
-
-    alert(
-      'Selecione uma opção para continuar.'
-    );
-
-    return;
-  }
-
-  const valorSelecionado =
-    selecionado
-      ? selecionado.value
-      : '';
-
-  const observacao =
-    valorSelecionado
-
-      ? `${produtoOpcoesAtual.grupoLabel}: ${valorSelecionado}`
-
-      : '';
-
-  abrirPersonalizacaoLanche({
-    nome:
-      produtoOpcoesAtual.nome,
-
-    preco:
-      produtoOpcoesAtual.preco,
-
-    observacaoBase:
-      observacao
-  });
-}
-
-
-/* =========================================================
-   ADICIONAIS
-========================================================= */
-
-function abrirAdicionalParaLanche(
-  nomeAdicional,
-  precoAdicional
-) {
-
-  const nomeNormalizado =
-    removerAcentos(
-      String(
-        nomeAdicional || ''
-      ).toLowerCase()
-    );
-
-  const precisaEscolherOpcao =
-    nomeNormalizado.includes(
-      'catupiry'
-    ) ||
-    nomeNormalizado.includes(
-      'cheddar'
-    ) ||
-    nomeNormalizado.includes(
-      'muçarela'
-    ) ||
-    nomeNormalizado.includes(
-      'calabresa'
-    ) ||
-    nomeNormalizado.includes(
-      'bacon'
-    ) ||
-    nomeNormalizado.includes(
-      'ovo'
-    ) ||
-    nomeNormalizado.includes(
-      'salsicha'
-    );
-
-  if (precisaEscolherOpcao) {
-
-    abrirEscolhaOpcaoAdicional(
-      nomeAdicional,
-      precoAdicional
-    );
-
-    return;
-  }
-
-  abrirEscolhaLancheParaAdicional(
-    nomeAdicional,
-    precoAdicional
-  );
-}
-
-function abrirEscolhaOpcaoAdicional(
-  nomeAdicional,
-  precoAdicional
-) {
-
-  garantirModalOpcoesForaDoCarrinho();
-
-  const nomeNormalizado =
-    removerAcentos(
-      String(
-        nomeAdicional || ''
-      ).toLowerCase()
-    );
-
-  let opcoes = [
-    'Catupiry',
-    'Cheddar',
-    'Muçarela'
-  ];
-
-  if (
-    nomeNormalizado.includes(
-      'calabresa'
-    ) ||
-    nomeNormalizado.includes(
-      'bacon'
-    )
-  ) {
-
-    opcoes = [
-      'Calabresa',
-      'Bacon'
-    ];
-  }
-
-  if (
-    nomeNormalizado.includes(
-      'ovo'
-    ) ||
-    nomeNormalizado.includes(
-      'salsicha'
-    )
-  ) {
-
-    opcoes = [
-      'Ovo',
-      'Salsicha'
-    ];
-  }
-
-  adicionalPendente = {
-    nome: '',
-    preco:
-      Number(
-        precoAdicional || 0
-      ),
-    etapa:
-      'escolher_opcao'
-  };
-
-  produtoOpcoesAtual = null;
-  produtoPersonalizacaoAtual = null;
-
-  const modal =
-    byId('modalOpcoesProduto');
-
-  const titulo =
-    byId('tituloOpcoesProduto');
-
-  const descricao =
-    byId('descricaoOpcoesProduto');
-
-  const lista =
-    byId('listaOpcoesProduto');
-
-  if (
-    !modal ||
-    !titulo ||
-    !descricao ||
-    !lista
-  ) {
-    return;
-  }
-
-  titulo.innerText =
-    'Escolha uma opção';
-
-  descricao.innerText =
-    'Escolha o adicional para colocar no lanche:';
-
-  lista.innerHTML =
-    opcoes
-      .map(
-        opcao => `
-
-        <label style="
-          display:flex;
-          align-items:center;
-          gap:10px;
-          padding:12px;
-          border:1px solid rgba(255,255,255,0.12);
-          border-radius:12px;
-          cursor:pointer;
-        ">
-
-          <input
-            type="radio"
-            name="opcaoAdicional"
-            value="${escaparHtml(opcao)}"
-          >
-
-          <span>
-            ${escaparHtml(opcao)}
-          </span>
-
-        </label>
-
-      `
-      )
-      .join('');
-
-  modal.style.display =
-    'flex';
-
-  modal.classList.add(
-    'ativo'
-  );
-}
-
-function abrirEscolhaLancheParaAdicional(
-  nomeAdicional,
-  precoAdicional
-) {
-
-  garantirModalOpcoesForaDoCarrinho();
-
-  const lanches =
-    carrinho
-      .map(
-        (item, index) => ({
-          ...item,
-          indexOriginal: index
-        })
-      )
-      .filter(
-        item =>
-          ehLanche(item.nome)
-      );
-
-  if (lanches.length === 0) {
-
-    alert(
-      'Escolha um lanche primeiro para adicionar este item.'
-    );
-
-    return;
-  }
-
-  adicionalPendente = {
-    nome:
-      nomeAdicional,
-
-    preco:
-      Number(
-        precoAdicional || 0
-      ),
-
-    etapa:
-      'escolher_lanche'
-  };
-
-  produtoOpcoesAtual = null;
-  produtoPersonalizacaoAtual = null;
-
-  const modal =
-    byId('modalOpcoesProduto');
-
-  const titulo =
-    byId('tituloOpcoesProduto');
-
-  const descricao =
-    byId('descricaoOpcoesProduto');
-
-  const lista =
-    byId('listaOpcoesProduto');
-
-  if (
-    !modal ||
-    !titulo ||
-    !descricao ||
-    !lista
-  ) {
-    return;
-  }
-
-  titulo.innerText =
-    'Adicionar ' +
-    nomeAdicional;
-
-  descricao.innerText =
-    'Escolha em qual lanche será adicionado:';
-
-  lista.innerHTML =
-    lanches
-      .map(
-        item => `
-
-        <label style="
-          display:flex;
-          align-items:center;
-          gap:10px;
-          padding:12px;
-          border:1px solid rgba(255,255,255,0.12);
-          border-radius:12px;
-          cursor:pointer;
-        ">
-
-          <input
-            type="radio"
-            name="lancheAdicional"
-            value="${item.indexOriginal}"
-          >
-
-          <span>
-            ${escaparHtml(item.nome)}
-          </span>
-
-        </label>
-
-      `
-      )
-      .join('');
-
-  modal.style.display =
-    'flex';
-
-  modal.classList.add(
-    'ativo'
-  );
-}
-
-
-/* =========================================================
-   QUANTIDADES
-========================================================= */
-
-function aumentarQuantidade(index) {
-
-  carrinho[index].quantidade += 1;
-
-  renderizarCarrinho();
-}
-
-function diminuirQuantidade(index) {
-
-  carrinho[index].quantidade -= 1;
-
-  if (
-    carrinho[index].quantidade <= 0
-  ) {
-    carrinho.splice(
-      index,
-      1
-    );
-  }
-
-  renderizarCarrinho();
-}
-
-function removerItem(index) {
-
-  carrinho.splice(
-    index,
-    1
-  );
-
-  renderizarCarrinho();
-}
-
-function calcularSubtotal() {
-
-  return carrinho.reduce(
-    (acc, item) =>
-      acc +
-      (
-        Number(item.preco || 0) *
-        Number(item.quantidade || 0)
-      ),
-    0
-  );
-}
-
-function calcularTotal() {
-
-  return (
-    calcularSubtotal() +
-    Number(taxaEntrega || 0)
-  );
-}
-
-
-/* =========================================================
-   HORÁRIO DA LOJA
-========================================================= */
 
 function converterHorarioParaMinutos(
   horario
@@ -1881,8 +792,9 @@ function converterHorarioParaMinutos(
   }
 
   const partes =
-    String(horario)
-      .split(':');
+    String(
+      horario
+    ).split(':');
 
   const hora =
     Number(
@@ -1895,11 +807,21 @@ function converterHorarioParaMinutos(
     );
 
   return (
-    hora * 60
-  ) + minuto;
+    hora * 60 +
+    minuto
+  );
 }
 
+
 function obterDiasPermitidosLoja() {
+
+  /*
+   * Domingo = 0
+   * Quarta = 3
+   * Quinta = 4
+   * Sexta = 5
+   * Sábado = 6
+   */
 
   return [
     0,
@@ -1909,6 +831,7 @@ function obterDiasPermitidosLoja() {
     6
   ];
 }
+
 
 function lojaAbertaPorHorario(
   config = null
@@ -1922,7 +845,9 @@ function lojaAbertaPorHorario(
 
   if (
     !obterDiasPermitidosLoja()
-      .includes(dia)
+      .includes(
+        dia
+      )
   ) {
     return false;
   }
@@ -1935,13 +860,13 @@ function lojaAbertaPorHorario(
     converterHorarioParaMinutos(
       config?.open_time
     ) ??
-    (19 * 60);
+    19 * 60;
 
   const fecha =
     converterHorarioParaMinutos(
       config?.close_time
     ) ??
-    (23 * 60);
+    23 * 60;
 
   return (
     minutosAgora >= abre &&
@@ -1949,9 +874,11 @@ function lojaAbertaPorHorario(
   );
 }
 
+
 function obterConfiguracaoLojaPadrao() {
 
   return {
+
     id: 1,
 
     store_name:
@@ -1963,8 +890,11 @@ function obterConfiguracaoLojaPadrao() {
     store_address:
       ENDERECO_LOJA_PADRAO,
 
-    store_lat: null,
-    store_lng: null,
+    store_lat:
+      -23.4743826,
+
+    store_lng:
+      -47.4619295,
 
     open_time:
       '19:00:00',
@@ -1983,6 +913,7 @@ function obterConfiguracaoLojaPadrao() {
   };
 }
 
+
 async function carregarConfiguracaoLoja() {
 
   if (!supabaseClient) {
@@ -2000,9 +931,14 @@ async function carregarConfiguracaoLoja() {
       error
     } =
       await supabaseClient
-        .from('store_settings')
+        .from(
+          'store_settings'
+        )
         .select('*')
-        .eq('id', 1)
+        .eq(
+          'id',
+          1
+        )
         .single();
 
     if (error) {
@@ -2038,17 +974,15 @@ async function carregarConfiguracaoLoja() {
   }
 }
 
+
 async function atualizarConfiguracaoLojaStatus() {
 
   if (!supabaseClient) {
 
-    if (!configuracaoLoja) {
-
-      configuracaoLoja =
-        obterConfiguracaoLojaPadrao();
-    }
-
-    return configuracaoLoja;
+    return (
+      configuracaoLoja ||
+      obterConfiguracaoLojaPadrao()
+    );
   }
 
   try {
@@ -2058,17 +992,22 @@ async function atualizarConfiguracaoLojaStatus() {
       error
     } =
       await supabaseClient
-        .from('store_settings')
+        .from(
+          'store_settings'
+        )
         .select(
           'id, open_time, close_time, auto_open, manual_force_open, manual_force_closed'
         )
-        .eq('id', 1)
+        .eq(
+          'id',
+          1
+        )
         .single();
 
     if (error) {
 
       console.error(
-        'Erro ao atualizar status da loja:',
+        'Erro ao atualizar status:',
         error
       );
 
@@ -2079,10 +1018,12 @@ async function atualizarConfiguracaoLojaStatus() {
     }
 
     configuracaoLoja = {
+
       ...(
         configuracaoLoja ||
         obterConfiguracaoLojaPadrao()
       ),
+
       ...data
     };
 
@@ -2091,7 +1032,6 @@ async function atualizarConfiguracaoLojaStatus() {
   } catch (erro) {
 
     console.error(
-      'Falha ao atualizar status da loja:',
       erro
     );
 
@@ -2101,6 +1041,7 @@ async function atualizarConfiguracaoLojaStatus() {
     );
   }
 }
+
 
 async function lojaAbertaAgora() {
 
@@ -2126,6 +1067,7 @@ async function lojaAbertaAgora() {
   if (
     config.auto_open === true
   ) {
+
     return lojaAbertaPorHorario(
       config
     );
@@ -2134,101 +1076,1273 @@ async function lojaAbertaAgora() {
   return false;
 }
 
+
 async function atualizarStatusLoja() {
 
-  const statusLoja =
+  const status =
     obterElementoStatusLoja();
 
-  const btnFinalizar =
-    byId('btnFinalizar');
+  const btnSalvar =
+    byId(
+      'btnFinalizar'
+    );
 
-  const btnFinalizarWhatsapp =
-    byId('btnFinalizarWhatsapp');
+  const btnWhatsapp =
+    byId(
+      'btnFinalizarWhatsapp'
+    );
 
   const aberta =
     await lojaAbertaAgora();
 
-  if (statusLoja) {
+  if (status) {
+
+    status.classList.remove(
+      'aberto',
+      'fechado'
+    );
 
     if (aberta) {
 
-      statusLoja.classList.remove(
-        'fechado'
-      );
-
-      statusLoja.classList.add(
+      status.classList.add(
         'aberto'
       );
 
-      statusLoja.innerText =
+      status.innerText =
         '🟢 Aberto agora';
 
     } else {
 
-      statusLoja.classList.remove(
-        'aberto'
-      );
-
-      statusLoja.classList.add(
+      status.classList.add(
         'fechado'
       );
 
-      statusLoja.innerText =
+      status.innerText =
         '🔴 Fechado no momento';
     }
   }
 
-  if (btnFinalizar) {
+  if (btnSalvar) {
 
-    btnFinalizar.disabled =
+    btnSalvar.disabled =
       !aberta;
   }
 
-  if (btnFinalizarWhatsapp) {
+  if (btnWhatsapp) {
 
-    btnFinalizarWhatsapp.disabled =
+    btnWhatsapp.disabled =
       !aberta;
   }
 }
 
 
 /* =========================================================
-   ENTREGA
+   ENDEREÇO
+========================================================= */
+
+function obterCamposEndereco() {
+
+  return {
+
+    cep:
+      byId('cepEntrega'),
+
+    rua:
+      byId('ruaEntrega'),
+
+    numero:
+      byId('numeroEntrega'),
+
+    bairro:
+      byId('bairroEntrega'),
+
+    cidade:
+      byId('cidadeEntrega'),
+
+    complemento:
+      byId('complementoEntrega')
+  };
+}
+
+
+function definirBloqueioCampos() {
+
+  const {
+    cep,
+    rua,
+    numero,
+    bairro,
+    cidade
+  } =
+    obterCamposEndereco();
+
+  if (cep) {
+    cep.readOnly = false;
+  }
+
+  if (rua) {
+    rua.readOnly = true;
+  }
+
+  if (bairro) {
+    bairro.readOnly = true;
+  }
+
+  if (cidade) {
+    cidade.readOnly = true;
+  }
+
+  if (numero) {
+    numero.readOnly = false;
+  }
+}
+
+
+function limparBloqueiosEndereco() {
+
+  definirBloqueioCampos();
+}
+
+
+function limparCacheCoordenadaCliente() {
+
+  coordenadaClienteCache =
+    null;
+}
+
+
+function montarEnderecoCompletoCliente() {
+
+  const rua =
+    byId(
+      'ruaEntrega'
+    )?.value.trim() || '';
+
+  const numero =
+    byId(
+      'numeroEntrega'
+    )?.value.trim() || '';
+
+  const bairro =
+    byId(
+      'bairroEntrega'
+    )?.value.trim() || '';
+
+  const cidade =
+    byId(
+      'cidadeEntrega'
+    )?.value.trim() ||
+    'Sorocaba';
+
+  const cep =
+    byId(
+      'cepEntrega'
+    )?.value.trim() || '';
+
+  const partes = [];
+
+  if (rua) {
+    partes.push(
+      rua
+    );
+  }
+
+  if (numero) {
+    partes.push(
+      numero
+    );
+  }
+
+  if (bairro) {
+    partes.push(
+      bairro
+    );
+  }
+
+  if (cidade) {
+    partes.push(
+      cidade
+    );
+  }
+
+  partes.push(
+    'SP'
+  );
+
+  if (cep) {
+    partes.push(
+      cep
+    );
+  }
+
+  partes.push(
+    'Brasil'
+  );
+
+  return partes.join(
+    ', '
+  );
+}
+
+
+function enderecoClienteTextoHumano() {
+
+  const rua =
+    byId(
+      'ruaEntrega'
+    )?.value.trim() || '';
+
+  const numero =
+    byId(
+      'numeroEntrega'
+    )?.value.trim() || '';
+
+  const bairro =
+    byId(
+      'bairroEntrega'
+    )?.value.trim() || '';
+
+  const cidade =
+    byId(
+      'cidadeEntrega'
+    )?.value.trim() ||
+    'Sorocaba';
+
+  const cep =
+    byId(
+      'cepEntrega'
+    )?.value.trim() || '';
+
+  const complemento =
+    byId(
+      'complementoEntrega'
+    )?.value.trim() || '';
+
+  const partes = [];
+
+  if (rua) {
+    partes.push(
+      rua
+    );
+  }
+
+  if (numero) {
+    partes.push(
+      numero
+    );
+  }
+
+  if (bairro) {
+    partes.push(
+      bairro
+    );
+  }
+
+  if (cidade) {
+    partes.push(
+      cidade
+    );
+  }
+
+  if (cep) {
+
+    partes.push(
+      `CEP ${cep}`
+    );
+  }
+
+  if (complemento) {
+
+    partes.push(
+      complemento
+    );
+  }
+
+  return partes.join(
+    ', '
+  );
+}
+
+
+/* =========================================================
+   CEP - VIACEP
+========================================================= */
+
+function aplicarMascaraCep() {
+
+  const input =
+    byId(
+      'cepEntrega'
+    );
+
+  if (!input) {
+    return;
+  }
+
+  input.addEventListener(
+    'input',
+    function () {
+
+      let valor =
+        somenteNumeros(
+          input.value
+        ).slice(
+          0,
+          8
+        );
+
+      if (
+        valor.length > 5
+      ) {
+
+        valor =
+          valor.slice(
+            0,
+            5
+          ) +
+          '-' +
+          valor.slice(
+            5
+          );
+      }
+
+      input.value =
+        valor;
+
+      limparCacheCoordenadaCliente();
+
+      if (
+        somenteNumeros(
+          input.value
+        ).length === 8
+      ) {
+
+        buscarCepEntrega();
+
+      } else {
+
+        agendarCalculoEntrega();
+      }
+    }
+  );
+
+  input.addEventListener(
+    'blur',
+    buscarCepEntrega
+  );
+}
+
+
+function aplicarEventosEntrega() {
+
+  [
+    'numeroEntrega',
+    'complementoEntrega'
+  ].forEach(
+    id => {
+
+      const campo =
+        byId(
+          id
+        );
+
+      if (!campo) {
+        return;
+      }
+
+      campo.addEventListener(
+        'input',
+        () => {
+
+          limparCacheCoordenadaCliente();
+
+          agendarCalculoEntrega();
+        }
+      );
+
+      campo.addEventListener(
+        'change',
+        () => {
+
+          limparCacheCoordenadaCliente();
+
+          agendarCalculoEntrega();
+        }
+      );
+
+      campo.addEventListener(
+        'blur',
+        () => {
+
+          agendarCalculoEntrega();
+        }
+      );
+    }
+  );
+}
+
+
+function agendarCalculoEntrega() {
+
+  clearTimeout(
+    timeoutCalculoEntrega
+  );
+
+  timeoutCalculoEntrega =
+    setTimeout(
+      () => {
+
+        calcularEntregaAutomaticamente();
+
+      },
+      700
+    );
+}
+
+
+async function buscarCepEntrega() {
+
+  const cepCampo =
+    byId(
+      'cepEntrega'
+    );
+
+  const ruaCampo =
+    byId(
+      'ruaEntrega'
+    );
+
+  const bairroCampo =
+    byId(
+      'bairroEntrega'
+    );
+
+  const cidadeCampo =
+    byId(
+      'cidadeEntrega'
+    );
+
+  const numeroCampo =
+    byId(
+      'numeroEntrega'
+    );
+
+  const aviso =
+    byId(
+      'avisoEntrega'
+    );
+
+  if (
+    !cepCampo ||
+    !aviso
+  ) {
+    return;
+  }
+
+  const cep =
+    somenteNumeros(
+      cepCampo.value
+    );
+
+  if (!cep) {
+
+    taxaEntrega = 0;
+
+    distanciaEntregaKm =
+      null;
+
+    tempoEntregaTexto =
+      null;
+
+    aviso.innerText =
+      'Digite o CEP para buscar o endereço.';
+
+    renderizarCarrinho();
+
+    return;
+  }
+
+  if (
+    cep.length !== 8
+  ) {
+
+    taxaEntrega = 0;
+
+    distanciaEntregaKm =
+      null;
+
+    tempoEntregaTexto =
+      null;
+
+    aviso.innerText =
+      'Digite um CEP válido com 8 números.';
+
+    renderizarCarrinho();
+
+    return;
+  }
+
+  try {
+
+    aviso.innerText =
+      'Consultando CEP...';
+
+    const resposta =
+      await fetch(
+        `https://viacep.com.br/ws/${cep}/json/`
+      );
+
+    if (
+      !resposta.ok
+    ) {
+
+      throw new Error(
+        'ViaCEP retornou ' +
+        resposta.status
+      );
+    }
+
+    const dados =
+      await resposta.json();
+
+    if (dados.erro) {
+
+      throw new Error(
+        'CEP não encontrado.'
+      );
+    }
+
+    if (ruaCampo) {
+
+      ruaCampo.value =
+        dados.logradouro ||
+        '';
+    }
+
+    if (bairroCampo) {
+
+      bairroCampo.value =
+        dados.bairro ||
+        '';
+    }
+
+    if (cidadeCampo) {
+
+      cidadeCampo.value =
+        dados.localidade ||
+        'Sorocaba';
+    }
+
+    limparCacheCoordenadaCliente();
+
+    definirBloqueioCampos();
+
+    if (numeroCampo) {
+
+      numeroCampo.readOnly =
+        false;
+
+      numeroCampo.focus();
+    }
+
+    aviso.innerText =
+      'CEP localizado. Informe o número para calcular a entrega.';
+
+    agendarCalculoEntrega();
+
+  } catch (erro) {
+
+    console.error(
+      'Erro ViaCEP:',
+      erro
+    );
+
+    taxaEntrega = 0;
+
+    distanciaEntregaKm =
+      null;
+
+    tempoEntregaTexto =
+      null;
+
+    aviso.innerText =
+      'CEP não encontrado. Confira o número digitado.';
+
+    renderizarCarrinho();
+  }
+}
+
+
+async function buscarCepPorEndereco() {
+
+  return;
+}
+
+
+/* =========================================================
+   CARRINHO
+========================================================= */
+
+function atualizarContadores() {
+
+  const total =
+    carrinho.reduce(
+      (
+        acumulado,
+        item
+      ) =>
+        acumulado +
+        Number(
+          item.quantidade || 0
+        ),
+      0
+    );
+
+  const contador =
+    byId(
+      'cartCount'
+    );
+
+  if (contador) {
+
+    contador.innerText =
+      total;
+  }
+}
+
+
+function ehLanche(nome) {
+
+  const n =
+    removerAcentos(
+      String(
+        nome || ''
+      ).toLowerCase()
+    );
+
+  return (
+    !n.includes('coca') &&
+    !n.includes('sprite') &&
+    !n.includes('fanta') &&
+    !n.includes('guarana') &&
+    !n.includes('agua') &&
+    !n.includes('suco') &&
+    !n.includes('refrigerante') &&
+    !n.includes('fritas') &&
+    !n.includes('batata')
+  );
+}
+
+
+function obterIngredientesRemoviveisPorLanche(
+  nome
+) {
+
+  const normalizado =
+    removerAcentos(
+      String(
+        nome || ''
+      ).toLowerCase()
+    );
+
+  const chaves =
+    Object.keys(
+      INGREDIENTES_POR_LANCHE
+    ).sort(
+      (
+        a,
+        b
+      ) =>
+        b.length -
+        a.length
+    );
+
+  for (
+    const chave of chaves
+  ) {
+
+    const chaveNormalizada =
+      removerAcentos(
+        chave.toLowerCase()
+      );
+
+    if (
+      normalizado.includes(
+        chaveNormalizada
+      )
+    ) {
+
+      return INGREDIENTES_POR_LANCHE[
+        chave
+      ];
+    }
+  }
+
+  return INGREDIENTES_REMOVIVEIS_PADRAO;
+}
+
+
+function gerarChaveItem(
+  nome,
+  preco,
+  observacao = ''
+) {
+
+  return (
+    `${nome}||${preco}||${observacao}`
+  );
+}
+
+
+function adicionarItemFinalAoCarrinho(
+  nome,
+  preco,
+  observacao = ''
+) {
+
+  const chave =
+    gerarChaveItem(
+      nome,
+      preco,
+      observacao
+    );
+
+  const existente =
+    carrinho.find(
+      item =>
+        item.chave === chave
+    );
+
+  if (existente) {
+
+    existente.quantidade += 1;
+
+  } else {
+
+    carrinho.push(
+      {
+        chave,
+        nome,
+        preco:
+          Number(
+            preco || 0
+          ),
+        quantidade: 1,
+        observacao
+      }
+    );
+  }
+
+  renderizarCarrinho();
+
+  mostrarToastLeLanches(
+    `${nome} adicionado ao carrinho.`
+  );
+}
+
+
+function adicionarAoCarrinho(
+  nome,
+  preco,
+  observacao = ''
+) {
+
+  if (
+    ehLanche(
+      nome
+    )
+  ) {
+
+    abrirPersonalizacaoLanche(
+      {
+        nome,
+        preco,
+        observacaoBase:
+          observacao
+      }
+    );
+
+    return;
+  }
+
+  adicionarItemFinalAoCarrinho(
+    nome,
+    preco,
+    observacao
+  );
+}
+
+
+/* =========================================================
+   PERSONALIZAÇÃO
+========================================================= */
+
+function abrirPersonalizacaoLanche(
+  produto
+) {
+
+  garantirModalOpcoesForaDoCarrinho();
+
+  produtoPersonalizacaoAtual =
+    produto;
+
+  produtoOpcoesAtual =
+    null;
+
+  adicionalPendente =
+    null;
+
+  const modal =
+    byId(
+      'modalOpcoesProduto'
+    );
+
+  const titulo =
+    byId(
+      'tituloOpcoesProduto'
+    );
+
+  const descricao =
+    byId(
+      'descricaoOpcoesProduto'
+    );
+
+  const lista =
+    byId(
+      'listaOpcoesProduto'
+    );
+
+  if (
+    !modal ||
+    !titulo ||
+    !descricao ||
+    !lista
+  ) {
+    return;
+  }
+
+  const ingredientes =
+    obterIngredientesRemoviveisPorLanche(
+      produto.nome
+    );
+
+  titulo.innerText =
+    produto.nome;
+
+  descricao.innerText =
+    'Deseja remover algum ingrediente?';
+
+  lista.innerHTML = `
+
+    <div style="
+      display:grid;
+      gap:10px;
+      padding-bottom:15px;
+    ">
+
+      ${
+        ingredientes
+          .map(
+            ingrediente => `
+
+              <label style="
+                display:flex;
+                align-items:center;
+                gap:10px;
+                padding:12px;
+                border:1px solid rgba(255,255,255,.12);
+                border-radius:12px;
+                cursor:pointer;
+              ">
+
+                <input
+                  type="checkbox"
+                  name="ingredienteRemover"
+                  value="${escaparHtml(ingrediente)}"
+                >
+
+                <span>
+                  Sem ${escaparHtml(ingrediente)}
+                </span>
+
+              </label>
+
+            `
+          )
+          .join('')
+      }
+
+      <label style="
+        display:block;
+        margin-top:8px;
+      ">
+
+        <span style="
+          display:block;
+          margin-bottom:6px;
+        ">
+          Observação do lanche:
+        </span>
+
+        <textarea
+          id="observacaoItemLanche"
+          placeholder="Ex.: carne bem passada, pouco molho..."
+          style="
+            width:100%;
+            min-height:70px;
+            border-radius:12px;
+            padding:10px;
+            box-sizing:border-box;
+          "
+        ></textarea>
+
+      </label>
+
+    </div>
+  `;
+
+  modal.style.display =
+    'flex';
+
+  modal.classList.add(
+    'ativo'
+  );
+}
+
+
+function abrirOpcoesProduto(
+  produtoId
+) {
+
+  const produto =
+    PRODUTOS_COM_OPCOES[
+      produtoId
+    ];
+
+  if (!produto) {
+    return;
+  }
+
+  produtoOpcoesAtual =
+    produto;
+
+  abrirPersonalizacaoLanche(
+    produto
+  );
+}
+
+
+function fecharOpcoesProduto() {
+
+  const modal =
+    byId(
+      'modalOpcoesProduto'
+    );
+
+  const lista =
+    byId(
+      'listaOpcoesProduto'
+    );
+
+  produtoOpcoesAtual =
+    null;
+
+  adicionalPendente =
+    null;
+
+  produtoPersonalizacaoAtual =
+    null;
+
+  if (lista) {
+
+    lista.innerHTML =
+      '';
+  }
+
+  if (modal) {
+
+    modal.classList.remove(
+      'ativo'
+    );
+
+    modal.style.display =
+      'none';
+  }
+}
+
+
+function confirmarOpcoesProduto() {
+
+  if (
+    produtoPersonalizacaoAtual
+  ) {
+
+    const removidos =
+      Array.from(
+        document.querySelectorAll(
+          'input[name="ingredienteRemover"]:checked'
+        )
+      ).map(
+        input =>
+          `Sem ${input.value}`
+      );
+
+    const observacao =
+      byId(
+        'observacaoItemLanche'
+      )?.value.trim() || '';
+
+    const observacoes =
+      [
+        produtoPersonalizacaoAtual
+          .observacaoBase || '',
+        ...removidos,
+        observacao
+          ? `Obs: ${observacao}`
+          : ''
+      ]
+        .filter(Boolean)
+        .join(
+          ' | '
+        );
+
+    adicionarItemFinalAoCarrinho(
+      produtoPersonalizacaoAtual.nome,
+      produtoPersonalizacaoAtual.preco,
+      observacoes
+    );
+
+    fecharOpcoesProduto();
+
+    return;
+  }
+
+  fecharOpcoesProduto();
+}
+
+
+/* =========================================================
+   ADICIONAIS
+========================================================= */
+
+function abrirAdicionalParaLanche(
+  nomeAdicional,
+  precoAdicional
+) {
+
+  const lanches =
+    carrinho
+      .map(
+        (
+          item,
+          index
+        ) => ({
+          ...item,
+          index
+        })
+      )
+      .filter(
+        item =>
+          ehLanche(
+            item.nome
+          )
+      );
+
+  if (
+    lanches.length === 0
+  ) {
+
+    alert(
+      'Escolha um lanche primeiro.'
+    );
+
+    return;
+  }
+
+  adicionalPendente = {
+    nome:
+      nomeAdicional,
+    preco:
+      Number(
+        precoAdicional || 0
+      )
+  };
+
+  const index =
+    lanches[0].index;
+
+  carrinho[index].preco +=
+    adicionalPendente.preco;
+
+  carrinho[index].observacao =
+    carrinho[index].observacao
+
+      ? carrinho[index].observacao +
+        ' | Adicional: ' +
+        nomeAdicional
+
+      : 'Adicional: ' +
+        nomeAdicional;
+
+  adicionalPendente =
+    null;
+
+  renderizarCarrinho();
+}
+
+
+function abrirEscolhaOpcaoAdicional() {
+
+  return;
+}
+
+
+function abrirEscolhaLancheParaAdicional() {
+
+  return;
+}
+
+
+/* =========================================================
+   QUANTIDADES
+========================================================= */
+
+function aumentarQuantidade(
+  index
+) {
+
+  if (
+    !carrinho[index]
+  ) {
+    return;
+  }
+
+  carrinho[index].quantidade +=
+    1;
+
+  renderizarCarrinho();
+}
+
+
+function diminuirQuantidade(
+  index
+) {
+
+  if (
+    !carrinho[index]
+  ) {
+    return;
+  }
+
+  carrinho[index].quantidade -=
+    1;
+
+  if (
+    carrinho[index].quantidade <= 0
+  ) {
+
+    carrinho.splice(
+      index,
+      1
+    );
+  }
+
+  renderizarCarrinho();
+}
+
+
+function removerItem(
+  index
+) {
+
+  carrinho.splice(
+    index,
+    1
+  );
+
+  renderizarCarrinho();
+}
+
+
+function calcularSubtotal() {
+
+  return carrinho.reduce(
+    (
+      total,
+      item
+    ) =>
+      total +
+      (
+        Number(
+          item.preco || 0
+        ) *
+        Number(
+          item.quantidade || 0
+        )
+      ),
+    0
+  );
+}
+
+
+function calcularTotal() {
+
+  return (
+    calcularSubtotal() +
+    Number(
+      taxaEntrega || 0
+    )
+  );
+}
+
+
+/* =========================================================
+   ENTREGA - INTERFACE
 ========================================================= */
 
 function atualizarEntrega() {
 
-  const tipoEntrega =
-    byId('tipoEntrega')?.value ||
+  const tipo =
+    byId(
+      'tipoEntrega'
+    )?.value ||
     'retirada';
 
-  const camposEntrega =
-    byId('camposEntrega');
+  const campos =
+    byId(
+      'camposEntrega'
+    );
 
-  const avisoEntrega =
-    byId('avisoEntrega');
+  const aviso =
+    byId(
+      'avisoEntrega'
+    );
 
   if (
-    tipoEntrega !== 'delivery'
+    tipo !== 'delivery'
   ) {
 
     taxaEntrega = 0;
-    distanciaEntregaKm = null;
-    tempoEntregaTexto = null;
+
+    distanciaEntregaKm =
+      null;
+
+    tempoEntregaTexto =
+      null;
 
     clearTimeout(
       timeoutCalculoEntrega
     );
 
-    if (camposEntrega) {
+    if (campos) {
 
-      camposEntrega.style.display =
+      campos.style.display =
         'none';
     }
 
-    if (avisoEntrega) {
+    if (aviso) {
 
-      avisoEntrega.innerText =
+      aviso.innerText =
         'Retirada no local sem taxa de entrega.';
     }
 
@@ -2237,33 +2351,38 @@ function atualizarEntrega() {
     return;
   }
 
-  if (camposEntrega) {
+  if (campos) {
 
-    camposEntrega.style.display =
+    campos.style.display =
       'grid';
   }
 
   definirBloqueioCampos();
 
   const cep =
-    byId('cepEntrega')?.value.trim() ||
-    '';
+    byId(
+      'cepEntrega'
+    )?.value.trim() || '';
 
   const rua =
-    byId('ruaEntrega')?.value.trim() ||
-    '';
+    byId(
+      'ruaEntrega'
+    )?.value.trim() || '';
 
   const numero =
-    byId('numeroEntrega')?.value.trim() ||
-    '';
+    byId(
+      'numeroEntrega'
+    )?.value.trim() || '';
 
   const bairro =
-    byId('bairroEntrega')?.value.trim() ||
-    '';
+    byId(
+      'bairroEntrega'
+    )?.value.trim() || '';
 
   const cidade =
-    byId('cidadeEntrega')?.value.trim() ||
-    '';
+    byId(
+      'cidadeEntrega'
+    )?.value.trim() || '';
 
   if (
     !cep ||
@@ -2274,12 +2393,16 @@ function atualizarEntrega() {
   ) {
 
     taxaEntrega = 0;
-    distanciaEntregaKm = null;
-    tempoEntregaTexto = null;
 
-    if (avisoEntrega) {
+    distanciaEntregaKm =
+      null;
 
-      avisoEntrega.innerText =
+    tempoEntregaTexto =
+      null;
+
+    if (aviso) {
+
+      aviso.innerText =
         'Digite o CEP e depois informe o número para calcular a entrega.';
     }
 
@@ -2289,8 +2412,593 @@ function atualizarEntrega() {
   }
 
   agendarCalculoEntrega();
+}
 
-  renderizarCarrinho();
+
+/* =========================================================
+   REGRAS DE ENTREGA
+========================================================= */
+
+async function carregarRegrasEntrega() {
+
+  if (!supabaseClient) {
+
+    regrasEntrega =
+      [
+        ...REGRAS_ENTREGA_PADRAO
+      ];
+
+    return;
+  }
+
+  try {
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from(
+          'delivery_rules'
+        )
+        .select('*')
+        .eq(
+          'active',
+          true
+        )
+        .order(
+          'km_min',
+          {
+            ascending: true
+          }
+        );
+
+    if (error) {
+
+      console.error(
+        'Erro ao carregar regras de entrega:',
+        error
+      );
+
+      regrasEntrega =
+        [
+          ...REGRAS_ENTREGA_PADRAO
+        ];
+
+      return;
+    }
+
+    regrasEntrega =
+      data?.length
+        ? data
+        : [
+            ...REGRAS_ENTREGA_PADRAO
+          ];
+
+    console.log(
+      'Regras de entrega carregadas:',
+      regrasEntrega
+    );
+
+  } catch (erro) {
+
+    console.error(
+      'Falha ao carregar regras:',
+      erro
+    );
+
+    regrasEntrega =
+      [
+        ...REGRAS_ENTREGA_PADRAO
+      ];
+  }
+}
+
+
+/* =========================================================
+   TEMPO
+========================================================= */
+
+function formatarDuracao(
+  segundos
+) {
+
+  const totalMinutos =
+    Math.round(
+      Number(
+        segundos || 0
+      ) / 60
+    );
+
+  if (
+    totalMinutos < 60
+  ) {
+
+    return (
+      `${totalMinutos} min`
+    );
+  }
+
+  const horas =
+    Math.floor(
+      totalMinutos / 60
+    );
+
+  const minutos =
+    totalMinutos % 60;
+
+  if (
+    minutos === 0
+  ) {
+
+    return (
+      `${horas}h`
+    );
+  }
+
+  return (
+    `${horas}h ${minutos}min`
+  );
+}
+
+
+function somarTempoPreparoComEntrega(
+  segundosEntrega
+) {
+
+  const minutosEntrega =
+    Math.round(
+      Number(
+        segundosEntrega || 0
+      ) / 60
+    );
+
+  const total =
+    TEMPO_PREPARO_FIXO_MINUTOS +
+    minutosEntrega;
+
+  return formatarDuracao(
+    total * 60
+  );
+}
+
+
+/* =========================================================
+   TAXA POR DISTÂNCIA
+========================================================= */
+
+function descobrirTaxaPorDistancia(
+  distanciaKm
+) {
+
+  if (
+    !Number.isFinite(
+      distanciaKm
+    ) ||
+    distanciaKm < 0
+  ) {
+
+    return null;
+  }
+
+  const regra =
+    regrasEntrega.find(
+      item => {
+
+        if (
+          item.active === false
+        ) {
+          return false;
+        }
+
+        const min =
+          Number(
+            item.km_min
+          );
+
+        const max =
+          Number(
+            item.km_max
+          );
+
+        return (
+          distanciaKm >= min &&
+          distanciaKm <= max
+        );
+      }
+    );
+
+  if (!regra) {
+
+    return null;
+  }
+
+  return Number(
+    regra.fee || 0
+  );
+}
+
+
+/* =========================================================
+   COORDENADAS DA LOJA
+========================================================= */
+
+function obterCoordenadasLoja() {
+
+  const latitude =
+    Number(
+      configuracaoLoja?.store_lat
+    );
+
+  const longitude =
+    Number(
+      configuracaoLoja?.store_lng
+    );
+
+  if (
+    Number.isFinite(
+      latitude
+    ) &&
+    Number.isFinite(
+      longitude
+    ) &&
+    latitude !== 0 &&
+    longitude !== 0
+  ) {
+
+    return {
+
+      lat:
+        latitude,
+
+      lng:
+        longitude
+    };
+  }
+
+  /*
+   * Fallback do Lê Lanches
+   */
+
+  return {
+
+    lat:
+      -23.4743826,
+
+    lng:
+      -47.4619295
+  };
+}
+
+
+/* =========================================================
+   CALCULAR ENTREGA REAL
+========================================================= */
+
+async function calcularEntregaAutomaticamente() {
+
+  const tipo =
+    byId(
+      'tipoEntrega'
+    )?.value ||
+    'retirada';
+
+  const aviso =
+    byId(
+      'avisoEntrega'
+    );
+
+  if (
+    tipo !== 'delivery'
+  ) {
+
+    taxaEntrega = 0;
+
+    distanciaEntregaKm =
+      null;
+
+    tempoEntregaTexto =
+      null;
+
+    if (aviso) {
+
+      aviso.innerText =
+        'Retirada no local sem taxa de entrega.';
+    }
+
+    renderizarCarrinho();
+
+    return;
+  }
+
+  const cep =
+    byId(
+      'cepEntrega'
+    )?.value.trim() || '';
+
+  const rua =
+    byId(
+      'ruaEntrega'
+    )?.value.trim() || '';
+
+  const numero =
+    byId(
+      'numeroEntrega'
+    )?.value.trim() || '';
+
+  const bairro =
+    byId(
+      'bairroEntrega'
+    )?.value.trim() || '';
+
+  const cidade =
+    byId(
+      'cidadeEntrega'
+    )?.value.trim() || '';
+
+  if (
+    !cep ||
+    !rua ||
+    !numero ||
+    !bairro ||
+    !cidade
+  ) {
+
+    taxaEntrega = 0;
+
+    distanciaEntregaKm =
+      null;
+
+    tempoEntregaTexto =
+      null;
+
+    if (aviso) {
+
+      aviso.innerText =
+        'Digite o CEP e informe o número para calcular a entrega.';
+    }
+
+    renderizarCarrinho();
+
+    return;
+  }
+
+  try {
+
+    if (aviso) {
+
+      aviso.innerText =
+        'Calculando distância e taxa de entrega...';
+    }
+
+    /*
+     * Carrega Google Maps JS.
+     */
+
+    await carregarGoogleMapsApi();
+
+    /*
+     * Origem = Lê Lanches.
+     */
+
+    const origem =
+      obterCoordenadasLoja();
+
+    /*
+     * Destino montado com CEP + número.
+     *
+     * O próprio DirectionsService resolve o
+     * endereço. Não usamos Geocoding REST aqui.
+     */
+
+    const destino =
+      montarEnderecoCompletoCliente();
+
+    console.log(
+      'Calculando entrega:',
+      {
+        origem,
+        destino
+      }
+    );
+
+    const directionsService =
+      new google.maps.DirectionsService();
+
+    const resultado =
+      await new Promise(
+        (
+          resolve,
+          reject
+        ) => {
+
+          directionsService.route(
+            {
+              origin:
+                origem,
+
+              destination:
+                destino,
+
+              travelMode:
+                google.maps.TravelMode.DRIVING,
+
+              region:
+                'BR',
+
+              provideRouteAlternatives:
+                false
+            },
+            (
+              response,
+              status
+            ) => {
+
+              if (
+                status === 'OK' &&
+                response
+              ) {
+
+                resolve(
+                  response
+                );
+
+                return;
+              }
+
+              reject(
+                new Error(
+                  'DirectionsService: ' +
+                  status
+                )
+              );
+            }
+          );
+        }
+      );
+
+    const rota =
+      resultado
+        ?.routes
+        ?.[0];
+
+    const trecho =
+      rota
+        ?.legs
+        ?.[0];
+
+    const distanciaMetros =
+      Number(
+        trecho
+          ?.distance
+          ?.value
+      );
+
+    const duracaoSegundos =
+      Number(
+        trecho
+          ?.duration
+          ?.value
+      );
+
+    if (
+      !Number.isFinite(
+        distanciaMetros
+      ) ||
+      distanciaMetros <= 0
+    ) {
+
+      throw new Error(
+        'Google Maps não retornou distância válida.'
+      );
+    }
+
+    const distanciaKm =
+      Number(
+        (
+          distanciaMetros /
+          1000
+        ).toFixed(
+          2
+        )
+      );
+
+    distanciaEntregaKm =
+      distanciaKm;
+
+    /*
+     * Localiza regra cadastrada no Supabase.
+     */
+
+    const taxa =
+      descobrirTaxaPorDistancia(
+        distanciaKm
+      );
+
+    if (
+      taxa === null
+    ) {
+
+      taxaEntrega = 0;
+
+      tempoEntregaTexto =
+        null;
+
+      if (aviso) {
+
+        aviso.innerText =
+          `Distância real: ${
+            distanciaKm
+              .toFixed(2)
+              .replace('.', ',')
+          } km | Endereço fora da área de entrega.`;
+      }
+
+      renderizarCarrinho();
+
+      return;
+    }
+
+    taxaEntrega =
+      taxa;
+
+    tempoEntregaTexto =
+      somarTempoPreparoComEntrega(
+        duracaoSegundos
+      );
+
+    if (aviso) {
+
+      aviso.innerText =
+        `Distância real: ${
+          distanciaKm
+            .toFixed(2)
+            .replace('.', ',')
+        } km | ` +
+        `Tempo estimado: ${
+          tempoEntregaTexto
+        } | ` +
+        `Taxa: ${
+          formatarPreco(
+            taxaEntrega
+          )
+        }`;
+    }
+
+    console.log(
+      'Entrega calculada:',
+      {
+        distanciaKm,
+        taxaEntrega,
+        tempoEntregaTexto
+      }
+    );
+
+    renderizarCarrinho();
+
+  } catch (erro) {
+
+    console.error(
+      'Erro ao calcular entrega:',
+      erro
+    );
+
+    taxaEntrega = 0;
+
+    distanciaEntregaKm =
+      null;
+
+    tempoEntregaTexto =
+      null;
+
+    if (aviso) {
+
+      aviso.innerText =
+        'Não foi possível calcular a entrega. Confira o CEP e o número.';
+    }
+
+    renderizarCarrinho();
+  }
 }
 
 
@@ -2301,7 +3009,9 @@ function atualizarEntrega() {
 function renderizarCarrinho() {
 
   const lista =
-    byId('listaCarrinho');
+    byId(
+      'listaCarrinho'
+    );
 
   const subtotal =
     calcularSubtotal();
@@ -2324,123 +3034,174 @@ function renderizarCarrinho() {
 
         <div class="lista-carrinho">
 
-          ${carrinho
-            .map(
-              (item, index) => `
+          ${
+            carrinho
+              .map(
+                (
+                  item,
+                  index
+                ) => `
 
-              <div class="item-carrinho">
+                  <div class="item-carrinho">
 
-                <div>
+                    <div>
 
-                  <strong>
-                    ${escaparHtml(item.nome)}
-                  </strong>
+                      <strong>
+                        ${escaparHtml(item.nome)}
+                      </strong>
 
-                  ${
-                    item.observacao
-                      ? `
-                        <small style="
-                          display:block;
-                          margin-top:4px;
-                        ">
-                          ${escaparHtml(item.observacao)}
-                        </small>
-                      `
-                      : ''
-                  }
+                      ${
+                        item.observacao
+                          ? `
+                            <small style="
+                              display:block;
+                              margin-top:4px;
+                            ">
+                              ${escaparHtml(item.observacao)}
+                            </small>
+                          `
+                          : ''
+                      }
 
-                  <small>
-                    ${formatarPreco(item.preco)} cada
-                  </small>
+                      <small>
+                        ${formatarPreco(item.preco)} cada
+                      </small>
 
-                </div>
+                    </div>
 
-                <div class="acoes-carrinho">
+                    <div class="acoes-carrinho">
 
-                  <div class="qtd-box">
+                      <div class="qtd-box">
 
-                    <button
-                      class="qtd-btn"
-                      onclick="diminuirQuantidade(${index})"
-                    >
-                      -
-                    </button>
+                        <button
+                          class="qtd-btn"
+                          type="button"
+                          onclick="diminuirQuantidade(${index})"
+                        >
+                          -
+                        </button>
 
-                    <strong>
-                      ${item.quantidade}
-                    </strong>
+                        <strong>
+                          ${item.quantidade}
+                        </strong>
 
-                    <button
-                      class="qtd-btn"
-                      onclick="aumentarQuantidade(${index})"
-                    >
-                      +
-                    </button>
+                        <button
+                          class="qtd-btn"
+                          type="button"
+                          onclick="aumentarQuantidade(${index})"
+                        >
+                          +
+                        </button>
+
+                      </div>
+
+                      <strong>
+                        ${
+                          formatarPreco(
+                            Number(
+                              item.preco
+                            ) *
+                            Number(
+                              item.quantidade
+                            )
+                          )
+                        }
+                      </strong>
+
+                      <button
+                        class="btn-remover"
+                        type="button"
+                        onclick="removerItem(${index})"
+                      >
+                        Remover
+                      </button>
+
+                    </div>
 
                   </div>
 
-                  <strong>
-                    ${formatarPreco(
-                      item.preco *
-                      item.quantidade
-                    )}
-                  </strong>
-
-                  <button
-                    class="btn-remover"
-                    onclick="removerItem(${index})"
-                  >
-                    Remover
-                  </button>
-
-                </div>
-
-              </div>
-
-            `
-            )
-            .join('')}
+                `
+              )
+              .join('')
+          }
 
         </div>
       `;
     }
   }
 
-  if (byId('resumoItens')) {
+  const resumoItens =
+    byId(
+      'resumoItens'
+    );
 
-    byId('resumoItens').innerText =
+  if (resumoItens) {
+
+    resumoItens.innerText =
       carrinho.reduce(
-        (acc, item) =>
-          acc + item.quantidade,
+        (
+          total,
+          item
+        ) =>
+          total +
+          Number(
+            item.quantidade || 0
+          ),
         0
       );
   }
 
-  if (byId('resumoSubtotal')) {
-
+  const resumoSubtotal =
     byId(
       'resumoSubtotal'
-    ).innerText =
+    );
+
+  if (resumoSubtotal) {
+
+    resumoSubtotal.innerText =
       formatarPreco(
         subtotal
       );
   }
 
-  if (byId('resumoTaxaEntrega')) {
-
+  const resumoTaxa =
     byId(
       'resumoTaxaEntrega'
-    ).innerText =
-      formatarPreco(
-        taxaEntrega
-      );
+    );
+
+  if (resumoTaxa) {
+
+    const tipo =
+      byId(
+        'tipoEntrega'
+      )?.value ||
+      'retirada';
+
+    if (
+      tipo === 'delivery' &&
+      distanciaEntregaKm === null
+    ) {
+
+      resumoTaxa.innerText =
+        'A calcular';
+
+    } else {
+
+      resumoTaxa.innerText =
+        formatarPreco(
+          taxaEntrega
+        );
+    }
   }
 
-  if (byId('resumoTotal')) {
-
+  const resumoTotal =
     byId(
       'resumoTotal'
-    ).innerText =
+    );
+
+  if (resumoTotal) {
+
+    resumoTotal.innerText =
       formatarPreco(
         total
       );
@@ -2453,7 +3214,7 @@ function renderizarCarrinho() {
 
 
 /* =========================================================
-   ABRIR / FECHAR CARRINHO
+   MODAL CARRINHO
 ========================================================= */
 
 function abrirCarrinho() {
@@ -2461,7 +3222,9 @@ function abrirCarrinho() {
   renderizarCarrinho();
 
   const modal =
-    byId('modalCarrinho');
+    byId(
+      'modalCarrinho'
+    );
 
   if (modal) {
 
@@ -2471,10 +3234,13 @@ function abrirCarrinho() {
   }
 }
 
+
 function fecharCarrinho() {
 
   const modal =
-    byId('modalCarrinho');
+    byId(
+      'modalCarrinho'
+    );
 
   if (modal) {
 
@@ -2484,307 +3250,97 @@ function fecharCarrinho() {
   }
 }
 
+
 function limparCarrinho() {
 
   carrinho = [];
 
   taxaEntrega = 0;
-  distanciaEntregaKm = null;
-  tempoEntregaTexto = null;
 
-  produtoOpcoesAtual = null;
-  adicionalPendente = null;
-  produtoPersonalizacaoAtual = null;
+  distanciaEntregaKm =
+    null;
 
-  if (byId('nomeCliente')) {
-    byId('nomeCliente').value = '';
-  }
+  tempoEntregaTexto =
+    null;
 
-  if (byId('tipoEntrega')) {
-    byId('tipoEntrega').value =
-      'retirada';
-  }
+  produtoOpcoesAtual =
+    null;
 
-  if (byId('cepEntrega')) {
-    byId('cepEntrega').value = '';
-  }
+  adicionalPendente =
+    null;
 
-  if (byId('ruaEntrega')) {
-    byId('ruaEntrega').value = '';
-  }
+  produtoPersonalizacaoAtual =
+    null;
 
-  if (byId('numeroEntrega')) {
-    byId('numeroEntrega').value = '';
-  }
+  const campos = [
+    'nomeCliente',
+    'cepEntrega',
+    'ruaEntrega',
+    'numeroEntrega',
+    'bairroEntrega',
+    'complementoEntrega',
+    'observacoes'
+  ];
 
-  if (byId('bairroEntrega')) {
-    byId('bairroEntrega').value = '';
-  }
+  campos.forEach(
+    id => {
 
-  if (byId('cidadeEntrega')) {
-    byId('cidadeEntrega').value =
+      const campo =
+        byId(
+          id
+        );
+
+      if (campo) {
+
+        campo.value =
+          '';
+      }
+    }
+  );
+
+  if (
+    byId(
+      'cidadeEntrega'
+    )
+  ) {
+
+    byId(
+      'cidadeEntrega'
+    ).value =
       'Sorocaba';
   }
 
-  if (byId('complementoEntrega')) {
-    byId('complementoEntrega').value =
-      '';
+  if (
+    byId(
+      'tipoEntrega'
+    )
+  ) {
+
+    byId(
+      'tipoEntrega'
+    ).value =
+      'retirada';
   }
 
-  if (byId('formaPagamento')) {
-    byId('formaPagamento').value =
-      '';
-  }
+  if (
+    byId(
+      'formaPagamento'
+    )
+  ) {
 
-  if (byId('observacoes')) {
-    byId('observacoes').value = '';
+    byId(
+      'formaPagamento'
+    ).value =
+      '';
   }
 
   atualizarPagamento();
 
-  limparBloqueiosEndereco();
-
   limparCacheCoordenadaCliente();
 
+  limparBloqueiosEndereco();
+
   atualizarEntrega();
-
-  renderizarCarrinho();
-}
-
-
-/* =========================================================
-   REGRAS DE ENTREGA
-========================================================= */
-
-async function carregarRegrasEntrega() {
-
-  if (!supabaseClient) {
-
-    regrasEntrega = [
-      ...REGRAS_ENTREGA_PADRAO
-    ];
-
-    return;
-  }
-
-  try {
-
-    const {
-      data,
-      error
-    } =
-      await supabaseClient
-        .from('delivery_rules')
-        .select('*')
-        .eq('active', true)
-        .order(
-          'km_min',
-          {
-            ascending: true
-          }
-        );
-
-    if (error) {
-
-      console.error(
-        'Erro ao carregar regras de entrega:',
-        error
-      );
-
-      regrasEntrega = [
-        ...REGRAS_ENTREGA_PADRAO
-      ];
-
-      return;
-    }
-
-    regrasEntrega =
-      data &&
-      data.length > 0
-
-        ? data
-
-        : [
-            ...REGRAS_ENTREGA_PADRAO
-          ];
-
-  } catch (erro) {
-
-    console.error(
-      'Falha ao carregar regras:',
-      erro
-    );
-
-    regrasEntrega = [
-      ...REGRAS_ENTREGA_PADRAO
-    ];
-  }
-}
-
-
-/* =========================================================
-   DURAÇÃO / TAXA
-========================================================= */
-
-function formatarDuracao(
-  segundos
-) {
-
-  const totalMin =
-    Math.round(
-      Number(segundos || 0) /
-      60
-    );
-
-  if (totalMin < 60) {
-
-    return `${totalMin} min`;
-  }
-
-  const horas =
-    Math.floor(
-      totalMin / 60
-    );
-
-  const minutos =
-    totalMin % 60;
-
-  if (minutos === 0) {
-
-    return `${horas}h`;
-  }
-
-  return (
-    `${horas}h ${minutos}min`
-  );
-}
-
-function somarTempoPreparoComEntrega(
-  segundosEntrega
-) {
-
-  const minutosEntrega =
-    Math.round(
-      Number(
-        segundosEntrega || 0
-      ) / 60
-    );
-
-  const minutosTotais =
-    TEMPO_PREPARO_FIXO_MINUTOS +
-    minutosEntrega;
-
-  return formatarDuracao(
-    minutosTotais * 60
-  );
-}
-
-function descobrirTaxaPorDistancia(
-  distanciaKm
-) {
-
-  if (
-    !Number.isFinite(
-      distanciaKm
-    ) ||
-    distanciaKm <= 0
-  ) {
-    return 0;
-  }
-
-  if (
-    regrasEntrega &&
-    regrasEntrega.length > 0
-  ) {
-
-    const regra =
-      regrasEntrega.find(
-        r => {
-
-          const min =
-            Number(r.km_min);
-
-          const max =
-            Number(r.km_max);
-
-          return (
-            distanciaKm >= min &&
-            distanciaKm <= max
-          );
-        }
-      );
-
-    if (regra) {
-
-      return Number(
-        regra.fee
-      );
-    }
-  }
-
-  if (
-    distanciaKm <= 3
-  ) {
-    return 4;
-  }
-
-  return (
-    4 +
-    Math.ceil(
-      distanciaKm - 3
-    )
-  );
-}
-
-
-/* =========================================================
-   ENTREGA ATUAL
-========================================================= */
-
-async function calcularEntregaAutomaticamente() {
-
-  const tipoEntrega =
-    byId('tipoEntrega')?.value ||
-    'retirada';
-
-  const aviso =
-    byId('avisoEntrega');
-
-  if (
-    tipoEntrega !== 'delivery'
-  ) {
-
-    taxaEntrega = 0;
-    distanciaEntregaKm = null;
-    tempoEntregaTexto = null;
-
-    if (aviso) {
-
-      aviso.innerText =
-        'Retirada no local sem taxa de entrega.';
-    }
-
-    renderizarCarrinho();
-
-    return;
-  }
-
-  taxaEntrega = 0;
-
-  /*
-   * Mantemos 0 para permitir a conclusão do
-   * pedido. A taxa será confirmada pela loja
-   * via WhatsApp.
-   */
-  distanciaEntregaKm = 0;
-
-  tempoEntregaTexto = null;
-
-  if (aviso) {
-
-    aviso.innerText =
-      'Delivery: taxa e prazo serão confirmados pela loja no WhatsApp.';
-  }
 
   renderizarCarrinho();
 }
@@ -2801,8 +3357,12 @@ async function salvarPedidoNoBanco(
   if (!supabaseClient) {
 
     const pedido = {
+
       ...payload,
-      id: Date.now(),
+
+      id:
+        Date.now(),
+
       created_at:
         new Date().toISOString()
     };
@@ -2821,7 +3381,7 @@ async function salvarPedidoNoBanco(
           ) || '[]'
         );
 
-    } catch (e) {
+    } catch {
 
       lista = [];
     }
@@ -2832,7 +3392,9 @@ async function salvarPedidoNoBanco(
 
     localStorage.setItem(
       chave,
-      JSON.stringify(lista)
+      JSON.stringify(
+        lista
+      )
     );
 
     return pedido;
@@ -2843,8 +3405,14 @@ async function salvarPedidoNoBanco(
     error
   } =
     await supabaseClient
-      .from('orders')
-      .insert([payload])
+      .from(
+        'orders'
+      )
+      .insert(
+        [
+          payload
+        ]
+      )
       .select()
       .single();
 
@@ -2893,36 +3461,25 @@ async function finalizarPedido(
   }
 
   const nome =
-    byId('nomeCliente')?.value.trim() ||
-    '';
+    byId(
+      'nomeCliente'
+    )?.value.trim() || '';
 
   const tipoEntrega =
-    byId('tipoEntrega')?.value;
+    byId(
+      'tipoEntrega'
+    )?.value ||
+    'retirada';
 
   const pagamento =
-    byId('formaPagamento')?.value ||
-    '';
+    byId(
+      'formaPagamento'
+    )?.value || '';
 
   const observacoes =
-    byId('observacoes')?.value.trim() ||
-    '';
-
-  const avisoEntrega =
-    byId('avisoEntrega');
-
-  const btnFinalizar =
-    enviarWhatsapp
-
-      ? byId(
-          'btnFinalizarWhatsapp'
-        )
-
-      : byId(
-          'btnFinalizar'
-        );
-
-  const endereco =
-    enderecoClienteTextoHumano();
+    byId(
+      'observacoes'
+    )?.value.trim() || '';
 
   if (!nome) {
 
@@ -2942,29 +3499,37 @@ async function finalizarPedido(
     return;
   }
 
+  const endereco =
+    enderecoClienteTextoHumano();
+
   if (
     tipoEntrega === 'delivery'
   ) {
 
     const cep =
-      byId('cepEntrega')?.value.trim() ||
-      '';
+      byId(
+        'cepEntrega'
+      )?.value.trim() || '';
 
     const rua =
-      byId('ruaEntrega')?.value.trim() ||
-      '';
+      byId(
+        'ruaEntrega'
+      )?.value.trim() || '';
 
     const numero =
-      byId('numeroEntrega')?.value.trim() ||
-      '';
+      byId(
+        'numeroEntrega'
+      )?.value.trim() || '';
 
     const bairro =
-      byId('bairroEntrega')?.value.trim() ||
-      '';
+      byId(
+        'bairroEntrega'
+      )?.value.trim() || '';
 
     const cidade =
-      byId('cidadeEntrega')?.value.trim() ||
-      '';
+      byId(
+        'cidadeEntrega'
+      )?.value.trim() || '';
 
     if (
       !cep ||
@@ -2993,7 +3558,23 @@ async function finalizarPedido(
     ) {
 
       alert(
-        'Não foi possível calcular a entrega. Verifique o CEP e o número.'
+        'Não foi possível calcular a entrega.'
+      );
+
+      return;
+    }
+
+    const taxaLocalizada =
+      descobrirTaxaPorDistancia(
+        distanciaEntregaKm
+      );
+
+    if (
+      taxaLocalizada === null
+    ) {
+
+      alert(
+        'Este endereço está fora da nossa área de entrega.'
       );
 
       return;
@@ -3005,6 +3586,11 @@ async function finalizarPedido(
 
   const total =
     calcularTotal();
+
+  const complemento =
+    byId(
+      'complementoEntrega'
+    )?.value.trim() || '';
 
   const payload = {
 
@@ -3026,53 +3612,40 @@ async function finalizarPedido(
       tipoEntrega === 'delivery'
         ? byId(
             'bairroEntrega'
-          ).value.trim()
+          )?.value.trim() || ''
         : null,
 
     customer_city:
       tipoEntrega === 'delivery'
         ? byId(
             'cidadeEntrega'
-          ).value.trim()
+          )?.value.trim() || 'Sorocaba'
         : 'Sorocaba',
 
-    customer_notes: [
+    customer_notes:
+      [
+        pagamento
+          ? `Pagamento: ${pagamento}`
+          : '',
 
-      pagamento
-        ? `Pagamento: ${pagamento}`
-        : '',
+        observacoes
+          ? `Observações: ${observacoes}`
+          : '',
 
-      pagamento.toLowerCase() === 'pix'
-        ? `Chave PIX: ${CHAVE_PIX}`
-        : '',
+        tipoEntrega === 'delivery' &&
+        complemento
+          ? `Complemento: ${complemento}`
+          : '',
 
-      observacoes
-        ? `Observações: ${observacoes}`
-        : '',
-
-      tipoEntrega === 'delivery' &&
-      byId(
-        'complementoEntrega'
-      ).value.trim()
-
-        ? `Complemento: ${
-            byId(
-              'complementoEntrega'
-            ).value.trim()
-          }`
-
-        : '',
-
-      tipoEntrega === 'delivery' &&
-      tempoEntregaTexto
-
-        ? `Tempo estimado: ${tempoEntregaTexto}`
-
-        : ''
-
-    ]
-      .filter(Boolean)
-      .join(' | '),
+        tipoEntrega === 'delivery' &&
+        tempoEntregaTexto
+          ? `Tempo estimado: ${tempoEntregaTexto}`
+          : ''
+      ]
+        .filter(Boolean)
+        .join(
+          ' | '
+        ),
 
     items:
       carrinho.map(
@@ -3081,13 +3654,18 @@ async function finalizarPedido(
             item.nome,
 
           preco:
-            item.preco,
+            Number(
+              item.preco
+            ),
 
           quantidade:
-            item.quantidade,
+            Number(
+              item.quantidade
+            ),
 
           observacao:
-            item.observacao || ''
+            item.observacao ||
+            ''
         })
       ),
 
@@ -3095,7 +3673,9 @@ async function finalizarPedido(
       subtotal,
 
     delivery_fee:
-      taxaEntrega,
+      tipoEntrega === 'delivery'
+        ? taxaEntrega
+        : 0,
 
     total:
       total,
@@ -3109,18 +3689,27 @@ async function finalizarPedido(
       'novo'
   };
 
+  const botao =
+    enviarWhatsapp
+      ? byId(
+          'btnFinalizarWhatsapp'
+        )
+      : byId(
+          'btnFinalizar'
+        );
+
   try {
 
-    if (btnFinalizar) {
+    if (botao) {
 
-      btnFinalizar.disabled =
+      botao.disabled =
         true;
 
-      btnFinalizar.innerText =
+      botao.innerText =
         'Salvando pedido...';
     }
 
-    const pedidoSalvo =
+    const pedido =
       await salvarPedidoNoBanco(
         payload
       );
@@ -3128,7 +3717,7 @@ async function finalizarPedido(
     let mensagem =
 `🍔 *Pedido - ${nomeLoja}*
 
-📦 *Pedido:* #${pedidoSalvo.id}
+📦 *Pedido:* #${pedido.id}
 👤 *Cliente:* ${nome}
 🏠 *Tipo do pedido:* ${formatarTipoEntregaTexto(tipoEntrega)}`;
 
@@ -3138,6 +3727,9 @@ async function finalizarPedido(
 
       mensagem += `
 📍 *Endereço:* ${endereco}`;
+
+      mensagem += `
+📏 *Distância:* ${Number(distanciaEntregaKm).toFixed(2).replace('.', ',')} km`;
 
       if (
         tempoEntregaTexto
@@ -3163,36 +3755,20 @@ async function finalizarPedido(
     payload.items.forEach(
       item => {
 
-        const nomeItem =
-          item.nome ||
-          'Item';
-
-        const quantidadeItem =
-          Number(
-            item.quantidade || 1
-          );
-
-        const precoItem =
-          Number(
-            item.preco || 0
-          );
-
-        const obsItem =
-          item.observacao ||
-          '';
-
         mensagem += `
 ━━━━━━━━━━━━━━
-🍟 *${quantidadeItem}x ${nomeItem}*
+🍟 *${item.quantidade}x ${item.nome}*
 💰 ${formatarPreco(
-          precoItem *
-          quantidadeItem
+          item.preco *
+          item.quantidade
         )}`;
 
-        if (obsItem) {
+        if (
+          item.observacao
+        ) {
 
           mensagem += `
-📝 ${obsItem}`;
+📝 ${item.observacao}`;
         }
       }
     );
@@ -3202,115 +3778,126 @@ async function finalizarPedido(
 ━━━━━━━━━━━━━━
 💵 *Subtotal:* ${formatarPreco(subtotal)}
 🚚 *Taxa de entrega:* ${
-      tipoEntrega === 'delivery'
-        ? 'A confirmar'
-        : formatarPreco(taxaEntrega)
-    }
-💲 *Total:* ${formatarPreco(total)}`;
-
-    if (pagamento) {
-
-      mensagem += `
+  tipoEntrega === 'delivery'
+    ? formatarPreco(taxaEntrega)
+    : formatarPreco(0)
+}
+💲 *Total:* ${formatarPreco(total)}
 💳 *Pagamento:* ${pagamento}`;
 
-      if (
-        pagamento.toLowerCase() ===
-        'pix'
-      ) {
-
-        mensagem += `
-📲 *Chave PIX:* ${CHAVE_PIX}`;
-      }
-    }
-
-    if (observacoes) {
+    if (
+      observacoes
+    ) {
 
       mensagem += `
 📌 *Observações:* ${observacoes}`;
     }
 
-    const urlWhatsapp =
+    const url =
       `https://api.whatsapp.com/send?phone=${numeroWhatsapp}&text=${encodeURIComponent(mensagem)}`;
+
+    /*
+     * Limpa pedido.
+     */
 
     carrinho = [];
 
     taxaEntrega = 0;
-    distanciaEntregaKm = null;
-    tempoEntregaTexto = null;
 
-    produtoOpcoesAtual = null;
-    adicionalPendente = null;
-    produtoPersonalizacaoAtual = null;
+    distanciaEntregaKm =
+      null;
 
-    if (byId('nomeCliente')) {
-      byId('nomeCliente').value = '';
-    }
+    tempoEntregaTexto =
+      null;
 
-    if (byId('tipoEntrega')) {
-      byId('tipoEntrega').value =
-        'retirada';
-    }
+    produtoPersonalizacaoAtual =
+      null;
 
-    if (byId('cepEntrega')) {
-      byId('cepEntrega').value = '';
-    }
+    produtoOpcoesAtual =
+      null;
 
-    if (byId('ruaEntrega')) {
-      byId('ruaEntrega').value = '';
-    }
+    adicionalPendente =
+      null;
 
-    if (byId('numeroEntrega')) {
-      byId('numeroEntrega').value = '';
-    }
+    [
+      'nomeCliente',
+      'cepEntrega',
+      'ruaEntrega',
+      'numeroEntrega',
+      'bairroEntrega',
+      'complementoEntrega',
+      'observacoes'
+    ].forEach(
+      id => {
 
-    if (byId('bairroEntrega')) {
-      byId('bairroEntrega').value = '';
-    }
+        const campo =
+          byId(
+            id
+          );
 
-    if (byId('cidadeEntrega')) {
-      byId('cidadeEntrega').value =
+        if (campo) {
+
+          campo.value =
+            '';
+        }
+      }
+    );
+
+    if (
+      byId(
+        'cidadeEntrega'
+      )
+    ) {
+
+      byId(
+        'cidadeEntrega'
+      ).value =
         'Sorocaba';
     }
 
-    if (byId('complementoEntrega')) {
-      byId('complementoEntrega').value =
+    if (
+      byId(
+        'tipoEntrega'
+      )
+    ) {
+
+      byId(
+        'tipoEntrega'
+      ).value =
+        'retirada';
+    }
+
+    if (
+      byId(
+        'formaPagamento'
+      )
+    ) {
+
+      byId(
+        'formaPagamento'
+      ).value =
         '';
-    }
-
-    if (byId('formaPagamento')) {
-      byId('formaPagamento').value =
-        '';
-    }
-
-    if (byId('observacoes')) {
-      byId('observacoes').value = '';
-    }
-
-    atualizarPagamento();
-
-    limparBloqueiosEndereco();
-
-    limparCacheCoordenadaCliente();
-
-    if (avisoEntrega) {
-
-      avisoEntrega.innerText =
-        'Retirada no local sem taxa de entrega.';
     }
 
     fecharCarrinho();
 
     fecharOpcoesProduto();
 
+    atualizarEntrega();
+
+    atualizarPagamento();
+
     renderizarCarrinho();
 
-    if (enviarWhatsapp) {
+    if (
+      enviarWhatsapp
+    ) {
 
       setTimeout(
         () => {
 
           abrirWhatsapp(
-            urlWhatsapp
+            url
           );
 
         },
@@ -3320,30 +3907,31 @@ async function finalizarPedido(
     } else {
 
       alert(
-        'Pedido finalizado com sucesso!'
+        'Pedido salvo com sucesso!'
       );
     }
 
   } catch (erro) {
 
-    alert(
-      'Erro ao salvar o pedido. Verifique a configuração do Supabase.'
+    console.error(
+      'Erro ao finalizar pedido:',
+      erro
     );
 
-    console.error(
-      erro
+    alert(
+      'Erro ao salvar o pedido. Verifique a conexão com o Supabase.'
     );
 
   } finally {
 
-    if (btnFinalizar) {
+    if (botao) {
 
-      btnFinalizar.innerText =
+      botao.innerText =
         enviarWhatsapp
           ? 'Finalizar no WhatsApp'
           : 'Salvar pedido';
 
-      btnFinalizar.disabled =
+      botao.disabled =
         !(await lojaAbertaAgora());
     }
   }
@@ -3355,23 +3943,31 @@ async function finalizarPedido(
 ========================================================= */
 
 window.onclick =
-  function (event) {
+  function (
+    event
+  ) {
 
     const modalCarrinho =
-      byId('modalCarrinho');
+      byId(
+        'modalCarrinho'
+      );
 
     const modalOpcoes =
-      byId('modalOpcoesProduto');
+      byId(
+        'modalOpcoesProduto'
+      );
 
     if (
-      event.target === modalCarrinho
+      event.target ===
+      modalCarrinho
     ) {
 
       fecharCarrinho();
     }
 
     if (
-      event.target === modalOpcoes
+      event.target ===
+      modalOpcoes
     ) {
 
       fecharOpcoesProduto();
@@ -3385,9 +3981,53 @@ window.onclick =
 
 async function iniciarSistema() {
 
+  console.log(
+    'Iniciando Lê Lanches...'
+  );
+
+  /*
+   * 1. Configuração da loja.
+   */
+
   await carregarConfiguracaoLoja();
 
+  console.log(
+    'Configuração da loja:',
+    configuracaoLoja
+  );
+
+  /*
+   * 2. Regras de entrega.
+   */
+
   await carregarRegrasEntrega();
+
+  /*
+   * 3. Carrega Google Maps antecipadamente.
+   */
+
+  carregarGoogleMapsApi()
+    .then(
+      () => {
+
+        console.log(
+          'Google Maps carregado para cálculo de entrega.'
+        );
+      }
+    )
+    .catch(
+      erro => {
+
+        console.warn(
+          'Google Maps ainda não pôde ser carregado:',
+          erro
+        );
+      }
+    );
+
+  /*
+   * 4. Eventos.
+   */
 
   garantirModalOpcoesForaDoCarrinho();
 
@@ -3407,6 +4047,11 @@ async function iniciarSistema() {
 
   await atualizarStatusLoja();
 
+  /*
+   * Atualiza status a cada 5 segundos para
+   * refletir mudanças feitas no painel admin.
+   */
+
   setInterval(
     async () => {
 
@@ -3417,7 +4062,7 @@ async function iniciarSistema() {
   );
 
   console.log(
-    'Lê Lanches 2.0 iniciado.'
+    'Lê Lanches 2.1 iniciado.'
   );
 }
 
@@ -3431,13 +4076,14 @@ document.addEventListener(
   function () {
 
     const tipoEntrega =
-      byId('tipoEntrega');
+      byId(
+        'tipoEntrega'
+      );
 
     const camposEntrega =
-      byId('camposEntrega');
-
-    const formaPagamento =
-      byId('formaPagamento');
+      byId(
+        'camposEntrega'
+      );
 
     if (tipoEntrega) {
 
@@ -3449,14 +4095,6 @@ document.addEventListener(
 
       camposEntrega.style.display =
         'none';
-    }
-
-    if (formaPagamento) {
-
-      formaPagamento.addEventListener(
-        'change',
-        atualizarPagamento
-      );
     }
 
     garantirModalOpcoesForaDoCarrinho();
