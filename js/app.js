@@ -477,6 +477,7 @@ function carregarGoogleMapsApi() {
   return googleMapsCarregamentoPromise;
 }
 
+
 /* =========================================================
    TOAST
 ========================================================= */
@@ -797,14 +798,6 @@ function converterHorarioParaMinutos(
 
 
 function obterDiasPermitidosLoja() {
-
-  /*
-   * Domingo = 0
-   * Quarta = 3
-   * Quinta = 4
-   * Sexta = 5
-   * Sábado = 6
-   */
 
   return [
     0,
@@ -2639,10 +2632,6 @@ function obterCoordenadasLoja() {
     };
   }
 
-  /*
-   * Fallback do Lê Lanches
-   */
-
   return {
 
     lat:
@@ -2650,6 +2639,232 @@ function obterCoordenadasLoja() {
 
     lng:
       -47.4619295
+  };
+}
+
+
+/* =========================================================
+   GEOCODIFICAÇÃO - OPENSTREETMAP / NOMINATIM
+========================================================= */
+
+async function geocodificarEnderecoOpenStreetMap(
+  enderecoCompleto
+) {
+
+  const endereco =
+    String(
+      enderecoCompleto || ''
+    ).trim();
+
+  if (!endereco) {
+
+    throw new Error(
+      'Endereço vazio para geocodificação.'
+    );
+  }
+
+  const montarUrl =
+    texto =>
+      'https://nominatim.openstreetmap.org/search' +
+      '?format=jsonv2' +
+      '&limit=5' +
+      '&countrycodes=br' +
+      '&addressdetails=1' +
+      '&accept-language=pt-BR' +
+      '&q=' +
+      encodeURIComponent(
+        texto
+      );
+
+  async function consultar(
+    texto
+  ) {
+
+    const controller =
+      new AbortController();
+
+    const timeout =
+      setTimeout(
+        () => controller.abort(),
+        10000
+      );
+
+    try {
+
+      const resposta =
+        await fetch(
+          montarUrl(
+            texto
+          ),
+          {
+            method:
+              'GET',
+
+            headers: {
+              'Accept':
+                'application/json'
+            },
+
+            signal:
+              controller.signal
+          }
+        );
+
+      if (!resposta.ok) {
+
+        throw new Error(
+          'OpenStreetMap retornou HTTP ' +
+          resposta.status
+        );
+      }
+
+      const dados =
+        await resposta.json();
+
+      return Array.isArray(
+        dados
+      )
+        ? dados
+        : [];
+
+    } finally {
+
+      clearTimeout(
+        timeout
+      );
+    }
+  }
+
+  console.log(
+    'OpenStreetMap - procurando endereço:',
+    endereco
+  );
+
+  let resultados =
+    await consultar(
+      endereco
+    );
+
+  /*
+   * Alguns endereços não possuem o número
+   * cadastrado no OpenStreetMap.
+   * Fazemos nova busca sem o número.
+   */
+
+  if (
+    resultados.length === 0
+  ) {
+
+    const rua =
+      byId(
+        'ruaEntrega'
+      )?.value.trim() || '';
+
+    const bairro =
+      byId(
+        'bairroEntrega'
+      )?.value.trim() || '';
+
+    const cidade =
+      byId(
+        'cidadeEntrega'
+      )?.value.trim() ||
+      'Sorocaba';
+
+    const cep =
+      byId(
+        'cepEntrega'
+      )?.value.trim() || '';
+
+    const enderecoFallback =
+      [
+        rua,
+        bairro,
+        cidade,
+        'SP',
+        cep,
+        'Brasil'
+      ]
+        .filter(Boolean)
+        .join(
+          ', '
+        );
+
+    console.log(
+      'OpenStreetMap - tentando endereço alternativo:',
+      enderecoFallback
+    );
+
+    resultados =
+      await consultar(
+        enderecoFallback
+      );
+  }
+
+  if (
+    resultados.length === 0
+  ) {
+
+    throw new Error(
+      'Endereço não localizado no OpenStreetMap.'
+    );
+  }
+
+  const resultado =
+    resultados.find(
+      item => {
+
+        const texto =
+          removerAcentos(
+            String(
+              item.display_name || ''
+            ).toLowerCase()
+          );
+
+        return texto.includes(
+          'sorocaba'
+        );
+      }
+    ) ||
+    resultados[0];
+
+  const lat =
+    Number(
+      resultado.lat
+    );
+
+  const lng =
+    Number(
+      resultado.lon
+    );
+
+  if (
+    !Number.isFinite(
+      lat
+    ) ||
+    !Number.isFinite(
+      lng
+    )
+  ) {
+
+    throw new Error(
+      'OpenStreetMap retornou coordenadas inválidas.'
+    );
+  }
+
+  console.log(
+    'OpenStreetMap - coordenada encontrada:',
+    {
+      lat,
+      lng,
+      displayName:
+        resultado.display_name
+    }
+  );
+
+  return {
+    lat,
+    lng
   };
 }
 
@@ -2676,21 +2891,15 @@ async function calcularEntregaAutomaticamente() {
   ) {
 
     taxaEntrega = 0;
-
-    distanciaEntregaKm =
-      null;
-
-    tempoEntregaTexto =
-      null;
+    distanciaEntregaKm = null;
+    tempoEntregaTexto = null;
 
     if (aviso) {
-
       aviso.innerText =
         'Retirada no local sem taxa de entrega.';
     }
 
     renderizarCarrinho();
-
     return;
   }
 
@@ -2728,57 +2937,59 @@ async function calcularEntregaAutomaticamente() {
   ) {
 
     taxaEntrega = 0;
-
-    distanciaEntregaKm =
-      null;
-
-    tempoEntregaTexto =
-      null;
+    distanciaEntregaKm = null;
+    tempoEntregaTexto = null;
 
     if (aviso) {
-
       aviso.innerText =
         'Digite o CEP e informe o número para calcular a entrega.';
     }
 
     renderizarCarrinho();
-
     return;
   }
 
   try {
 
-    if (aviso) {
+    taxaEntrega = 0;
+    distanciaEntregaKm = null;
+    tempoEntregaTexto = null;
 
+    /*
+     * ETAPA 1
+     * Localiza endereço.
+     */
+
+    if (aviso) {
       aviso.innerText =
-        'Calculando distância e taxa de entrega...';
+        'Localizando endereço...';
     }
 
+    const enderecoCliente =
+      montarEnderecoCompletoCliente();
+
+    const destino =
+      await geocodificarEnderecoOpenStreetMap(
+        enderecoCliente
+      );
+
     /*
-     * Carrega Google Maps JS.
+     * ETAPA 2
+     * Calcula rota no Google.
      */
+
+    if (aviso) {
+      aviso.innerText =
+        'Calculando rota e taxa de entrega...';
+    }
 
     await carregarGoogleMapsApi();
-
-    /*
-     * Origem = Lê Lanches.
-     */
 
     const origem =
       obterCoordenadasLoja();
 
-    /*
-     * Destino montado com CEP + número.
-     *
-     * O próprio DirectionsService resolve o
-     * endereço. Não usamos Geocoding REST aqui.
-     */
-
-    const destino =
-      montarEnderecoCompletoCliente();
-
     console.log(
-      'Calculando entrega:',
+      'Google Maps - calculando rota:',
       {
         origem,
         destino
@@ -2794,6 +3005,35 @@ async function calcularEntregaAutomaticamente() {
           resolve,
           reject
         ) => {
+
+          let finalizado =
+            false;
+
+          /*
+           * Nunca mais fica eternamente
+           * parado em "Calculando...".
+           */
+
+          const timeout =
+            setTimeout(
+              () => {
+
+                if (finalizado) {
+                  return;
+                }
+
+                finalizado =
+                  true;
+
+                reject(
+                  new Error(
+                    'Tempo limite ao calcular rota no Google Maps.'
+                  )
+                );
+
+              },
+              15000
+            );
 
           directionsService.route(
             {
@@ -2816,6 +3056,22 @@ async function calcularEntregaAutomaticamente() {
               response,
               status
             ) => {
+
+              if (finalizado) {
+                return;
+              }
+
+              finalizado =
+                true;
+
+              clearTimeout(
+                timeout
+              );
+
+              console.log(
+                'Google Maps - status da rota:',
+                status
+              );
 
               if (
                 status === 'OK' &&
@@ -2872,7 +3128,7 @@ async function calcularEntregaAutomaticamente() {
     ) {
 
       throw new Error(
-        'Google Maps não retornou distância válida.'
+        'Google Maps não retornou uma distância válida.'
       );
     }
 
@@ -2890,7 +3146,7 @@ async function calcularEntregaAutomaticamente() {
       distanciaKm;
 
     /*
-     * Localiza regra cadastrada no Supabase.
+     * Procura a regra no Supabase.
      */
 
     const taxa =
@@ -2914,8 +3170,13 @@ async function calcularEntregaAutomaticamente() {
             distanciaKm
               .toFixed(2)
               .replace('.', ',')
-          } km | Endereço fora da área de entrega.`;
+          } km | Fora da área de entrega.`;
       }
+
+      console.warn(
+        'Endereço fora da área de entrega:',
+        distanciaKm
+      );
 
       renderizarCarrinho();
 
@@ -2927,7 +3188,11 @@ async function calcularEntregaAutomaticamente() {
 
     tempoEntregaTexto =
       somarTempoPreparoComEntrega(
-        duracaoSegundos
+        Number.isFinite(
+          duracaoSegundos
+        )
+          ? duracaoSegundos
+          : 0
       );
 
     if (aviso) {
@@ -2949,7 +3214,7 @@ async function calcularEntregaAutomaticamente() {
     }
 
     console.log(
-      'Entrega calculada:',
+      'Entrega calculada com sucesso:',
       {
         distanciaKm,
         taxaEntrega,
@@ -2967,17 +3232,24 @@ async function calcularEntregaAutomaticamente() {
     );
 
     taxaEntrega = 0;
-
-    distanciaEntregaKm =
-      null;
-
-    tempoEntregaTexto =
-      null;
+    distanciaEntregaKm = null;
+    tempoEntregaTexto = null;
 
     if (aviso) {
 
-      aviso.innerText =
-        'Não foi possível calcular a entrega. Confira o CEP e o número.';
+      if (
+        erro?.name ===
+        'AbortError'
+      ) {
+
+        aviso.innerText =
+          'A consulta do endereço demorou demais. Tente novamente.';
+
+      } else {
+
+        aviso.innerText =
+          'Não foi possível calcular a entrega. Confira o CEP e o número.';
+      }
     }
 
     renderizarCarrinho();
@@ -3779,10 +4051,6 @@ async function finalizarPedido(
     const url =
       `https://api.whatsapp.com/send?phone=${numeroWhatsapp}&text=${encodeURIComponent(mensagem)}`;
 
-    /*
-     * Limpa pedido.
-     */
-
     carrinho = [];
 
     taxaEntrega = 0;
@@ -3968,10 +4236,6 @@ async function iniciarSistema() {
     'Iniciando Lê Lanches...'
   );
 
-  /*
-   * 1. Configuração da loja.
-   */
-
   await carregarConfiguracaoLoja();
 
   console.log(
@@ -3979,15 +4243,7 @@ async function iniciarSistema() {
     configuracaoLoja
   );
 
-  /*
-   * 2. Regras de entrega.
-   */
-
   await carregarRegrasEntrega();
-
-  /*
-   * 3. Carrega Google Maps antecipadamente.
-   */
 
   carregarGoogleMapsApi()
     .then(
@@ -4008,10 +4264,6 @@ async function iniciarSistema() {
       }
     );
 
-  /*
-   * 4. Eventos.
-   */
-
   garantirModalOpcoesForaDoCarrinho();
 
   aplicarMascaraCep();
@@ -4030,11 +4282,6 @@ async function iniciarSistema() {
 
   await atualizarStatusLoja();
 
-  /*
-   * Atualiza status a cada 5 segundos para
-   * refletir mudanças feitas no painel admin.
-   */
-
   setInterval(
     async () => {
 
@@ -4045,7 +4292,7 @@ async function iniciarSistema() {
   );
 
   console.log(
-    'Lê Lanches 2.1 iniciado.'
+    'Lê Lanches 2.2 iniciado.'
   );
 }
 
