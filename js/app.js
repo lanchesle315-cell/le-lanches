@@ -84,6 +84,8 @@ let adicionalPendente = null;
 
 let coordenadaClienteCache = null;
 
+let calculoEntregaCache = null;
+
 
 /* =========================================================
    INGREDIENTES
@@ -1187,6 +1189,129 @@ function limparCacheCoordenadaCliente() {
 }
 
 
+function obterEnderecoAtualComoChave() {
+
+  const rua =
+    byId(
+      'ruaEntrega'
+    )?.value.trim() || '';
+
+  const numero =
+    byId(
+      'numeroEntrega'
+    )?.value.trim() || '';
+
+  const bairro =
+    byId(
+      'bairroEntrega'
+    )?.value.trim() || '';
+
+  const cidade =
+    byId(
+      'cidadeEntrega'
+    )?.value.trim() ||
+    'Sorocaba';
+
+  const cep =
+    byId(
+      'cepEntrega'
+    )?.value.trim() || '';
+
+  return [
+    rua,
+    numero,
+    bairro,
+    cidade,
+    cep
+  ]
+    .join('|')
+    .toLowerCase();
+}
+
+
+function salvarCoordenadaClienteNoCache(
+  coordenada
+) {
+
+  if (!coordenada) {
+    return;
+  }
+
+  coordenadaClienteCache = {
+    chave:
+      obterEnderecoAtualComoChave(),
+
+    valor:
+      coordenada
+  };
+}
+
+
+function obterCoordenadaClienteDoCache() {
+
+  const chaveAtual =
+    obterEnderecoAtualComoChave();
+
+  if (
+    coordenadaClienteCache &&
+    coordenadaClienteCache.chave ===
+      chaveAtual
+  ) {
+
+    return coordenadaClienteCache.valor;
+  }
+
+  return null;
+}
+
+
+function limparCacheEntrega() {
+
+  calculoEntregaCache =
+    null;
+}
+
+
+function salvarCalculoEntregaNoCache(
+  distanciaKm,
+  taxa,
+  tempo
+) {
+
+  calculoEntregaCache = {
+    chave:
+      obterEnderecoAtualComoChave(),
+
+    distanciaKm:
+      Number(distanciaKm),
+
+    taxa:
+      Number(taxa),
+
+    tempo:
+      tempo || null
+  };
+}
+
+
+function obterCalculoEntregaDoCache() {
+
+  const chaveAtual =
+    obterEnderecoAtualComoChave();
+
+  if (
+    calculoEntregaCache &&
+    calculoEntregaCache.chave ===
+      chaveAtual
+  ) {
+
+    return calculoEntregaCache;
+  }
+
+  return null;
+}
+
+
 function montarEnderecoCompletoCliente() {
 
   const rua =
@@ -1386,6 +1511,7 @@ function aplicarMascaraCep() {
         valor;
 
       limparCacheCoordenadaCliente();
+      limparCacheEntrega();
 
       if (
         somenteNumeros(
@@ -1411,50 +1537,40 @@ function aplicarMascaraCep() {
 
 function aplicarEventosEntrega() {
 
-  [
-    'numeroEntrega',
-    'complementoEntrega'
-  ].forEach(
-    id => {
+  const numeroCampo =
+    byId(
+      'numeroEntrega'
+    );
 
-      const campo =
-        byId(
-          id
-        );
+  if (numeroCampo) {
 
-      if (!campo) {
-        return;
+    numeroCampo.addEventListener(
+      'input',
+      () => {
+
+        limparCacheCoordenadaCliente();
+        limparCacheEntrega();
+
+        agendarCalculoEntrega();
       }
+    );
 
-      campo.addEventListener(
-        'input',
-        () => {
+    numeroCampo.addEventListener(
+      'change',
+      () => {
 
-          limparCacheCoordenadaCliente();
+        limparCacheCoordenadaCliente();
+        limparCacheEntrega();
 
-          agendarCalculoEntrega();
-        }
-      );
+        agendarCalculoEntrega();
+      }
+    );
+  }
 
-      campo.addEventListener(
-        'change',
-        () => {
-
-          limparCacheCoordenadaCliente();
-
-          agendarCalculoEntrega();
-        }
-      );
-
-      campo.addEventListener(
-        'blur',
-        () => {
-
-          agendarCalculoEntrega();
-        }
-      );
-    }
-  );
+  /*
+   * O complemento não altera a rota.
+   * Portanto ele não dispara novo cálculo.
+   */
 }
 
 
@@ -1610,6 +1726,7 @@ async function buscarCepEntrega() {
     }
 
     limparCacheCoordenadaCliente();
+    limparCacheEntrega();
 
     definirBloqueioCampos();
 
@@ -2745,12 +2862,6 @@ async function geocodificarEnderecoOpenStreetMap(
       endereco
     );
 
-  /*
-   * Alguns endereços não possuem o número
-   * cadastrado no OpenStreetMap.
-   * Fazemos nova busca sem o número.
-   */
-
   if (
     resultados.length === 0
   ) {
@@ -2895,11 +3006,13 @@ async function calcularEntregaAutomaticamente() {
     tempoEntregaTexto = null;
 
     if (aviso) {
+
       aviso.innerText =
         'Retirada no local sem taxa de entrega.';
     }
 
     renderizarCarrinho();
+
     return;
   }
 
@@ -2941,11 +3054,55 @@ async function calcularEntregaAutomaticamente() {
     tempoEntregaTexto = null;
 
     if (aviso) {
+
       aviso.innerText =
         'Digite o CEP e informe o número para calcular a entrega.';
     }
 
     renderizarCarrinho();
+
+    return;
+  }
+
+  const cacheEntrega =
+    obterCalculoEntregaDoCache();
+
+  if (cacheEntrega) {
+
+    distanciaEntregaKm =
+      cacheEntrega.distanciaKm;
+
+    taxaEntrega =
+      cacheEntrega.taxa;
+
+    tempoEntregaTexto =
+      cacheEntrega.tempo;
+
+    if (aviso) {
+
+      aviso.innerText =
+        `Distância real: ${
+          distanciaEntregaKm
+            .toFixed(2)
+            .replace('.', ',')
+        } km | ` +
+        `Tempo estimado: ${
+          tempoEntregaTexto || '-'
+        } | ` +
+        `Taxa: ${
+          formatarPreco(
+            taxaEntrega
+          )
+        }`;
+    }
+
+    console.log(
+      'Entrega reaproveitada do cache:',
+      cacheEntrega
+    );
+
+    renderizarCarrinho();
+
     return;
   }
 
@@ -2955,12 +3112,8 @@ async function calcularEntregaAutomaticamente() {
     distanciaEntregaKm = null;
     tempoEntregaTexto = null;
 
-    /*
-     * ETAPA 1
-     * Localiza endereço.
-     */
-
     if (aviso) {
+
       aviso.innerText =
         'Localizando endereço...';
     }
@@ -2968,17 +3121,33 @@ async function calcularEntregaAutomaticamente() {
     const enderecoCliente =
       montarEnderecoCompletoCliente();
 
-    const destino =
-      await geocodificarEnderecoOpenStreetMap(
-        enderecoCliente
-      );
+    let destino =
+      obterCoordenadaClienteDoCache();
 
-    /*
-     * ETAPA 2
-     * Calcula rota no Google.
-     */
+    if (!destino) {
+
+      destino =
+        await geocodificarEnderecoOpenStreetMap(
+          enderecoCliente
+        );
+
+      if (destino) {
+
+        salvarCoordenadaClienteNoCache(
+          destino
+        );
+      }
+    }
+
+    if (!destino) {
+
+      throw new Error(
+        'Não foi possível localizar o endereço.'
+      );
+    }
 
     if (aviso) {
+
       aviso.innerText =
         'Calculando rota e taxa de entrega...';
     }
@@ -3008,11 +3177,6 @@ async function calcularEntregaAutomaticamente() {
 
           let finalizado =
             false;
-
-          /*
-           * Nunca mais fica eternamente
-           * parado em "Calculando...".
-           */
 
           const timeout =
             setTimeout(
@@ -3096,13 +3260,10 @@ async function calcularEntregaAutomaticamente() {
         }
       );
 
-    const rota =
+    const trecho =
       resultado
         ?.routes
-        ?.[0];
-
-    const trecho =
-      rota
+        ?.[0]
         ?.legs
         ?.[0];
 
@@ -3145,10 +3306,6 @@ async function calcularEntregaAutomaticamente() {
     distanciaEntregaKm =
       distanciaKm;
 
-    /*
-     * Procura a regra no Supabase.
-     */
-
     const taxa =
       descobrirTaxaPorDistancia(
         distanciaKm
@@ -3159,9 +3316,7 @@ async function calcularEntregaAutomaticamente() {
     ) {
 
       taxaEntrega = 0;
-
-      tempoEntregaTexto =
-        null;
+      tempoEntregaTexto = null;
 
       if (aviso) {
 
@@ -3195,11 +3350,17 @@ async function calcularEntregaAutomaticamente() {
           : 0
       );
 
+    salvarCalculoEntregaNoCache(
+      distanciaEntregaKm,
+      taxaEntrega,
+      tempoEntregaTexto
+    );
+
     if (aviso) {
 
       aviso.innerText =
         `Distância real: ${
-          distanciaKm
+          distanciaEntregaKm
             .toFixed(2)
             .replace('.', ',')
         } km | ` +
@@ -3214,9 +3375,9 @@ async function calcularEntregaAutomaticamente() {
     }
 
     console.log(
-      'Entrega calculada com sucesso:',
+      'Entrega calculada e salva no cache:',
       {
-        distanciaKm,
+        distanciaEntregaKm,
         taxaEntrega,
         tempoEntregaTexto
       }
@@ -3592,6 +3753,7 @@ function limparCarrinho() {
   atualizarPagamento();
 
   limparCacheCoordenadaCliente();
+  limparCacheEntrega();
 
   limparBloqueiosEndereco();
 
@@ -4070,6 +4232,9 @@ async function finalizarPedido(
     adicionalPendente =
       null;
 
+    limparCacheCoordenadaCliente();
+    limparCacheEntrega();
+
     [
       'nomeCliente',
       'cepEntrega',
@@ -4292,7 +4457,7 @@ async function iniciarSistema() {
   );
 
   console.log(
-    'Lê Lanches 2.2 iniciado.'
+    'Lê Lanches 2.3 iniciado.'
   );
 }
 
