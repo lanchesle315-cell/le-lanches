@@ -322,24 +322,34 @@ textarea {
 }
 
 /* ==========================================================
-   CATEGORY BAR
+   CATEGORY BAR - LE LANCHES
 ========================================================== */
 
 .ll-category-bar {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: rgba(10,10,10,.92);
-  border-bottom: 1px solid rgba(255,255,255,.08);
+
+  background: rgba(10, 10, 10, .94);
+  border-bottom: 1px solid rgba(255, 189, 0, .12);
+
   backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .ll-category-scroll {
   min-height: 72px;
+
   display: flex;
   align-items: center;
-  gap: 8px;
+
+  gap: 10px;
+
+  padding: 8px 0;
+
   overflow-x: auto;
+  overflow-y: hidden;
+
   scrollbar-width: none;
 }
 
@@ -347,23 +357,148 @@ textarea {
   display: none;
 }
 
+
+/* BOTÃO DA CATEGORIA */
+
 .ll-category-scroll a {
   flex: 0 0 auto;
-  padding: 10px 16px;
+
+  height: 54px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 9px;
+
+  padding: 5px 16px 5px 7px;
+
   color: #d9d9d9;
+
   border: 1px solid #303030;
-  border-radius: 999px;
+  border-radius: 14px;
+
   background: #141414;
+
   text-decoration: none;
-  font-size: 14px;
+
+  font-size: 13px;
   font-weight: 900;
-  transition: .2s ease;
+
+  white-space: nowrap;
+
+  transition:
+    color .2s ease,
+    background .2s ease,
+    border-color .2s ease,
+    transform .2s ease,
+    box-shadow .2s ease;
 }
 
+
+/* IMAGEM DA CATEGORIA */
+
+.ll-category-scroll a img {
+  display: block;
+
+  width: 42px !important;
+  height: 42px !important;
+
+  min-width: 42px;
+  min-height: 42px;
+
+  max-width: 42px !important;
+  max-height: 42px !important;
+
+  flex: 0 0 42px;
+
+  object-fit: contain;
+
+  border-radius: 10px;
+
+  transition:
+    transform .2s ease;
+}
+
+
+/* TEXTO */
+
+.ll-category-scroll a span {
+  display: block;
+
+  font-size: 13px;
+  font-weight: 900;
+
+  line-height: 1;
+
+  white-space: nowrap;
+}
+
+
+/* HOVER */
+
 .ll-category-scroll a:hover {
-  color: #111;
-  background: var(--ll-yellow);
-  border-color: var(--ll-yellow);
+  color: var(--ll-yellow);
+
+  background: #1a1a1a;
+
+  border-color: rgba(255, 189, 0, .55);
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, .28);
+}
+
+.ll-category-scroll a:hover img {
+  transform: scale(1.08);
+}
+
+
+/* ==========================================================
+   MOBILE - CATEGORY BAR
+========================================================== */
+
+@media (max-width: 576px) {
+
+  .ll-category-scroll {
+    min-height: 64px;
+
+    gap: 7px;
+
+    padding: 7px 0;
+  }
+
+  .ll-category-scroll a {
+    height: 48px;
+
+    gap: 6px;
+
+    padding:
+      4px 11px
+      4px 5px;
+
+    border-radius: 12px;
+  }
+
+  .ll-category-scroll a img {
+    width: 38px !important;
+    height: 38px !important;
+
+    min-width: 38px;
+    min-height: 38px;
+
+    max-width: 38px !important;
+    max-height: 38px !important;
+
+    flex-basis: 38px;
+
+    border-radius: 9px;
+  }
+
+  .ll-category-scroll a span {
+    font-size: 12px;
+  }
 }
 
 /* ==========================================================
