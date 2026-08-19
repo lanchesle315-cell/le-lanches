@@ -7,35 +7,37 @@
   <meta name="description" content="Cardápio online do Lê Lanches em Sorocaba. Prensados, smash burgers, fritas e bebidas." />
   <title>Lê Lanches | Cardápio Online</title>
   <link rel="icon" type="image/png" href="img/le-lanches-logo.png">
-  <link rel="stylesheet" href="css/style.css?v=20260818-lelanches">
+  <link rel="stylesheet" href="css/style.css?v=20260818-topo-premium-v2">
 </head>
 <body>
-<header class="hero">
-  <div class="hero-glow"></div>
-  <img class="hero-logo" src="img/le-lanches-logo.png" alt="Lê Lanches">
-  <div class="hero-copy">
-    <span class="eyebrow">PRENSADOS • SMASH • FRITAS</span>
-    <h1>Lê Lanches</h1>
-    <p>Seu lanche caprichado em Sorocaba. Escolha, monte o carrinho e finalize pelo WhatsApp.</p>
-    <div id="statusLoja" class="status-loja fechado">🔴 Fechado no momento</div>
-    <div class="hero-actions">
-      <a class="btn hero-btn" href="#cardapio">Ver cardápio</a>
-      <a class="btn hero-btn secondary" href="https://wa.me/5515996314700" target="_blank" rel="noopener">WhatsApp</a>
-    </div>
-  </div>
-</header>
-
-<nav class="categoria-nav" aria-label="Categorias do cardápio">
-  <a href="#hot-dog">Hot Dog</a><a href="#burguer">Burguer</a><a href="#smash-burguer">Smash</a><a href="#fritas">Fritas</a><a href="#bebidas">Bebidas</a>
-</nav>
+<div class="topbar"><div class="topbar-inner">
+<div class="topbar-item"><span class="topbar-icon">⌖</span><span>R. Firmino Mineli, 315 - Jardim Hungares, Sorocaba - SP</span></div>
+<div class="topbar-item"><span class="topbar-icon">◷</span><span>Quarta a domingo, 19h às 23h</span></div>
+<div class="topbar-item"><span class="topbar-icon">▣</span><span>(15) 99631-4700</span></div>
+<a class="topbar-item topbar-link" href="https://www.instagram.com/lelan_ches2025/" target="_blank" rel="noopener"><span class="topbar-icon">◎</span><span>@lelan_ches2025</span></a>
+</div></div>
+<header class="hero-modern"><div class="hero-modern-inner">
+<div class="hero-brand"><div class="brand-glow"></div><img class="hero-logo-modern" src="img/le-lanches-logo.png" alt="Lê Lanches"></div>
+<div class="hero-content">
+<div class="hero-eyebrow"><span>PRENSADOS</span><b>•</b><span>SMASH</span><b>•</b><span>FRITAS</span></div>
+<h1 class="hero-title"><span class="hero-title-white">LÊ</span><span class="hero-title-orange">LANCHES</span></h1>
+<p class="hero-subtitle">Seu lanche caprichado em Sorocaba.<br>Escolha, monte o carrinho e finalize pelo WhatsApp.</p>
+<div class="hero-status-row"><div id="statusLoja" class="status-loja fechado">🔴 Fechado no momento</div><span class="hero-hours">Abrimos quarta a domingo, das 19h às 23h</span></div>
+<div class="hero-actions-modern"><a class="hero-action hero-action-primary" href="#cardapio"><span>☰</span><span>Ver cardápio</span></a><a class="hero-action hero-action-secondary" href="https://wa.me/5515996314700" target="_blank" rel="noopener"><span>◉</span><span>WhatsApp</span></a></div>
+</div>
+<div class="hero-food" aria-hidden="true"><img src="img/hero-burger.png" alt="" class="hero-food-image" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"><div class="hero-food-fallback">🍔</div></div>
+</div></header>
+<div class="categoria-shell"><nav class="categoria-nav-modern" aria-label="Categorias do cardápio">
+<a class="categoria-link active" href="#hot-dog"><span>🌭</span><span>Hot Dog</span></a>
+<a class="categoria-link" href="#burguer"><span>🍔</span><span>Burguer</span></a>
+<a class="categoria-link" href="#smash-burguer"><span>🔥</span><span>Smash</span></a>
+<a class="categoria-link" href="#fritas"><span>🍟</span><span>Fritas</span></a>
+<a class="categoria-link" href="#bebidas"><span>🥤</span><span>Bebidas</span></a>
+<div class="categoria-spacer"></div>
+<button type="button" class="categoria-cart" onclick="abrirCarrinho()">🛒 Carrinho (<strong id="cartCount">0</strong>)</button>
+</nav></div>
 
 <main class="container" id="cardapio">
-  <section class="info-loja">
-    <div><strong>📍 Endereço</strong><span>R. Firmino Mineli, 315 - Jardim Hungares, Sorocaba - SP, 18075-700</span></div>
-    <div><strong>🕖 Horário</strong><span>Quarta a domingo • 19:00 às 23:00</span></div>
-    <div><strong>📲 Pedidos</strong><span>(15) 99631-4700</span></div>
-    <div><strong>📸 Instagram</strong><span>@lelan_ches2025</span></div>
-  </section>
 <section class="secao" id="hot-dog">
     <div class="secao-titulo"><span>🌭</span><h2>Hot Dog</h2></div>
     <div class="grid"><article class="item">
@@ -401,7 +403,7 @@
   </section>
 </main>
 
-<button class="carrinho-flutuante" onclick="abrirCarrinho()">🛒 Carrinho (<span id="cartCount">0</span>)</button>
+<button class="carrinho-flutuante" onclick="abrirCarrinho()">🛒 Carrinho</button>
 
 <div class="modal" id="modalCarrinho">
   <div class="modal-conteudo">
