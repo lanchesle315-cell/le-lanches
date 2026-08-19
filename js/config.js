@@ -1,6 +1,6 @@
 window.APP_CONFIG = {
-  supabaseUrl: "",
-  supabaseAnonKey: "",
+  supabaseUrl: "https://xkpwudryhqgjazbpwqwb.supabase.co",
+  supabaseAnonKey: "sb_publishable_ddaRsLHPWSvH29VjvowWOA_mg1wpKpR",
   googleMapsApiKey: "",
   whatsappNumber: "5515996314700",
   storeName: "Lê Lanches",
