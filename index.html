@@ -1,456 +1,1266 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0b0b0b" />
-  <meta name="description" content="Cardápio online do Lê Lanches em Sorocaba. Prensados, smash burgers, fritas e bebidas." />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090909">
+  <meta
+    name="description"
+    content="Cardápio online do Lê Lanches em Sorocaba. Prensados, smash burgers, fritas e bebidas."
+  >
+
   <title>Lê Lanches | Cardápio Online</title>
+
   <link rel="icon" type="image/png" href="img/le-lanches-logo.png">
-  <link rel="stylesheet" href="css/style.css?v=20260818-lelanches">
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+  >
+
+  <link rel="stylesheet" href="css/style.css?v=20260819-bootstrap">
 </head>
+
 <body>
-<header class="hero">
-  <div class="hero-glow"></div>
-  <img class="hero-logo" src="img/le-lanches-logo.png" alt="Lê Lanches">
-  <div class="hero-copy">
-    <span class="eyebrow">PRENSADOS • SMASH • FRITAS</span>
-    <h1>Lê Lanches</h1>
-    <p>Seu lanche caprichado em Sorocaba. Escolha, monte o carrinho e finalize pelo WhatsApp.</p>
-    <div id="statusLoja" class="status-loja fechado">🔴 Fechado no momento</div>
-    <div class="hero-actions">
-      <a class="btn hero-btn" href="#cardapio">Ver cardápio</a>
-      <a class="btn hero-btn secondary" href="https://wa.me/5515996314700" target="_blank" rel="noopener">WhatsApp</a>
-    </div>
-  </div>
-</header>
 
-<nav class="categoria-nav" aria-label="Categorias do cardápio">
-  <a href="#hot-dog">Hot Dog</a><a href="#burguer">Burguer</a><a href="#smash-burguer">Smash</a><a href="#fritas">Fritas</a><a href="#bebidas">Bebidas</a>
-</nav>
-
-<main class="container" id="cardapio">
-  <section class="info-loja">
-    <div><strong>📍 Endereço</strong><span>R. Firmino Mineli, 315 - Jardim Hungares, Sorocaba - SP, 18075-700</span></div>
-    <div><strong>🕖 Horário</strong><span>Quarta a domingo • 19:00 às 23:00</span></div>
-    <div><strong>📲 Pedidos</strong><span>(15) 99631-4700</span></div>
-    <div><strong>📸 Instagram</strong><span>@lelan_ches2025</span></div>
-  </section>
-<section class="secao" id="hot-dog">
-    <div class="secao-titulo"><span>🌭</span><h2>Hot Dog</h2></div>
-    <div class="grid"><article class="item">
-      <div class="codigo">HD01</div>
-      <h3>Simples</h3>
-      <p>Pão, salsicha, batata palha, purê de batata, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 17,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Simples%20-%20R%24%2017%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Simples', 17)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">HD02</div>
-      <h3>Duplo</h3>
-      <p>Pão, 2 salsichas, batata palha, purê de batata, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 19,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Duplo%20-%20R%24%2019%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Duplo', 19)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">HD03</div>
-      <h3>Especial</h3>
-      <p>Pão, 2 salsichas, calabresa, bacon, muçarela, catupiry ou cheddar, batata palha, purê de batata, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 26,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Especial%20-%20R%24%2026%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Especial', 26)">+ Carrinho</button>
-        </div>
-      </div>
-    </article></div>
-  </section>
-<section class="secao" id="burguer">
-    <div class="secao-titulo"><span>🍔</span><h2>Burguer</h2></div>
-    <div class="grid"><article class="item">
-      <div class="codigo">B01</div>
-      <h3>X-Burguer</h3>
-      <p>Pão, hambúrguer, muçarela, catupiry, batata palha, tomate, cebola, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 22,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Burguer%20-%20R%24%2022%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('X-Burguer', 22)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">B02</div>
-      <h3>X-Salada</h3>
-      <p>Pão, hambúrguer, presunto, muçarela, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 23,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Salada%20-%20R%24%2023%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('X-Salada', 23)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">B03</div>
-      <h3>X-Egg</h3>
-      <p>Pão, hambúrguer, ovo, presunto, muçarela, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 28,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Egg%20-%20R%24%2028%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('X-Egg', 28)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">B04</div>
-      <h3>X-Bacon</h3>
-      <p>Pão, hambúrguer, bacon, muçarela, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 27,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Bacon%20-%20R%24%2027%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('X-Bacon', 27)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">B05</div>
-      <h3>X-Calabresa</h3>
-      <p>Pão, hambúrguer, calabresa, muçarela, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 27,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Calabresa%20-%20R%24%2027%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('X-Calabresa', 27)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">B06</div>
-      <h3>X-Frango</h3>
-      <p>Pão, frango desfiado, muçarela, catupiry, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 28,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Frango%20-%20R%24%2028%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('X-Frango', 28)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">B07</div>
-      <h3>X-Tudo</h3>
-      <p>Pão, hambúrguer, salsicha, ovo, calabresa, bacon, presunto, muçarela, catupiry, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 35,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Tudo%20-%20R%24%2035%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('X-Tudo', 35)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">B08</div>
-      <h3>Calabacon</h3>
-      <p>Pão, hambúrguer, calabresa, bacon, muçarela, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 29,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Calabacon%20-%20R%24%2029%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Calabacon', 29)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">B09</div>
-      <h3>Franbacon</h3>
-      <p>Pão, frango desfiado, bacon, muçarela, catupiry, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 30,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Franbacon%20-%20R%24%2030%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Franbacon', 30)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">B10</div>
-      <h3>Calafrango</h3>
-      <p>Pão, frango desfiado, calabresa, muçarela, catupiry, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 30,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Calafrango%20-%20R%24%2030%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Calafrango', 30)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">B11</div>
-      <h3>X-Costela</h3>
-      <p>Pão, costela desfiada, muçarela, batata palha, tomate, cebola, ketchup, maionese temperada, mostarda.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 35,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20X-Costela%20-%20R%24%2035%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('X-Costela', 35)">+ Carrinho</button>
-        </div>
-      </div>
-    </article></div>
-  </section>
-<section class="secao" id="smash-burguer">
-    <div class="secao-titulo"><span>🔥</span><h2>Smash Burguer</h2></div>
-    <div class="grid"><article class="item">
-      <div class="codigo">S01</div>
-      <h3>Smash Salada</h3>
-      <p>Pão brioche selado, 2 smash de 60g cada, queijo cheddar, alface, tomate, picles, cebola, maionese temperada.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 35,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Smash%20Salada%20-%20R%24%2035%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Smash Salada', 35)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">S02</div>
-      <h3>Smash Oklahoma</h3>
-      <p>Pão brioche selado, 2 smash de 60g cada dourado com cebola na chapa, queijo cheddar, picles, maionese temperada.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 35,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Smash%20Oklahoma%20-%20R%24%2035%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Smash Oklahoma', 35)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">S03</div>
-      <h3>Smash Bacon</h3>
-      <p>Pão brioche selado na chapa, 2 smash de 60g cada, bacon, queijo cheddar, maionese temperada.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 38,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Smash%20Bacon%20-%20R%24%2038%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Smash Bacon', 38)">+ Carrinho</button>
-        </div>
-      </div>
-    </article></div>
-  </section>
-<section class="secao" id="fritas">
-    <div class="secao-titulo"><span>🍟</span><h2>Fritas</h2></div>
-    <div class="grid"><article class="item">
-      <div class="codigo">F01</div>
-      <h3>Fritas Simples</h3>
-      <p>200g de batata ondulada.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 14,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Fritas%20Simples%20-%20R%24%2014%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Fritas Simples', 14)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">F02</div>
-      <h3>Fritas Especial</h3>
-      <p>200g de batata ondulada com cheddar e bacon.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 18,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Fritas%20Especial%20-%20R%24%2018%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Fritas Especial', 18)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">F03</div>
-      <h3>Fritas Elite</h3>
-      <p>200g de batata ondulada com cheddar, catupiry e bacon.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 20,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Fritas%20Elite%20-%20R%24%2020%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Fritas Elite', 20)">+ Carrinho</button>
-        </div>
-      </div>
-    </article></div>
-  </section>
-<section class="secao" id="bebidas">
-    <div class="secao-titulo"><span>🥤</span><h2>Bebidas</h2></div>
-    <div class="grid"><article class="item">
-      <div class="codigo">R01</div>
-      <h3>Coca-Cola 350ml</h3>
-      <p>Lata 350ml.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 6,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Coca-Cola%20350ml%20-%20R%24%206%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Coca-Cola 350ml', 6)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">R02</div>
-      <h3>Coca-Cola 2 litros</h3>
-      <p>Garrafa 2 litros.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 16,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Coca-Cola%202%20litros%20-%20R%24%2016%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Coca-Cola 2 litros', 16)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">R03</div>
-      <h3>Guaraná 350ml</h3>
-      <p>Lata 350ml.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 6,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Guaran%C3%A1%20350ml%20-%20R%24%206%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Guaraná 350ml', 6)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">R04</div>
-      <h3>Guaraná Antarctica 2 litros</h3>
-      <p>Garrafa 2 litros.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 16,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Guaran%C3%A1%20Antarctica%202%20litros%20-%20R%24%2016%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Guaraná Antarctica 2 litros', 16)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">R05</div>
-      <h3>Fanta 350ml</h3>
-      <p>Lata 350ml - sabores.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 6,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Fanta%20350ml%20-%20R%24%206%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Fanta 350ml', 6)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">R06</div>
-      <h3>Fanta 2 litros</h3>
-      <p>Garrafa 2 litros - sabores.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 16,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Fanta%202%20litros%20-%20R%24%2016%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Fanta 2 litros', 16)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">R07</div>
-      <h3>Sprite 350ml</h3>
-      <p>Lata 350ml.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 6,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Sprite%20350ml%20-%20R%24%206%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Sprite 350ml', 6)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">R08</div>
-      <h3>Sprite 2 litros</h3>
-      <p>Garrafa 2 litros.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 16,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Sprite%202%20litros%20-%20R%24%2016%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Sprite 2 litros', 16)">+ Carrinho</button>
-        </div>
-      </div>
-    </article>
-<article class="item">
-      <div class="codigo">R09</div>
-      <h3>Vedete 2 litros</h3>
-      <p>Garrafa 2 litros - sabores.</p>
-      <div class="rodape-item">
-        <div class="preco">R$ 11,00</div>
-        <div class="acoes-item">
-          <a class="btn btn-pedir" href="https://wa.me/5515996314700?text=Ol%C3%A1%21%20Quero%20pedir%20Vedete%202%20litros%20-%20R%24%2011%2C00" target="_blank" rel="noopener">Pedir direto</a>
-          <button class="btn btn-add" onclick="adicionarAoCarrinho('Vedete 2 litros', 11)">+ Carrinho</button>
-        </div>
-      </div>
-    </article></div>
-  </section>
-</main>
-
-<button class="carrinho-flutuante" onclick="abrirCarrinho()">🛒 Carrinho (<span id="cartCount">0</span>)</button>
-
-<div class="modal" id="modalCarrinho">
-  <div class="modal-conteudo">
-    <div class="modal-topo"><h3>Seu pedido</h3><button class="fechar" onclick="fecharCarrinho()">×</button></div>
-    <div class="modal-corpo">
-      <div id="listaCarrinho"></div>
-      <div class="resumo">
-        <div class="linha-resumo"><span>Itens</span><strong id="resumoItens">0</strong></div>
-        <div class="linha-resumo"><span>Subtotal</span><strong id="resumoSubtotal">R$ 0,00</strong></div>
-        <div class="linha-resumo"><span>Taxa de entrega</span><strong id="resumoTaxaEntrega">A confirmar</strong></div>
-        <div class="linha-resumo total"><span>Total dos itens</span><strong id="resumoTotal">R$ 0,00</strong></div>
-      </div>
-      <div class="dados-pedido">
-        <div class="campo"><label for="nomeCliente">Seu nome</label><input type="text" id="nomeCliente" placeholder="Digite seu nome"></div>
-        <div class="campo"><label for="tipoEntrega">Tipo do pedido</label><select id="tipoEntrega" onchange="atualizarEntrega()"><option value="retirada">Retirada no local</option><option value="delivery">Delivery</option></select></div>
-        <div class="entrega-box">
-          <div id="camposEntrega" style="display:none;">
-            <div class="campo"><label for="cepEntrega">CEP</label><input type="text" id="cepEntrega" placeholder="00000-000" maxlength="9" autocomplete="postal-code"></div>
-            <div class="campo"><label for="ruaEntrega">Rua</label><input type="text" id="ruaEntrega" placeholder="Nome da rua" autocomplete="address-line1"></div>
-            <div class="campo"><label for="numeroEntrega">Número</label><input type="text" id="numeroEntrega" placeholder="Ex.: 315"></div>
-            <div class="campo"><label for="bairroEntrega">Bairro</label><input type="text" id="bairroEntrega" placeholder="Bairro"></div>
-            <div class="campo"><label for="cidadeEntrega">Cidade</label><input type="text" id="cidadeEntrega" value="Sorocaba" placeholder="Cidade"></div>
-            <div class="campo"><label for="complementoEntrega">Complemento</label><input type="text" id="complementoEntrega" placeholder="Casa, ap, referência..."></div>
+  <header class="ll-header">
+    <div class="container">
+      <nav class="ll-navbar">
+        <a href="#" class="ll-brand" aria-label="Lê Lanches">
+          <img src="img/le-lanches-logo.png" alt="Logo Lê Lanches">
+          <div>
+            <strong>Lê Lanches</strong>
+            <span>Prensados • Smash • Fritas</span>
           </div>
-          <div class="aviso-entrega" id="avisoEntrega">Retirada no local sem taxa de entrega.</div>
+        </a>
+
+        <div class="ll-header-actions">
+          <div id="statusLoja" class="status-loja fechado">
+            🔴 Fechado no momento
+          </div>
+
+          <a
+            class="btn ll-btn-whatsapp d-none d-sm-inline-flex"
+            href="https://wa.me/5515996314700"
+            target="_blank"
+            rel="noopener"
+          >
+            <i class="bi bi-whatsapp"></i>
+            WhatsApp
+          </a>
         </div>
-        <div class="campo"><label for="formaPagamento">Forma de pagamento</label><select id="formaPagamento" onchange="atualizarPagamento()"><option value="">Selecione</option><option value="Dinheiro">Dinheiro</option><option value="Cartão">Cartão</option></select><div id="boxPix" style="display:none"><b id="chavePixTexto"></b></div></div>
-        <div class="campo"><label for="observacoes">Observações do pedido</label><textarea id="observacoes" rows="4" placeholder="Ex.: sem cebola, sem milho, troco para R$ 50..."></textarea></div>
+      </nav>
+
+      <div class="row align-items-center g-4 ll-hero">
+        <div class="col-lg-7">
+          <span class="ll-eyebrow">LÊ LANCHES • SOROCABA</span>
+
+          <h1>
+            Bateu a fome?
+            <span>A gente resolve.</span>
+          </h1>
+
+          <p class="ll-hero-text">
+            Escolha seus favoritos, personalize seu lanche,
+            monte o carrinho e finalize seu pedido pelo WhatsApp.
+          </p>
+
+          <div class="ll-hero-buttons">
+            <a href="#cardapio" class="btn ll-btn-primary">
+              Ver cardápio
+              <i class="bi bi-arrow-down"></i>
+            </a>
+
+            <a
+              href="https://wa.me/5515996314700"
+              target="_blank"
+              rel="noopener"
+              class="btn ll-btn-outline"
+            >
+              <i class="bi bi-whatsapp"></i>
+              Fazer pedido
+            </a>
+          </div>
+        </div>
+
+        <div class="col-lg-5">
+          <div class="ll-info-panel">
+            <div class="ll-info-item">
+              <i class="bi bi-geo-alt"></i>
+              <div>
+                <span>Endereço</span>
+                <strong>R. Firmino Mineli, 315</strong>
+                <small>Jardim Hungares • Sorocaba/SP</small>
+              </div>
+            </div>
+
+            <div class="ll-info-item">
+              <i class="bi bi-clock"></i>
+              <div>
+                <span>Funcionamento</span>
+                <strong>Quarta a domingo</strong>
+                <small>19:00 às 23:00</small>
+              </div>
+            </div>
+
+            <div class="ll-info-item">
+              <i class="bi bi-telephone"></i>
+              <div>
+                <span>Pedidos</span>
+                <strong>(15) 99631-4700</strong>
+                <small>Retirada ou delivery</small>
+              </div>
+            </div>
+
+            <div class="ll-info-item">
+              <i class="bi bi-instagram"></i>
+              <div>
+                <span>Instagram</span>
+                <strong>@lelan_ches2025</strong>
+                <small>Siga o Lê Lanches</small>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="acoes-final"><button class="btn btn-limpar" onclick="limparCarrinho()">Limpar carrinho</button><button class="btn btn-finalizar" id="btnFinalizarWhatsapp" onclick="finalizarPedido(true)">Finalizar no WhatsApp</button><button class="btn btn-finalizar ghost" id="btnFinalizar" onclick="finalizarPedido(false)">Salvar pedido</button></div>
-      <div class="obs">Para delivery, a taxa deve ser confirmada com a loja pelo WhatsApp.</div>
+    </div>
+  </header>
+
+  <div class="ll-category-bar">
+    <div class="container">
+      <div class="ll-category-scroll">
+        <a href="#hot-dog">🌭 Hot Dog</a>
+        <a href="#burguer">🍔 Burguer</a>
+        <a href="#smash-burguer">🔥 Smash</a>
+        <a href="#fritas">🍟 Fritas</a>
+        <a href="#bebidas">🥤 Bebidas</a>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="modal" id="modalOpcoesProduto" style="display:none;">
-  <div class="modal-conteudo"><div class="modal-topo"><h3 id="tituloOpcoesProduto">Personalize seu item</h3><button class="fechar" onclick="fecharOpcoesProduto()">×</button></div><div class="modal-corpo"><div id="descricaoOpcoesProduto"></div><div id="listaOpcoesProduto"></div><div class="acoes-final"><button class="btn btn-limpar" onclick="fecharOpcoesProduto()">Cancelar</button><button class="btn btn-finalizar" onclick="confirmarOpcoesProduto()">Adicionar ao carrinho</button></div></div></div>
-</div>
+  <main id="cardapio" class="ll-main">
+    <div class="container">
 
-<footer>
-  <img src="img/le-lanches-logo.png" alt="Lê Lanches">
-  <p><strong>Lê Lanches</strong> • Prensados • Smash • Fritas</p>
-  <p>Quarta a domingo, 19h às 23h • (15) 99631-4700</p>
-  <p>R. Firmino Mineli, 315 - Jardim Hungares, Sorocaba - SP</p>
-  <p class="dev">Desenvolvido por <strong>SMATech</strong> – Criação de Sites e Sistemas personalizados • <a href="https://wa.me/5515998363325?text=Olá,%20quero%20um%20orçamento" target="_blank">(15) 99836-3325</a></p>
-</footer>
+      <section class="ll-search-box">
+        <div>
+          <span class="ll-section-kicker">FAÇA SEU PEDIDO</span>
+          <h2>O que você quer comer hoje?</h2>
+          <p>
+            Busque pelo nome, código ou ingrediente.
+          </p>
+        </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/config.js?v=20260818-lelanches"></script>
-<script src="js/app.js?v=20260818-lelanches"></script>
+        <div class="ll-search-control">
+          <i class="bi bi-search"></i>
+          <input
+            id="buscaCardapio"
+            type="search"
+            placeholder="Ex.: X-Bacon, HD03, cheddar..."
+            autocomplete="off"
+            oninput="filtrarCardapio()"
+          >
+          <button
+            id="btnLimparBusca"
+            type="button"
+            onclick="limparBuscaCardapio()"
+            aria-label="Limpar busca"
+          >
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+      </section>
+
+      <div id="mensagemBuscaVazia" class="ll-empty-search d-none">
+        <div>🔎</div>
+        <strong>Nenhum item encontrado</strong>
+        <span>Tente pesquisar outro nome ou ingrediente.</span>
+      </div>
+
+      
+    <section class="ll-section" id="hot-dog">
+      <div class="ll-section-head">
+        <div class="ll-section-icon" aria-hidden="true">🌭</div>
+        <div>
+          <span class="ll-section-kicker">CARDÁPIO</span>
+          <h2>Hot Dog</h2>
+          <p>Prensados caprichados, do simples ao especial.</p>
+        </div>
+      </div>
+
+      <div class="row g-3 g-lg-4">
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="hd01 simples pão, salsicha, batata palha, purê de batata, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">HD01</span>
+              <span class="ll-product-category">🌭 Hot Dog</span>
+            </div>
+
+            <h3 class="ll-product-name">Simples</h3>
+            <p class="ll-product-description">Pão, salsicha, batata palha, purê de batata, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 17,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('Simples', 17)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="hd02 duplo pão, 2 salsichas, batata palha, purê de batata, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">HD02</span>
+              <span class="ll-product-category">🌭 Hot Dog</span>
+            </div>
+
+            <h3 class="ll-product-name">Duplo</h3>
+            <p class="ll-product-description">Pão, 2 salsichas, batata palha, purê de batata, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 19,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('Duplo', 19)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="hd03 especial pão, 2 salsichas, calabresa, bacon, muçarela, catupiry ou cheddar, batata palha, purê de batata, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">HD03</span>
+              <span class="ll-product-category">🌭 Hot Dog</span>
+            </div>
+
+            <h3 class="ll-product-name">Especial</h3>
+            <p class="ll-product-description">Pão, 2 salsichas, calabresa, bacon, muçarela, catupiry ou cheddar, batata palha, purê de batata, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 26,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('Especial', 26)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+      </div>
+    </section>
+    
+
+    <section class="ll-section" id="burguer">
+      <div class="ll-section-head">
+        <div class="ll-section-icon" aria-hidden="true">🍔</div>
+        <div>
+          <span class="ll-section-kicker">CARDÁPIO</span>
+          <h2>Burguer</h2>
+          <p>Clássicos da casa, bem recheados e preparados na chapa.</p>
+        </div>
+      </div>
+
+      <div class="row g-3 g-lg-4">
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="b01 x-burguer pão, hambúrguer, muçarela, catupiry, batata palha, tomate, cebola, ketchup, maionese temperada, mostarda.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">B01</span>
+              <span class="ll-product-category">🍔 Burguer</span>
+            </div>
+
+            <h3 class="ll-product-name">X-Burguer</h3>
+            <p class="ll-product-description">Pão, hambúrguer, muçarela, catupiry, batata palha, tomate, cebola, ketchup, maionese temperada, mostarda.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 22,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('X-Burguer', 22)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="b02 x-salada pão, hambúrguer, presunto, muçarela, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">B02</span>
+              <span class="ll-product-category">🍔 Burguer</span>
+            </div>
+
+            <h3 class="ll-product-name">X-Salada</h3>
+            <p class="ll-product-description">Pão, hambúrguer, presunto, muçarela, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 23,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('X-Salada', 23)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="b03 x-egg pão, hambúrguer, ovo, presunto, muçarela, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">B03</span>
+              <span class="ll-product-category">🍔 Burguer</span>
+            </div>
+
+            <h3 class="ll-product-name">X-Egg</h3>
+            <p class="ll-product-description">Pão, hambúrguer, ovo, presunto, muçarela, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 28,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('X-Egg', 28)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="b04 x-bacon pão, hambúrguer, bacon, muçarela, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">B04</span>
+              <span class="ll-product-category">🍔 Burguer</span>
+            </div>
+
+            <h3 class="ll-product-name">X-Bacon</h3>
+            <p class="ll-product-description">Pão, hambúrguer, bacon, muçarela, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 27,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('X-Bacon', 27)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="b05 x-calabresa pão, hambúrguer, calabresa, muçarela, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">B05</span>
+              <span class="ll-product-category">🍔 Burguer</span>
+            </div>
+
+            <h3 class="ll-product-name">X-Calabresa</h3>
+            <p class="ll-product-description">Pão, hambúrguer, calabresa, muçarela, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 27,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('X-Calabresa', 27)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="b06 x-frango pão, frango desfiado, muçarela, catupiry, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">B06</span>
+              <span class="ll-product-category">🍔 Burguer</span>
+            </div>
+
+            <h3 class="ll-product-name">X-Frango</h3>
+            <p class="ll-product-description">Pão, frango desfiado, muçarela, catupiry, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 28,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('X-Frango', 28)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="b07 x-tudo pão, hambúrguer, salsicha, ovo, calabresa, bacon, presunto, muçarela, catupiry, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">B07</span>
+              <span class="ll-product-category">🍔 Burguer</span>
+            </div>
+
+            <h3 class="ll-product-name">X-Tudo</h3>
+            <p class="ll-product-description">Pão, hambúrguer, salsicha, ovo, calabresa, bacon, presunto, muçarela, catupiry, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 35,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('X-Tudo', 35)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="b08 calabacon pão, hambúrguer, calabresa, bacon, muçarela, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">B08</span>
+              <span class="ll-product-category">🍔 Burguer</span>
+            </div>
+
+            <h3 class="ll-product-name">Calabacon</h3>
+            <p class="ll-product-description">Pão, hambúrguer, calabresa, bacon, muçarela, batata palha, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 29,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('Calabacon', 29)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="b09 franbacon pão, frango desfiado, bacon, muçarela, catupiry, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">B09</span>
+              <span class="ll-product-category">🍔 Burguer</span>
+            </div>
+
+            <h3 class="ll-product-name">Franbacon</h3>
+            <p class="ll-product-description">Pão, frango desfiado, bacon, muçarela, catupiry, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 30,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('Franbacon', 30)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="b10 calafrango pão, frango desfiado, calabresa, muçarela, catupiry, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">B10</span>
+              <span class="ll-product-category">🍔 Burguer</span>
+            </div>
+
+            <h3 class="ll-product-name">Calafrango</h3>
+            <p class="ll-product-description">Pão, frango desfiado, calabresa, muçarela, catupiry, tomate, cebola, alface, milho, ketchup, maionese temperada, mostarda.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 30,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('Calafrango', 30)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="b11 x-costela pão, costela desfiada, muçarela, batata palha, tomate, cebola, ketchup, maionese temperada, mostarda.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">B11</span>
+              <span class="ll-product-category">🍔 Burguer</span>
+            </div>
+
+            <h3 class="ll-product-name">X-Costela</h3>
+            <p class="ll-product-description">Pão, costela desfiada, muçarela, batata palha, tomate, cebola, ketchup, maionese temperada, mostarda.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 35,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('X-Costela', 35)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+      </div>
+    </section>
+    
+
+    <section class="ll-section" id="smash-burguer">
+      <div class="ll-section-head">
+        <div class="ll-section-icon" aria-hidden="true">🔥</div>
+        <div>
+          <span class="ll-section-kicker">CARDÁPIO</span>
+          <h2>Smash Burguer</h2>
+          <p>Smash no pão brioche, com muito sabor.</p>
+        </div>
+      </div>
+
+      <div class="row g-3 g-lg-4">
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="s01 smash salada pão brioche selado, 2 smash de 60g cada, queijo cheddar, alface, tomate, picles, cebola, maionese temperada.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">S01</span>
+              <span class="ll-product-category">🔥 Smash Burguer</span>
+            </div>
+
+            <h3 class="ll-product-name">Smash Salada</h3>
+            <p class="ll-product-description">Pão brioche selado, 2 smash de 60g cada, queijo cheddar, alface, tomate, picles, cebola, maionese temperada.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 35,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('Smash Salada', 35)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="s02 smash oklahoma pão brioche selado, 2 smash de 60g cada dourado com cebola na chapa, queijo cheddar, picles, maionese temperada.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">S02</span>
+              <span class="ll-product-category">🔥 Smash Burguer</span>
+            </div>
+
+            <h3 class="ll-product-name">Smash Oklahoma</h3>
+            <p class="ll-product-description">Pão brioche selado, 2 smash de 60g cada dourado com cebola na chapa, queijo cheddar, picles, maionese temperada.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 35,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('Smash Oklahoma', 35)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="s03 smash bacon pão brioche selado na chapa, 2 smash de 60g cada, bacon, queijo cheddar, maionese temperada.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">S03</span>
+              <span class="ll-product-category">🔥 Smash Burguer</span>
+            </div>
+
+            <h3 class="ll-product-name">Smash Bacon</h3>
+            <p class="ll-product-description">Pão brioche selado na chapa, 2 smash de 60g cada, bacon, queijo cheddar, maionese temperada.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 38,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('Smash Bacon', 38)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+      </div>
+    </section>
+    
+
+    <section class="ll-section" id="fritas">
+      <div class="ll-section-head">
+        <div class="ll-section-icon" aria-hidden="true">🍟</div>
+        <div>
+          <span class="ll-section-kicker">CARDÁPIO</span>
+          <h2>Fritas</h2>
+          <p>Porções crocantes para acompanhar seu pedido.</p>
+        </div>
+      </div>
+
+      <div class="row g-3 g-lg-4">
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="f01 fritas simples 200g de batata ondulada.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">F01</span>
+              <span class="ll-product-category">🍟 Fritas</span>
+            </div>
+
+            <h3 class="ll-product-name">Fritas Simples</h3>
+            <p class="ll-product-description">200g de batata ondulada.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 14,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('Fritas Simples', 14)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="f02 fritas especial 200g de batata ondulada com cheddar e bacon.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">F02</span>
+              <span class="ll-product-category">🍟 Fritas</span>
+            </div>
+
+            <h3 class="ll-product-name">Fritas Especial</h3>
+            <p class="ll-product-description">200g de batata ondulada com cheddar e bacon.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 18,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('Fritas Especial', 18)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="f03 fritas elite 200g de batata ondulada com cheddar, catupiry e bacon.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">F03</span>
+              <span class="ll-product-category">🍟 Fritas</span>
+            </div>
+
+            <h3 class="ll-product-name">Fritas Elite</h3>
+            <p class="ll-product-description">200g de batata ondulada com cheddar, catupiry e bacon.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 20,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('Fritas Elite', 20)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+      </div>
+    </section>
+    
+
+    <section class="ll-section" id="bebidas">
+      <div class="ll-section-head">
+        <div class="ll-section-icon" aria-hidden="true">🥤</div>
+        <div>
+          <span class="ll-section-kicker">CARDÁPIO</span>
+          <h2>Bebidas</h2>
+          <p>Refrigerantes para completar seu lanche.</p>
+        </div>
+      </div>
+
+      <div class="row g-3 g-lg-4">
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="r01 coca-cola 350ml lata 350ml.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">R01</span>
+              <span class="ll-product-category">🥤 Bebidas</span>
+            </div>
+
+            <h3 class="ll-product-name">Coca-Cola 350ml</h3>
+            <p class="ll-product-description">Lata 350ml.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 6,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('Coca-Cola 350ml', 6)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="r02 coca-cola 2 litros garrafa 2 litros.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">R02</span>
+              <span class="ll-product-category">🥤 Bebidas</span>
+            </div>
+
+            <h3 class="ll-product-name">Coca-Cola 2 litros</h3>
+            <p class="ll-product-description">Garrafa 2 litros.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 16,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('Coca-Cola 2 litros', 16)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="r03 guaraná 350ml lata 350ml.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">R03</span>
+              <span class="ll-product-category">🥤 Bebidas</span>
+            </div>
+
+            <h3 class="ll-product-name">Guaraná 350ml</h3>
+            <p class="ll-product-description">Lata 350ml.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 6,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('Guaraná 350ml', 6)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="r04 guaraná antarctica 2 litros garrafa 2 litros.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">R04</span>
+              <span class="ll-product-category">🥤 Bebidas</span>
+            </div>
+
+            <h3 class="ll-product-name">Guaraná Antarctica 2 litros</h3>
+            <p class="ll-product-description">Garrafa 2 litros.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 16,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('Guaraná Antarctica 2 litros', 16)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="r05 fanta 350ml lata 350ml - sabores.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">R05</span>
+              <span class="ll-product-category">🥤 Bebidas</span>
+            </div>
+
+            <h3 class="ll-product-name">Fanta 350ml</h3>
+            <p class="ll-product-description">Lata 350ml - sabores.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 6,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('Fanta 350ml', 6)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="r06 fanta 2 litros garrafa 2 litros - sabores.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">R06</span>
+              <span class="ll-product-category">🥤 Bebidas</span>
+            </div>
+
+            <h3 class="ll-product-name">Fanta 2 litros</h3>
+            <p class="ll-product-description">Garrafa 2 litros - sabores.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 16,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('Fanta 2 litros', 16)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="r07 sprite 350ml lata 350ml.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">R07</span>
+              <span class="ll-product-category">🥤 Bebidas</span>
+            </div>
+
+            <h3 class="ll-product-name">Sprite 350ml</h3>
+            <p class="ll-product-description">Lata 350ml.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 6,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('Sprite 350ml', 6)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="r08 sprite 2 litros garrafa 2 litros.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">R08</span>
+              <span class="ll-product-category">🥤 Bebidas</span>
+            </div>
+
+            <h3 class="ll-product-name">Sprite 2 litros</h3>
+            <p class="ll-product-description">Garrafa 2 litros.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 16,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('Sprite 2 litros', 16)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="r09 vedete 2 litros garrafa 2 litros - sabores.">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">R09</span>
+              <span class="ll-product-category">🥤 Bebidas</span>
+            </div>
+
+            <h3 class="ll-product-name">Vedete 2 litros</h3>
+            <p class="ll-product-description">Garrafa 2 litros - sabores.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 11,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="adicionarAoCarrinho('Vedete 2 litros', 11)"
+              >
+                <span>＋</span> Adicionar
+              </button>
+            </div>
+          </article>
+        </div>
+        
+      </div>
+    </section>
+    
+    </div>
+  </main>
+
+  <button
+    class="ll-floating-cart"
+    type="button"
+    onclick="abrirCarrinho()"
+    aria-label="Abrir carrinho"
+  >
+    <span class="ll-floating-cart-icon">
+      <i class="bi bi-bag-fill"></i>
+    </span>
+    <span>
+      <small>Seu pedido</small>
+      <strong>Carrinho</strong>
+    </span>
+    <span class="ll-cart-count" id="cartCount">0</span>
+  </button>
+
+  <div class="modal" id="modalCarrinho">
+    <div class="modal-conteudo">
+      <div class="modal-topo">
+        <div>
+          <span class="ll-modal-kicker">LÊ LANCHES</span>
+          <h3>Seu pedido</h3>
+        </div>
+
+        <button class="fechar" type="button" onclick="fecharCarrinho()">×</button>
+      </div>
+
+      <div class="modal-corpo">
+        <div id="listaCarrinho"></div>
+
+        <div class="resumo">
+          <div class="linha-resumo">
+            <span>Itens</span>
+            <strong id="resumoItens">0</strong>
+          </div>
+
+          <div class="linha-resumo">
+            <span>Subtotal</span>
+            <strong id="resumoSubtotal">R$ 0,00</strong>
+          </div>
+
+          <div class="linha-resumo">
+            <span>Taxa de entrega</span>
+            <strong id="resumoTaxaEntrega">A confirmar</strong>
+          </div>
+
+          <div class="linha-resumo total">
+            <span>Total dos itens</span>
+            <strong id="resumoTotal">R$ 0,00</strong>
+          </div>
+        </div>
+
+        <div class="dados-pedido">
+          <div class="campo">
+            <label for="nomeCliente">Seu nome</label>
+            <input
+              type="text"
+              id="nomeCliente"
+              placeholder="Digite seu nome"
+              autocomplete="name"
+            >
+          </div>
+
+          <div class="campo">
+            <label for="tipoEntrega">Tipo do pedido</label>
+            <select id="tipoEntrega" onchange="atualizarEntrega()">
+              <option value="retirada">Retirada no local</option>
+              <option value="delivery">Delivery</option>
+            </select>
+          </div>
+
+          <div class="entrega-box">
+            <div id="camposEntrega" style="display:none;">
+              <div class="campo">
+                <label for="cepEntrega">CEP</label>
+                <input
+                  type="text"
+                  id="cepEntrega"
+                  placeholder="00000-000"
+                  maxlength="9"
+                  autocomplete="postal-code"
+                >
+              </div>
+
+              <div class="campo">
+                <label for="ruaEntrega">Rua</label>
+                <input
+                  type="text"
+                  id="ruaEntrega"
+                  placeholder="Nome da rua"
+                  autocomplete="address-line1"
+                >
+              </div>
+
+              <div class="campo">
+                <label for="numeroEntrega">Número</label>
+                <input
+                  type="text"
+                  id="numeroEntrega"
+                  placeholder="Ex.: 315"
+                >
+              </div>
+
+              <div class="campo">
+                <label for="bairroEntrega">Bairro</label>
+                <input
+                  type="text"
+                  id="bairroEntrega"
+                  placeholder="Bairro"
+                >
+              </div>
+
+              <div class="campo">
+                <label for="cidadeEntrega">Cidade</label>
+                <input
+                  type="text"
+                  id="cidadeEntrega"
+                  value="Sorocaba"
+                  placeholder="Cidade"
+                >
+              </div>
+
+              <div class="campo">
+                <label for="complementoEntrega">Complemento</label>
+                <input
+                  type="text"
+                  id="complementoEntrega"
+                  placeholder="Casa, ap, referência..."
+                >
+              </div>
+            </div>
+
+            <div class="aviso-entrega" id="avisoEntrega">
+              Retirada no local sem taxa de entrega.
+            </div>
+          </div>
+
+          <div class="campo">
+            <label for="formaPagamento">Forma de pagamento</label>
+            <select id="formaPagamento" onchange="atualizarPagamento()">
+              <option value="">Selecione</option>
+              <option value="Dinheiro">Dinheiro</option>
+              <option value="Cartão">Cartão</option>
+            </select>
+
+            <div id="boxPix" style="display:none">
+              <b id="chavePixTexto"></b>
+            </div>
+          </div>
+
+          <div class="campo">
+            <label for="observacoes">Observações do pedido</label>
+            <textarea
+              id="observacoes"
+              rows="4"
+              placeholder="Ex.: sem cebola, sem milho, troco para R$ 50..."
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="acoes-final">
+          <button
+            class="btn btn-limpar"
+            type="button"
+            onclick="limparCarrinho()"
+          >
+            Limpar carrinho
+          </button>
+
+          <button
+            class="btn btn-finalizar"
+            id="btnFinalizarWhatsapp"
+            type="button"
+            onclick="finalizarPedido(true)"
+          >
+            <i class="bi bi-whatsapp"></i>
+            Finalizar no WhatsApp
+          </button>
+
+          <button
+            class="btn btn-finalizar ghost"
+            id="btnFinalizar"
+            type="button"
+            onclick="finalizarPedido(false)"
+          >
+            Salvar pedido
+          </button>
+        </div>
+
+        <div class="obs">
+          Para delivery, a taxa deve ser confirmada com a loja pelo WhatsApp.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalOpcoesProduto" style="display:none;">
+    <div class="modal-conteudo">
+      <div class="modal-topo">
+        <div>
+          <span class="ll-modal-kicker">PERSONALIZE</span>
+          <h3 id="tituloOpcoesProduto">Personalize seu item</h3>
+        </div>
+
+        <button
+          class="fechar"
+          type="button"
+          onclick="fecharOpcoesProduto()"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="modal-corpo">
+        <div id="descricaoOpcoesProduto"></div>
+        <div id="listaOpcoesProduto"></div>
+
+        <div class="acoes-final">
+          <button
+            class="btn btn-limpar"
+            type="button"
+            onclick="fecharOpcoesProduto()"
+          >
+            Cancelar
+          </button>
+
+          <button
+            class="btn btn-finalizar"
+            type="button"
+            onclick="confirmarOpcoesProduto()"
+          >
+            Adicionar ao carrinho
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="llToast" class="ll-toast" role="status" aria-live="polite">
+    <i class="bi bi-check-circle-fill"></i>
+    <span id="llToastTexto">Item adicionado ao carrinho.</span>
+  </div>
+
+  <footer class="ll-footer">
+    <div class="container">
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-5">
+          <div class="ll-footer-brand">
+            <img src="img/le-lanches-logo.png" alt="Lê Lanches">
+            <div>
+              <strong>Lê Lanches</strong>
+              <span>Prensados • Smash • Fritas</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <p>
+            <i class="bi bi-clock"></i>
+            Quarta a domingo • 19h às 23h
+          </p>
+
+          <p>
+            <i class="bi bi-geo-alt"></i>
+            R. Firmino Mineli, 315 • Sorocaba/SP
+          </p>
+        </div>
+
+        <div class="col-lg-3">
+          <a
+            class="ll-footer-whatsapp"
+            href="https://wa.me/5515996314700"
+            target="_blank"
+            rel="noopener"
+          >
+            <i class="bi bi-whatsapp"></i>
+            (15) 99631-4700
+          </a>
+        </div>
+      </div>
+
+      <div class="ll-footer-bottom">
+        <span>© 2026 Lê Lanches</span>
+
+        <span>
+          Desenvolvido por <strong>SMATech</strong> •
+          <a
+            href="https://wa.me/5515998363325?text=Olá,%20quero%20um%20orçamento"
+            target="_blank"
+            rel="noopener"
+          >
+            (15) 99836-3325
+          </a>
+        </span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js?v=20260819-bootstrap"></script>
+  <script src="js/app.js?v=20260819-bootstrap"></script>
 </body>
 </html>
