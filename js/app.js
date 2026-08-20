@@ -159,7 +159,9 @@ const CODIGO_POR_NOME_PRODUTO = {
 
   'fritas simples': 'F01',
 
-  'fritas com cheddar e bacon': 'F02'
+  'fritas especial': 'F02',
+
+  'fritas elite': 'F03'
 
 };
 
