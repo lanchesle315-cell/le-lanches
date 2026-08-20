@@ -1,43 +1,93 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Painel Admin - Lê Lanches</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
-  <link rel="icon" href="img/le-lanches-logo.png">
-  <link rel="stylesheet" href="css/admin.css">
+  <title>
+    Painel Admin - Lê Lanches
+  </title>
+
+  <link
+    rel="icon"
+    href="img/le-lanches-logo.png"
+  >
+
+  <link
+    rel="stylesheet"
+    href="css/admin.css"
+  >
+
 
   <script>
-    if (localStorage.getItem("le_lanches_admin_logado") !== "true") {
-      window.location.href = "login.html";
+
+    if (
+      localStorage.getItem(
+        "le_lanches_admin_logado"
+      ) !== "true"
+    ) {
+
+      window.location.href =
+        "login.html";
+
     }
+
   </script>
+
 </head>
+
 
 <body>
 
+
+  <!-- =====================================================
+       TOPO
+  ====================================================== -->
+
   <header class="topbar">
+
     <div class="header-container">
 
+
       <div class="logo-box">
-        <img src="img/le-lanches-logo.png" alt="Logo Lê Lanches">
+
+        <img
+          src="img/le-lanches-logo.png"
+          alt="Logo Lê Lanches"
+        >
+
 
         <div>
-          <h1>Painel Admin</h1>
-          <p>Controle de pedidos em tempo real</p>
+
+          <h1>
+            Painel Admin
+          </h1>
+
+          <p>
+            Controle de pedidos em tempo real
+          </p>
+
         </div>
+
       </div>
 
 
+
       <div class="header-right">
+
 
         <div class="store-status-wrap">
 
           <span class="store-label">
             Loja
           </span>
+
 
           <button
             id="btnToggleLoja"
@@ -46,6 +96,7 @@
           >
             Aberta
           </button>
+
 
           <button
             id="btnModoAutomatico"
@@ -58,7 +109,9 @@
         </div>
 
 
+
         <div class="top-actions">
+
 
           <button
             class="btn btn-yellow"
@@ -69,7 +122,6 @@
           </button>
 
 
-          <!-- VENDA EXTERNA -->
           <button
             class="btn btn-green"
             id="btnVendaExterna"
@@ -79,7 +131,6 @@
           </button>
 
 
-          <!-- PAINEL DE ITENS -->
           <button
             class="btn btn-dark"
             id="btnPainelItens"
@@ -90,7 +141,6 @@
           </button>
 
 
-          <!-- PAINEL MASTER -->
           <button
             class="btn btn-dark"
             id="btnPainelMaster"
@@ -114,18 +164,26 @@
       </div>
 
     </div>
+
   </header>
 
 
+
+  <!-- =====================================================
+       CONTEÚDO
+  ====================================================== -->
+
   <main class="container">
 
+
     <!-- =====================================================
-         CABEÇALHO DA PÁGINA
+         CABEÇALHO + RESUMO OPERACIONAL
     ====================================================== -->
 
     <section class="page-head">
 
-      <div>
+
+      <div class="page-head-title">
 
         <h2>
           Pedidos
@@ -138,105 +196,83 @@
       </div>
 
 
-      <div class="clock-box">
 
-        <span>
-          Agora
-        </span>
+      <div class="page-head-summary">
 
-        <strong id="clockAtual">
-          --:--:--
-        </strong>
+
+        <div class="header-stat-box">
+
+          <span>
+            Pedidos
+          </span>
+
+          <strong id="totalPedidos">
+            0
+          </strong>
+
+        </div>
+
+
+
+        <div class="header-stat-box">
+
+          <span>
+            Taxas entrega
+          </span>
+
+          <strong id="totalTaxasEntrega">
+            R$ 0,00
+          </strong>
+
+        </div>
+
+
+
+        <div class="header-stat-box">
+
+          <span>
+            Delivery
+          </span>
+
+          <strong id="totalDelivery">
+            0
+          </strong>
+
+        </div>
+
+
+
+        <div class="header-stat-box">
+
+          <span>
+            Retirada
+          </span>
+
+          <strong id="totalRetirada">
+            0
+          </strong>
+
+        </div>
+
+
+
+        <div class="clock-box">
+
+          <span>
+            Agora
+          </span>
+
+          <strong id="clockAtual">
+            --:--:--
+          </strong>
+
+        </div>
+
 
       </div>
 
     </section>
 
-
-    <!-- =====================================================
-         ESTATÍSTICAS
-    ====================================================== -->
-
-    <section class="stats-grid">
-
-      <div class="stat-card">
-
-        <p>
-          Total de pedidos
-        </p>
-
-        <strong id="totalPedidos">
-          0
-        </strong>
-
-      </div>
-
-
-      <div class="stat-card">
-
-        <p>
-          Faturamento do dia
-        </p>
-
-        <strong id="faturamentoDia">
-          R$ 0,00
-        </strong>
-
-      </div>
-
-
-      <div class="stat-card">
-
-        <p>
-          Total taxas entrega
-        </p>
-
-        <strong id="totalTaxasEntrega">
-          R$ 0,00
-        </strong>
-
-      </div>
-
-
-      <div class="stat-card">
-
-        <p>
-          Ticket médio
-        </p>
-
-        <strong id="ticketMedio">
-          R$ 0,00
-        </strong>
-
-      </div>
-
-
-      <div class="stat-card">
-
-        <p>
-          Delivery
-        </p>
-
-        <strong id="totalDelivery">
-          0
-        </strong>
-
-      </div>
-
-
-      <div class="stat-card">
-
-        <p>
-          Retirada
-        </p>
-
-        <strong id="totalRetirada">
-          0
-        </strong>
-
-      </div>
-
-    </section>
 
 
     <!-- =====================================================
@@ -246,6 +282,7 @@
     <section class="filters-card">
 
       <div class="filters-grid">
+
 
         <input
           type="text"
@@ -317,9 +354,11 @@
 
         </select>
 
+
       </div>
 
     </section>
+
 
 
     <!-- =====================================================
@@ -329,17 +368,21 @@
     <section class="board">
 
 
-      <!-- NOVOS PEDIDOS -->
+      <!-- ===================================================
+           NOVOS PEDIDOS
+      ==================================================== -->
 
       <div
         class="board-column"
         data-coluna="pendente"
       >
 
+
         <div
           class="column-head pendente column-toggle"
           onclick="toggleColuna('pendente')"
         >
+
 
           <div class="column-head-left">
 
@@ -363,6 +406,7 @@
             −
           </button>
 
+
         </div>
 
 
@@ -371,21 +415,26 @@
           class="column-body"
         ></div>
 
+
       </div>
 
 
 
-      <!-- EM PREPARO -->
+      <!-- ===================================================
+           EM PREPARO
+      ==================================================== -->
 
       <div
         class="board-column"
         data-coluna="preparo"
       >
 
+
         <div
           class="column-head preparo column-toggle"
           onclick="toggleColuna('preparo')"
         >
+
 
           <div class="column-head-left">
 
@@ -409,6 +458,7 @@
             −
           </button>
 
+
         </div>
 
 
@@ -417,21 +467,26 @@
           class="column-body"
         ></div>
 
+
       </div>
 
 
 
-      <!-- EM ENTREGA -->
+      <!-- ===================================================
+           EM ENTREGA
+      ==================================================== -->
 
       <div
         class="board-column"
         data-coluna="entrega"
       >
 
+
         <div
           class="column-head entrega column-toggle"
           onclick="toggleColuna('entrega')"
         >
+
 
           <div class="column-head-left">
 
@@ -455,6 +510,7 @@
             −
           </button>
 
+
         </div>
 
 
@@ -463,21 +519,26 @@
           class="column-body"
         ></div>
 
+
       </div>
 
 
 
-      <!-- FINALIZADOS -->
+      <!-- ===================================================
+           FINALIZADOS
+      ==================================================== -->
 
       <div
         class="board-column"
         data-coluna="finalizado"
       >
 
+
         <div
           class="column-head finalizado column-toggle"
           onclick="toggleColuna('finalizado')"
         >
+
 
           <div class="column-head-left">
 
@@ -501,6 +562,7 @@
             −
           </button>
 
+
         </div>
 
 
@@ -509,9 +571,12 @@
           class="column-body"
         ></div>
 
+
       </div>
 
+
     </section>
+
 
 
     <!-- =====================================================
@@ -529,6 +594,7 @@
         line-height: 1.6;
       "
     >
+
 
       <p style="margin: 2px 0 0;">
         Lê Lanches © 2026
@@ -561,6 +627,7 @@
         "
       >
 
+
         <a
           href="https://wa.me/5515998363325?text=Olá,%20quero%20um%20orçamento"
           target="_blank"
@@ -578,7 +645,9 @@
 
       </p>
 
+
     </footer>
+
 
   </main>
 
@@ -593,9 +662,12 @@
     class="modal-overlay hidden"
   >
 
+
     <div class="modal-box modal-box-large modal-venda-externa">
 
+
       <div class="modal-header">
+
 
         <div>
 
@@ -620,16 +692,20 @@
           ×
         </button>
 
+
       </div>
 
 
+
       <div class="modal-content modal-content-edit">
+
 
         <!-- =================================================
              ORIGEM DA VENDA
         ================================================== -->
 
         <section class="edit-section">
+
 
           <div class="edit-section-title">
 
@@ -646,11 +722,13 @@
 
           <div class="external-form-grid">
 
+
             <div class="external-field">
 
               <label for="vendaExternaOrigem">
                 Origem
               </label>
+
 
               <select id="vendaExternaOrigem">
 
@@ -662,10 +740,11 @@
                   99
                 </option>
 
-
               </select>
 
+
             </div>
+
 
 
             <div class="external-field">
@@ -674,6 +753,7 @@
                 Referência externa
               </label>
 
+
               <input
                 id="vendaExternaReferencia"
                 type="text"
@@ -681,13 +761,16 @@
                 autocomplete="off"
               >
 
+
               <small>
-                Opcional para Balcão e Telefone.
+                Informe o número do pedido na plataforma.
               </small>
 
             </div>
 
+
           </div>
+
 
         </section>
 
@@ -698,6 +781,7 @@
         ================================================== -->
 
         <section class="edit-section">
+
 
           <div class="edit-section-title">
 
@@ -714,20 +798,23 @@
 
           <div class="external-form-grid">
 
+
             <div class="external-field">
 
               <label for="vendaExternaCliente">
                 Cliente
               </label>
 
+
               <input
                 id="vendaExternaCliente"
                 type="text"
-                placeholder="Ex.: Cliente iFood"
+                placeholder="Digite o nome do cliente"
                 autocomplete="off"
               >
 
             </div>
+
 
 
             <div class="external-field">
@@ -735,6 +822,7 @@
               <label for="vendaExternaTipo">
                 Tipo
               </label>
+
 
               <select id="vendaExternaTipo">
 
@@ -750,7 +838,9 @@
 
             </div>
 
+
           </div>
+
 
         </section>
 
@@ -761,6 +851,7 @@
         ================================================== -->
 
         <section class="edit-section">
+
 
           <div class="edit-section-title">
 
@@ -778,11 +869,13 @@
 
           <div class="external-product-search">
 
+
             <div class="external-field">
 
               <label for="vendaExternaBuscaProduto">
                 Buscar produto
               </label>
+
 
               <input
                 id="vendaExternaBuscaProduto"
@@ -792,6 +885,7 @@
               >
 
             </div>
+
 
           </div>
 
@@ -807,6 +901,7 @@
 
           </div>
 
+
         </section>
 
 
@@ -816,6 +911,7 @@
         ================================================== -->
 
         <section class="edit-section">
+
 
           <div class="edit-section-title">
 
@@ -841,15 +937,17 @@
 
           </div>
 
+
         </section>
 
 
 
         <!-- =================================================
-             VALORES DA PLATAFORMA
+             VALORES
         ================================================== -->
 
         <section class="edit-section">
+
 
           <div class="edit-section-title">
 
@@ -866,11 +964,13 @@
 
           <div class="external-form-grid">
 
+
             <div class="external-field">
 
               <label for="vendaExternaTaxaPlataforma">
                 Taxa / comissão da plataforma
               </label>
+
 
               <input
                 id="vendaExternaTaxaPlataforma"
@@ -881,6 +981,7 @@
                 placeholder="0,00"
               >
 
+
               <small>
                 Informe R$ 0,00 quando não houver taxa.
               </small>
@@ -888,11 +989,13 @@
             </div>
 
 
+
             <div class="external-field">
 
               <label for="vendaExternaTaxaEntrega">
                 Taxa de entrega
               </label>
+
 
               <input
                 id="vendaExternaTaxaEntrega"
@@ -905,7 +1008,9 @@
 
             </div>
 
+
           </div>
+
 
         </section>
 
@@ -916,6 +1021,7 @@
         ================================================== -->
 
         <section class="edit-section">
+
 
           <label
             class="edit-label"
@@ -931,6 +1037,7 @@
             placeholder="Ex.: sem cebola, pagamento realizado pelo iFood..."
           ></textarea>
 
+
         </section>
 
 
@@ -940,6 +1047,7 @@
         ================================================== -->
 
         <section class="edit-summary external-summary">
+
 
           <div>
 
@@ -952,6 +1060,7 @@
             </strong>
 
           </div>
+
 
 
           <div>
@@ -967,6 +1076,7 @@
           </div>
 
 
+
           <div>
 
             <span>
@@ -978,6 +1088,7 @@
             </strong>
 
           </div>
+
 
 
           <div class="edit-summary-total">
@@ -993,6 +1104,7 @@
           </div>
 
 
+
           <div class="external-net-total">
 
             <span>
@@ -1005,6 +1117,7 @@
 
           </div>
 
+
         </section>
 
 
@@ -1014,6 +1127,7 @@
         ================================================== -->
 
         <div class="modal-actions edit-modal-actions">
+
 
           <button
             class="btn btn-dark"
@@ -1033,11 +1147,15 @@
             Registrar venda
           </button>
 
+
         </div>
+
 
       </div>
 
+
     </div>
+
 
   </div>
 
@@ -1052,9 +1170,12 @@
     class="modal-overlay hidden"
   >
 
+
     <div class="modal-box modal-box-large">
 
+
       <div class="modal-header">
+
 
         <div>
 
@@ -1078,15 +1199,20 @@
           ×
         </button>
 
+
       </div>
+
 
 
       <div class="modal-content modal-content-edit">
 
 
-        <!-- ITENS -->
+        <!-- =================================================
+             ITENS
+        ================================================== -->
 
         <section class="edit-section">
+
 
           <div class="edit-section-title">
 
@@ -1106,13 +1232,17 @@
             class="edit-items-list"
           ></div>
 
+
         </section>
 
 
 
-        <!-- ADICIONAR ITEM -->
+        <!-- =================================================
+             ADICIONAR ITEM
+        ================================================== -->
 
         <section class="edit-section add-item-box">
+
 
           <div class="edit-section-title">
 
@@ -1128,6 +1258,7 @@
 
 
           <div class="add-item-grid">
+
 
             <input
               id="novoItemNome"
@@ -1164,15 +1295,20 @@
               + Adicionar
             </button>
 
+
           </div>
+
 
         </section>
 
 
 
-        <!-- OBSERVAÇÃO -->
+        <!-- =================================================
+             OBSERVAÇÃO
+        ================================================== -->
 
         <section class="edit-section">
+
 
           <label
             class="edit-label"
@@ -1188,13 +1324,17 @@
             placeholder="Observação do pedido"
           ></textarea>
 
+
         </section>
 
 
 
-        <!-- RESUMO -->
+        <!-- =================================================
+             RESUMO
+        ================================================== -->
 
         <section class="edit-summary">
+
 
           <div>
 
@@ -1234,13 +1374,17 @@
 
           </div>
 
+
         </section>
 
 
 
-        <!-- AÇÕES -->
+        <!-- =================================================
+             AÇÕES
+        ================================================== -->
 
         <div class="modal-actions edit-modal-actions">
+
 
           <button
             class="btn btn-dark"
@@ -1260,11 +1404,15 @@
             Salvar alterações
           </button>
 
+
         </div>
+
 
       </div>
 
+
     </div>
+
 
   </div>
 
@@ -1279,9 +1427,12 @@
     class="modal-overlay hidden"
   >
 
+
     <div class="modal-box">
 
+
       <div class="modal-header">
+
 
         <h3>
           🚚 Enviar para motoboy
@@ -1296,10 +1447,13 @@
           ×
         </button>
 
+
       </div>
 
 
+
       <div class="modal-content">
+
 
         <p>
           Escolha quem receberá a entrega:
@@ -1313,6 +1467,7 @@
 
 
         <div class="modal-actions">
+
 
           <button
             class="btn btn-dark"
@@ -1331,11 +1486,15 @@
             Enviar WhatsApp
           </button>
 
+
         </div>
+
 
       </div>
 
+
     </div>
+
 
   </div>
 
@@ -1345,11 +1504,15 @@
        SCRIPTS
   ====================================================== -->
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
 
   <script src="js/config.js"></script>
 
   <script src="js/admin.js"></script>
 
+
 </body>
+
 </html>
