@@ -1073,52 +1073,151 @@ async function excluirPedidoNoBanco(pedido) {
     throw new Error("Pedido inválido para exclusão.");
   }
 
+  const bancoId = Number(pedido.bancoId);
+
   if (
     pedido.bancoId === null ||
     pedido.bancoId === undefined ||
-    Number.isNaN(Number(pedido.bancoId))
+    Number.isNaN(bancoId)
   ) {
     throw new Error("Pedido sem ID válido no banco.");
   }
 
-  const { error } = await supabaseClient
+  console.log(
+    "Tentando excluir pedido:",
+    {
+      bancoId,
+      pedido: pedido.id
+    }
+  );
+
+  const { data, error } = await supabaseClient
     .from(TABELA_PEDIDOS)
     .delete()
-    .eq("id", Number(pedido.bancoId));
+    .eq("id", bancoId)
+    .select("id");
 
   if (error) {
-    console.error("Erro ao excluir pedido no Supabase:", error);
-    throw error;
+    console.error(
+      "Erro ao excluir pedido no Supabase:",
+      error
+    );
+
+    throw new Error(
+      error.message ||
+      "Erro do Supabase ao excluir pedido."
+    );
   }
+
+  if (
+    !Array.isArray(data) ||
+    data.length === 0
+  ) {
+    console.error(
+      "DELETE executado, mas nenhuma linha foi excluída.",
+      {
+        bancoId,
+        retorno: data
+      }
+    );
+
+    throw new Error(
+      "O Supabase não permitiu excluir o pedido. " +
+      "Provavelmente falta uma policy DELETE na tabela orders."
+    );
+  }
+
+  console.log(
+    "Pedido excluído com sucesso:",
+    data
+  );
 
   return true;
 }
 
 async function excluirPedido(indice) {
-  if (indice < 0 || indice >= pedidos.length) return;
+  if (
+    indice < 0 ||
+    indice >= pedidos.length
+  ) {
+    alert("Pedido inválido.");
+    return;
+  }
 
   const pedido = pedidos[indice];
-  if (!pedido) return;
 
-  const identificador = pedido.id || pedido.bancoId || `pedido ${indice + 1}`;
-  const confirmar = confirm(`Deseja realmente excluir o pedido ${identificador}?`);
+  if (!pedido) {
+    alert("Pedido não encontrado.");
+    return;
+  }
 
-  if (!confirmar) return;
+  const identificador =
+    pedido.id ||
+    pedido.bancoId ||
+    `pedido ${indice + 1}`;
+
+  const confirmar = confirm(
+    `Deseja realmente excluir o pedido ${identificador}?\n\n` +
+    `Essa ação não poderá ser desfeita.`
+  );
+
+  if (!confirmar) {
+    return;
+  }
 
   try {
+
     if (supabaseClient) {
-      await excluirPedidoNoBanco(pedido);
+
+      await excluirPedidoNoBanco(
+        pedido
+      );
+
+      /*
+       * Força a atualização do painel.
+       */
+      ultimoHashPedidos = "";
+
       await carregarPedidos();
+
+      alert(
+        `Pedido ${identificador} excluído com sucesso.`
+      );
+
       return;
     }
 
-    pedidos.splice(indice, 1);
+
+    /*
+     * Modo local
+     */
+    pedidos.splice(
+      indice,
+      1
+    );
+
     salvarPedidosStorage();
+
+    ultimoHashPedidos = "";
+
     atualizarResumo();
     renderizarQuadro();
+
+    alert(
+      `Pedido ${identificador} excluído com sucesso.`
+    );
+
   } catch (erro) {
-    console.error("Falha ao excluir pedido:", erro);
-    alert("Não foi possível excluir o pedido.");
+
+    console.error(
+      "Falha ao excluir pedido:",
+      erro
+    );
+
+    alert(
+      "Não foi possível excluir o pedido.\n\n" +
+      (erro?.message || "Erro desconhecido.")
+    );
   }
 }
 
