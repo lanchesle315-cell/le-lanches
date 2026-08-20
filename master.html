@@ -96,7 +96,6 @@
 
       <nav class="master-nav">
 
-
         <button
           class="master-nav-item active"
           type="button"
@@ -155,7 +154,6 @@
           <span>📈</span>
           Relatórios
         </button>
-
 
       </nav>
 
@@ -220,7 +218,6 @@
 
 
         <div class="topbar-right">
-
 
           <div class="master-clock">
 
@@ -332,7 +329,6 @@
 
 
           <div class="master-stats-grid">
-
 
             <article class="master-stat-card">
 
@@ -464,7 +460,6 @@
 
           <div class="master-dashboard-grid">
 
-
             <section class="master-panel">
 
               <div class="panel-title">
@@ -578,25 +573,11 @@
 
                   <tr>
 
-                    <th>
-                      Data
-                    </th>
-
-                    <th>
-                      Produto
-                    </th>
-
-                    <th>
-                      Movimento
-                    </th>
-
-                    <th>
-                      Quantidade
-                    </th>
-
-                    <th>
-                      Estoque final
-                    </th>
+                    <th>Data</th>
+                    <th>Produto</th>
+                    <th>Movimento</th>
+                    <th>Quantidade</th>
+                    <th>Estoque final</th>
 
                   </tr>
 
@@ -674,7 +655,7 @@
 
 
         <!-- =================================================
-             ESTOQUE
+             ESTOQUE COMPLETO
         ================================================== -->
 
         <section
@@ -691,7 +672,7 @@
               </h2>
 
               <p>
-                Controle entradas, saídas, perdas e ajustes.
+                Controle entradas, saídas, perdas, ajustes e histórico.
               </p>
 
             </div>
@@ -708,22 +689,386 @@
           </div>
 
 
-          <div class="master-placeholder">
+          <!-- =================================================
+               RESUMO DO ESTOQUE
+          ================================================== -->
 
-            <span>
-              📦
-            </span>
+          <div class="stock-summary-grid">
 
-            <h3>
-              Controle de Estoque
-            </h3>
+            <article class="stock-summary-card">
 
-            <p>
-              Aqui cadastraremos as entradas de mercadoria,
-              estoque atual e histórico de movimentações.
-            </p>
+              <span class="stock-summary-icon">
+                📦
+              </span>
+
+              <div>
+
+                <span>
+                  Itens controlados
+                </span>
+
+                <strong id="masterEstoqueItensControlados">
+                  0
+                </strong>
+
+              </div>
+
+            </article>
+
+
+            <article class="stock-summary-card">
+
+              <span class="stock-summary-icon">
+                ⚠️
+              </span>
+
+              <div>
+
+                <span>
+                  Estoque baixo
+                </span>
+
+                <strong id="masterEstoqueQuantidadeBaixo">
+                  0
+                </strong>
+
+              </div>
+
+            </article>
+
+
+            <article class="stock-summary-card">
+
+              <span class="stock-summary-icon">
+                ❌
+              </span>
+
+              <div>
+
+                <span>
+                  Esgotados
+                </span>
+
+                <strong id="masterEstoqueQuantidadeEsgotado">
+                  0
+                </strong>
+
+              </div>
+
+            </article>
+
+
+            <article class="stock-summary-card">
+
+              <span class="stock-summary-icon">
+                💰
+              </span>
+
+              <div>
+
+                <span>
+                  Valor em estoque
+                </span>
+
+                <strong id="masterEstoqueValorTotal">
+                  R$ 0,00
+                </strong>
+
+              </div>
+
+            </article>
 
           </div>
+
+
+          <!-- =================================================
+               FILTROS DO ESTOQUE
+          ================================================== -->
+
+          <div class="stock-toolbar">
+
+            <div class="stock-search">
+
+              <span>
+                🔎
+              </span>
+
+              <input
+                type="search"
+                id="masterBuscaEstoque"
+                placeholder="Buscar item no estoque..."
+                autocomplete="off"
+              >
+
+            </div>
+
+
+            <div class="stock-filters">
+
+              <button
+                type="button"
+                class="stock-filter-btn active"
+                data-stock-filter="all"
+              >
+                Todos
+              </button>
+
+              <button
+                type="button"
+                class="stock-filter-btn"
+                data-stock-filter="product"
+              >
+                🍔 Produtos
+              </button>
+
+              <button
+                type="button"
+                class="stock-filter-btn"
+                data-stock-filter="ingredient"
+              >
+                🥩 Insumos
+              </button>
+
+              <button
+                type="button"
+                class="stock-filter-btn"
+                data-stock-filter="low"
+              >
+                ⚠️ Baixo
+              </button>
+
+              <button
+                type="button"
+                class="stock-filter-btn"
+                data-stock-filter="empty"
+              >
+                ❌ Esgotado
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- =================================================
+               LISTA / TABELA DO ESTOQUE
+          ================================================== -->
+
+          <section class="master-panel">
+
+            <div class="panel-title">
+
+              <div>
+
+                <h3>
+                  📦 Estoque atual
+                </h3>
+
+                <p>
+                  Quantidades, custos e situação atual de cada item.
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <div class="table-wrap">
+
+              <table class="master-table stock-table">
+
+                <thead>
+
+                  <tr>
+
+                    <th>
+                      Item
+                    </th>
+
+                    <th>
+                      Tipo
+                    </th>
+
+                    <th>
+                      Estoque
+                    </th>
+
+                    <th>
+                      Mínimo
+                    </th>
+
+                    <th>
+                      Custo médio
+                    </th>
+
+                    <th>
+                      Valor em estoque
+                    </th>
+
+                    <th>
+                      Status
+                    </th>
+
+                    <th>
+                      Ações
+                    </th>
+
+                  </tr>
+
+                </thead>
+
+
+                <tbody id="masterListaEstoque">
+
+                  <tr>
+
+                    <td
+                      colspan="8"
+                      class="table-empty"
+                    >
+                      Nenhum item com controle de estoque.
+                    </td>
+
+                  </tr>
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </section>
+
+
+          <!-- =================================================
+               HISTÓRICO
+          ================================================== -->
+
+          <section class="master-panel master-panel-full stock-history-panel">
+
+            <div class="panel-title">
+
+              <div>
+
+                <h3>
+                  🕘 Histórico de movimentações
+                </h3>
+
+                <p>
+                  Entradas, saídas, perdas, ajustes e vendas.
+                </p>
+
+              </div>
+
+
+              <div class="stock-history-filter">
+
+                <select id="masterFiltroMovimentacaoEstoque">
+
+                  <option value="all">
+                    Todos os movimentos
+                  </option>
+
+                  <option value="entrada">
+                    Entrada
+                  </option>
+
+                  <option value="venda">
+                    Venda
+                  </option>
+
+                  <option value="ajuste_entrada">
+                    Ajuste +
+                  </option>
+
+                  <option value="ajuste_saida">
+                    Ajuste -
+                  </option>
+
+                  <option value="perda">
+                    Perda
+                  </option>
+
+                  <option value="cancelamento">
+                    Cancelamento
+                  </option>
+
+                </select>
+
+              </div>
+
+            </div>
+
+
+            <div class="table-wrap">
+
+              <table class="master-table stock-history-table">
+
+                <thead>
+
+                  <tr>
+
+                    <th>
+                      Data
+                    </th>
+
+                    <th>
+                      Item
+                    </th>
+
+                    <th>
+                      Movimento
+                    </th>
+
+                    <th>
+                      Quantidade
+                    </th>
+
+                    <th>
+                      Antes
+                    </th>
+
+                    <th>
+                      Depois
+                    </th>
+
+                    <th>
+                      Custo unit.
+                    </th>
+
+                    <th>
+                      Valor
+                    </th>
+
+                    <th>
+                      Observação
+                    </th>
+
+                  </tr>
+
+                </thead>
+
+
+                <tbody id="masterHistoricoEstoque">
+
+                  <tr>
+
+                    <td
+                      colspan="9"
+                      class="table-empty"
+                    >
+                      Nenhuma movimentação registrada.
+                    </td>
+
+                  </tr>
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </section>
 
         </section>
 
@@ -752,6 +1097,7 @@
 
             </div>
 
+
             <button
               id="btnNovoProduto"
               class="btn-master btn-yellow"
@@ -762,10 +1108,6 @@
 
           </div>
 
-
-          <!-- =================================================
-               RESUMO
-          ================================================== -->
 
           <div class="products-summary-grid">
 
@@ -855,10 +1197,6 @@
           </div>
 
 
-          <!-- =================================================
-               FILTROS
-          ================================================== -->
-
           <div class="products-toolbar">
 
             <div class="products-search">
@@ -907,10 +1245,6 @@
 
           </div>
 
-
-          <!-- =================================================
-               LISTA
-          ================================================== -->
 
           <section class="master-panel">
 
@@ -1047,7 +1381,6 @@
 
         </section>
 
-
       </main>
 
 
@@ -1067,7 +1400,6 @@
         </span>
 
       </footer>
-
 
     </div>
 
@@ -1138,8 +1470,6 @@
           id="masterProdutoId"
         >
 
-
-        <!-- TIPO -->
 
         <div class="master-form-section">
 
@@ -1216,8 +1546,6 @@
 
         </div>
 
-
-        <!-- DADOS BÁSICOS -->
 
         <div class="master-form-section">
 
@@ -1341,8 +1669,6 @@
         </div>
 
 
-        <!-- FINANCEIRO -->
-
         <div class="master-form-section">
 
           <div class="master-form-section-title">
@@ -1421,8 +1747,6 @@
 
         </div>
 
-
-        <!-- ESTOQUE -->
 
         <div class="master-form-section">
 
@@ -1552,8 +1876,6 @@
         </div>
 
 
-        <!-- OBSERVAÇÕES -->
-
         <div class="master-form-section">
 
           <div class="master-field master-field-full">
@@ -1631,8 +1953,6 @@
       aria-labelledby="tituloModalMasterFicha"
     >
 
-      <!-- CABEÇALHO -->
-
       <div class="master-modal-header">
 
         <div>
@@ -1664,8 +1984,6 @@
       </div>
 
 
-      <!-- FORMULÁRIO -->
-
       <form
         id="formMasterFicha"
         class="master-form"
@@ -1676,8 +1994,6 @@
           id="masterFichaProdutoId"
         >
 
-
-        <!-- RESUMO DO PRODUTO -->
 
         <div class="recipe-summary-grid">
 
@@ -1735,8 +2051,6 @@
         </div>
 
 
-        <!-- EXPLICAÇÃO -->
-
         <div class="recipe-info-box">
 
           <span class="recipe-info-icon">
@@ -1752,15 +2066,13 @@
             <p>
               Selecione os insumos utilizados para produzir uma unidade
               deste produto e informe a quantidade utilizada de cada um.
-              O custo do produto será calculado automaticamente.
+              O custo será calculado automaticamente.
             </p>
 
           </div>
 
         </div>
 
-
-        <!-- BUSCA -->
 
         <div class="master-form-section">
 
@@ -1793,8 +2105,6 @@
           </div>
 
 
-          <!-- LISTA DE INSUMOS -->
-
           <div
             id="masterFichaListaInsumos"
             class="recipe-ingredients-list"
@@ -1808,8 +2118,6 @@
 
         </div>
 
-
-        <!-- TOTAL -->
 
         <div class="recipe-total-box">
 
@@ -1832,15 +2140,11 @@
         </div>
 
 
-        <!-- MENSAGEM -->
-
         <div
           id="masterFichaMensagem"
           class="master-form-message"
         ></div>
 
-
-        <!-- AÇÕES -->
 
         <div class="master-modal-actions">
 
@@ -1871,7 +2175,457 @@
 
 
   <!-- =====================================================
-       MODAL - ENTRADA DE ESTOQUE
+       MODAL - MOVIMENTAÇÃO DE ESTOQUE
+  ====================================================== -->
+
+  <div
+    id="modalMasterMovimentoEstoque"
+    class="master-modal hidden"
+    aria-hidden="true"
+  >
+
+    <div
+      class="master-modal-backdrop"
+      data-close-master-modal="movimento-estoque"
+    ></div>
+
+
+    <div
+      class="master-modal-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tituloModalMasterMovimentoEstoque"
+    >
+
+      <div class="master-modal-header">
+
+        <div>
+
+          <span
+            id="masterMovimentoBadge"
+            class="master-modal-badge"
+          >
+            📦 ESTOQUE
+          </span>
+
+          <h3 id="tituloModalMasterMovimentoEstoque">
+            Movimentação de estoque
+          </h3>
+
+          <p id="masterMovimentoProdutoNome">
+            Selecione o item.
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="master-modal-close"
+          data-close-master-modal="movimento-estoque"
+          aria-label="Fechar"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <form
+        id="formMasterMovimentoEstoque"
+        class="master-form"
+      >
+
+        <input
+          type="hidden"
+          id="masterMovimentoProdutoId"
+        >
+
+        <input
+          type="hidden"
+          id="masterMovimentoTipo"
+        >
+
+
+        <!-- SITUAÇÃO ATUAL -->
+
+        <div class="stock-current-box">
+
+          <div>
+
+            <span>
+              Estoque atual
+            </span>
+
+            <strong id="masterMovimentoEstoqueAtual">
+              0
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Custo médio atual
+            </span>
+
+            <strong id="masterMovimentoCustoAtual">
+              R$ 0,00
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- CAMPOS -->
+
+        <div class="master-form-grid">
+
+          <div class="master-field">
+
+            <label for="masterMovimentoQuantidade">
+              Quantidade *
+            </label>
+
+            <input
+              type="number"
+              id="masterMovimentoQuantidade"
+              min="0.0001"
+              step="0.0001"
+              placeholder="0"
+              required
+            >
+
+          </div>
+
+
+          <div
+            id="masterMovimentoCampoCusto"
+            class="master-field"
+          >
+
+            <label for="masterMovimentoCustoUnitario">
+              Custo unitário
+            </label>
+
+            <div class="money-input">
+
+              <span>
+                R$
+              </span>
+
+              <input
+                type="number"
+                id="masterMovimentoCustoUnitario"
+                min="0"
+                step="0.0001"
+                placeholder="0,00"
+              >
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- PREVISÃO -->
+
+        <div class="stock-preview">
+
+          <div>
+
+            <span>
+              Estoque anterior
+            </span>
+
+            <strong id="masterMovimentoPreviewAntes">
+              0
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Novo estoque
+            </span>
+
+            <strong id="masterMovimentoPreviewDepois">
+              0
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Valor movimentado
+            </span>
+
+            <strong id="masterMovimentoPreviewValor">
+              R$ 0,00
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="master-field master-field-full">
+
+          <label for="masterMovimentoObservacao">
+            Observação
+          </label>
+
+          <textarea
+            id="masterMovimentoObservacao"
+            rows="3"
+            maxlength="500"
+            placeholder="Informe o motivo ou detalhe da movimentação..."
+          ></textarea>
+
+        </div>
+
+
+        <div
+          id="masterMovimentoMensagem"
+          class="master-form-message"
+        ></div>
+
+
+        <div class="master-modal-actions">
+
+          <button
+            type="button"
+            class="btn-master btn-secondary"
+            data-close-master-modal="movimento-estoque"
+          >
+            Cancelar
+          </button>
+
+
+          <button
+            type="submit"
+            id="btnSalvarMasterMovimento"
+            class="btn-master btn-yellow"
+          >
+            Confirmar movimentação
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       MODAL - AJUSTE DE INVENTÁRIO
+  ====================================================== -->
+
+  <div
+    id="modalMasterAjusteEstoque"
+    class="master-modal hidden"
+    aria-hidden="true"
+  >
+
+    <div
+      class="master-modal-backdrop"
+      data-close-master-modal="ajuste-estoque"
+    ></div>
+
+
+    <div
+      class="master-modal-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tituloModalMasterAjusteEstoque"
+    >
+
+      <div class="master-modal-header">
+
+        <div>
+
+          <span class="master-modal-badge">
+            🧮 INVENTÁRIO
+          </span>
+
+          <h3 id="tituloModalMasterAjusteEstoque">
+            Ajustar estoque
+          </h3>
+
+          <p id="masterAjusteProdutoNome">
+            Produto
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="master-modal-close"
+          data-close-master-modal="ajuste-estoque"
+          aria-label="Fechar"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <form
+        id="formMasterAjusteEstoque"
+        class="master-form"
+      >
+
+        <input
+          type="hidden"
+          id="masterAjusteProdutoId"
+        >
+
+
+        <div class="stock-current-box">
+
+          <div>
+
+            <span>
+              Estoque atual
+            </span>
+
+            <strong id="masterAjusteEstoqueAtual">
+              0
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Custo médio
+            </span>
+
+            <strong id="masterAjusteCustoAtual">
+              R$ 0,00
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="master-field master-field-full">
+
+          <label for="masterAjusteNovoEstoque">
+            Estoque contado *
+          </label>
+
+          <input
+            type="number"
+            id="masterAjusteNovoEstoque"
+            min="0"
+            step="0.0001"
+            placeholder="0"
+            required
+          >
+
+          <small>
+            Informe a quantidade real encontrada no inventário.
+          </small>
+
+        </div>
+
+
+        <div class="stock-adjust-preview">
+
+          <div>
+
+            <span>
+              Diferença
+            </span>
+
+            <strong id="masterAjusteDiferenca">
+              0
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Movimento
+            </span>
+
+            <strong id="masterAjusteTipoPreview">
+              Sem alteração
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="master-field master-field-full">
+
+          <label for="masterAjusteObservacao">
+            Motivo do ajuste
+          </label>
+
+          <textarea
+            id="masterAjusteObservacao"
+            rows="3"
+            maxlength="500"
+            placeholder="Ex.: Inventário físico, divergência de contagem..."
+          ></textarea>
+
+        </div>
+
+
+        <div
+          id="masterAjusteMensagem"
+          class="master-form-message"
+        ></div>
+
+
+        <div class="master-modal-actions">
+
+          <button
+            type="button"
+            class="btn-master btn-secondary"
+            data-close-master-modal="ajuste-estoque"
+          >
+            Cancelar
+          </button>
+
+
+          <button
+            type="submit"
+            id="btnSalvarMasterAjuste"
+            class="btn-master btn-yellow"
+          >
+            Salvar ajuste
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       MODAL ANTIGO DE ENTRADA
+       Mantido para compatibilidade até o JS ser trocado
   ====================================================== -->
 
   <div
