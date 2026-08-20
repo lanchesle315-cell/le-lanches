@@ -7,6 +7,14 @@ let pedidoEmEdicao = null;
 let uidPedidoEmEdicao = null;
 let salvandoEdicaoPedido = false;
 
+/* =========================================================
+   VENDA EXTERNA
+========================================================= */
+
+let produtosVendaExterna = [];
+let carrinhoVendaExterna = [];
+let salvandoVendaExterna = false;
+
 const STORAGE_KEYS = ["le_lanches_pedidos"];
 const LOGIN_STORAGE_KEY = "le_lanches_admin_logado";
 const TABELA_PEDIDOS = "orders";
@@ -497,6 +505,31 @@ function normalizarPedido(pedido, index) {
     taxaEntrega,
     total,
     distanciaKm: Number(pedido.delivery_distance_km || 0),
+
+    orderSource:
+      String(
+        pedido.order_source ||
+        pedido.orderSource ||
+        "SITE"
+      ).toUpperCase(),
+
+    externalReference:
+      pedido.external_reference ||
+      pedido.externalReference ||
+      "",
+
+    platformFee:
+      Number(
+        pedido.platform_fee ||
+        pedido.platformFee ||
+        0
+      ),
+
+    platformNotes:
+      pedido.platform_notes ||
+      pedido.platformNotes ||
+      "",
+
     status: normalizarStatus(pedido.status),
     dataOriginal:
       pedido.data ||
@@ -519,6 +552,9 @@ function gerarHashPedidos(lista) {
         id: p.id,
         status: p.status,
         total: p.total,
+        orderSource: p.orderSource,
+        externalReference: p.externalReference,
+        platformFee: p.platformFee,
         itens: p.itens,
         data: p.dataTexto
       }))
@@ -692,6 +728,8 @@ function obterPedidosFiltrados() {
       ${pedido.complemento}
       ${pedido.pagamento}
       ${pedido.observacao}
+      ${pedido.orderSource}
+      ${pedido.externalReference}
       ${pedido.status}
       ${statusLabel(pedido.status)}
     `
@@ -797,6 +835,35 @@ function botaoProximoStatus(indice, statusAtual) {
   return `<button class="btn btn-yellow btn-small full-width" onclick="alterarStatus(${indice}, 'preparo')">Aceitar / Iniciar preparo</button>`;
 }
 
+
+function obterLabelOrigemPedido(origem) {
+  const valor = String(origem || "SITE").toUpperCase();
+
+  if (valor === "IFOOD") return "iFood";
+  if (valor === "99") return "99";
+  if (valor === "BALCAO") return "Balcão";
+  if (valor === "TELEFONE") return "Telefone";
+  return "Site";
+}
+
+function obterClasseOrigemPedido(origem) {
+  const valor = String(origem || "SITE").toUpperCase();
+
+  if (valor === "IFOOD") return "ifood";
+  if (valor === "99") return "ninenine";
+  if (valor === "BALCAO") return "balcao";
+  if (valor === "TELEFONE") return "telefone";
+  return "site";
+}
+
+function montarBadgeOrigemPedido(pedido) {
+  return `
+    <span class="external-origin-badge ${obterClasseOrigemPedido(pedido.orderSource)}">
+      ${escaparHtml(obterLabelOrigemPedido(pedido.orderSource))}
+    </span>
+  `;
+}
+
 function criarCardPedido(pedido) {
   const indiceReal = pedidos.findIndex((p) => p.uid === pedido.uid);
   const novo = pedidoEhNovo(pedido);
@@ -820,6 +887,7 @@ function criarCardPedido(pedido) {
             pedido.uid
           )}">${escaparHtml(tempoDecorridoTexto(pedido.dataObj))}</span>
           <span class="badge badge-status">${escaparHtml(statusLabel(pedido.status))}</span>
+          ${montarBadgeOrigemPedido(pedido)}
           ${novo ? `<span class="badge badge-new">Novo pedido</span>` : ""}
           ${atrasado ? `<span class="badge badge-delay">Atenção</span>` : ""}
         </div>
@@ -833,6 +901,17 @@ function criarCardPedido(pedido) {
             pedido.tipoEntrega === "delivery" ? "Delivery" : "Retirada"
           )}</div>
           <div class="line"><strong>Pagamento:</strong> ${escaparHtml(pedido.pagamento)}</div>
+          <div class="line"><strong>Origem:</strong> ${escaparHtml(obterLabelOrigemPedido(pedido.orderSource))}</div>
+          ${
+            pedido.externalReference
+              ? `<div class="line"><strong>Ref. externa:</strong> ${escaparHtml(pedido.externalReference)}</div>`
+              : ""
+          }
+          ${
+            Number(pedido.platformFee || 0) > 0
+              ? `<div class="line"><strong>Taxa plataforma:</strong> ${formatarMoeda(pedido.platformFee)}</div>`
+              : ""
+          }
           <div class="line"><strong>Telefone:</strong> ${escaparHtml(pedido.telefone || "Não informado")}</div>
           ${pedido.troco ? `<div class="line"><strong>Troco:</strong> ${escaparHtml(pedido.troco)}</div>` : ""}
         </div>
@@ -886,7 +965,8 @@ function criarCardPedido(pedido) {
           </button>
 
          ${
-    pedido.tipoEntrega === "delivery"
+    pedido.tipoEntrega === "delivery" &&
+    !["IFOOD", "99"].includes(String(pedido.orderSource || "").toUpperCase())
       ? `<button class="btn btn-green btn-small" onclick="enviarPedidoMotoboy('${pedido.uid}')">Enviar motoboy</button>`
       : ""
           }
@@ -1669,6 +1749,9 @@ Cliente: ${pedido.cliente}
 Telefone: ${pedido.telefone || "-"}
 Entrega: ${pedido.tipoEntrega === "delivery" ? "Delivery" : "Retirada"}
 Status: ${statusLabel(pedido.status)}
+Origem: ${obterLabelOrigemPedido(pedido.orderSource)}
+${pedido.externalReference ? `Referência externa: ${pedido.externalReference}` : ""}
+${Number(pedido.platformFee || 0) > 0 ? `Taxa plataforma: ${formatarMoeda(pedido.platformFee)}` : ""}
 Endereço: ${pedido.endereco || "-"}, ${pedido.numero || "-"} - ${pedido.bairro || "-"}${
     pedido.complemento ? " - " + pedido.complemento : ""
   }
@@ -2184,6 +2267,811 @@ async function salvarEdicaoPedido() {
   }
 }
 
+
+/* =========================================================
+   VENDA EXTERNA
+========================================================= */
+
+function normalizarTextoVendaExterna(texto) {
+  return String(texto || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function obterNomeClientePadraoVendaExterna(origem) {
+  const valor = String(origem || "IFOOD").toUpperCase();
+
+  if (valor === "IFOOD") return "Cliente iFood";
+  if (valor === "99") return "Cliente 99";
+  if (valor === "BALCAO") return "Cliente Balcão";
+  if (valor === "TELEFONE") return "Cliente Telefone";
+
+  return "Cliente";
+}
+
+async function buscarProdutosVendaExterna() {
+  if (!supabaseClient) {
+    throw new Error("Supabase não configurado.");
+  }
+
+  const { data, error } = await supabaseClient
+    .from("products")
+    .select(
+      `
+      id,
+      product_code,
+      name,
+      category,
+      sale_price,
+      stock_quantity,
+      minimum_stock,
+      stock_control,
+      available,
+      active,
+      item_type,
+      unit
+      `
+    )
+    .eq("item_type", "product")
+    .eq("active", true)
+    .order("category", { ascending: true })
+    .order("name", { ascending: true });
+
+  if (error) {
+    console.error("Erro ao buscar produtos da venda externa:", error);
+    throw error;
+  }
+
+  produtosVendaExterna = Array.isArray(data)
+    ? data
+    : [];
+
+  renderizarProdutosVendaExterna();
+}
+
+function produtoVendaExternaPodeSerAdicionado(produto) {
+  if (!produto) return false;
+  if (produto.active !== true) return false;
+  if (produto.available === false) return false;
+
+  if (
+    produto.stock_control === true &&
+    Number(produto.stock_quantity || 0) <= 0
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+function renderizarProdutosVendaExterna() {
+  const container = byId("vendaExternaListaProdutos");
+
+  if (!container) return;
+
+  const busca =
+    normalizarTextoVendaExterna(
+      byId("vendaExternaBuscaProduto")?.value || ""
+    );
+
+  const lista = produtosVendaExterna.filter((produto) => {
+    if (!busca) return true;
+
+    const texto =
+      normalizarTextoVendaExterna(
+        [
+          produto.name,
+          produto.product_code,
+          produto.category
+        ].join(" ")
+      );
+
+    return texto.includes(busca);
+  });
+
+  if (!lista.length) {
+    container.innerHTML = `
+      <div class="empty-column">
+        Nenhum produto encontrado.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = lista
+    .map((produto) => {
+      const controlado = produto.stock_control === true;
+      const estoque = Number(produto.stock_quantity || 0);
+      const minimo = Number(produto.minimum_stock || 0);
+      const disponivel = produtoVendaExternaPodeSerAdicionado(produto);
+
+      let estoqueClasse = "ok";
+      let estoqueTexto = "Sem controle de estoque";
+
+      if (controlado) {
+        if (estoque <= 0) {
+          estoqueClasse = "empty";
+          estoqueTexto = "Esgotado";
+        } else if (estoque <= minimo) {
+          estoqueClasse = "low";
+          estoqueTexto = `Estoque baixo: ${estoque}`;
+        } else {
+          estoqueClasse = "ok";
+          estoqueTexto = `Estoque: ${estoque}`;
+        }
+      }
+
+      return `
+        <div class="external-product-item">
+
+          <div class="external-product-info">
+
+            <strong>
+              ${escaparHtml(produto.name)}
+            </strong>
+
+            <span>
+              ${escaparHtml(produto.category || "Sem categoria")}
+              · #${escaparHtml(produto.product_code)}
+            </span>
+
+            <span class="external-product-price">
+              ${formatarMoeda(produto.sale_price)}
+            </span>
+
+            <span class="external-product-stock ${estoqueClasse}">
+              ${escaparHtml(estoqueTexto)}
+            </span>
+
+          </div>
+
+          <button
+            type="button"
+            class="external-product-add"
+            onclick="adicionarProdutoVendaExterna('${escaparHtml(produto.product_code)}')"
+            ${disponivel ? "" : "disabled"}
+          >
+            + Add
+          </button>
+
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function abrirModalVendaExterna() {
+  const modal = byId("modalVendaExterna");
+
+  if (!modal) {
+    alert("Modal de venda externa não encontrado no admin.html.");
+    return;
+  }
+
+  carrinhoVendaExterna = [];
+
+  const origem = byId("vendaExternaOrigem");
+  const referencia = byId("vendaExternaReferencia");
+  const cliente = byId("vendaExternaCliente");
+  const tipo = byId("vendaExternaTipo");
+  const busca = byId("vendaExternaBuscaProduto");
+  const taxaPlataforma = byId("vendaExternaTaxaPlataforma");
+  const taxaEntrega = byId("vendaExternaTaxaEntrega");
+  const observacao = byId("vendaExternaObservacao");
+
+  if (origem) origem.value = "IFOOD";
+  if (referencia) referencia.value = "";
+  if (cliente) cliente.value = "Cliente iFood";
+  if (tipo) tipo.value = "retirada";
+  if (busca) busca.value = "";
+  if (taxaPlataforma) taxaPlataforma.value = "0";
+  if (taxaEntrega) taxaEntrega.value = "0";
+  if (observacao) observacao.value = "";
+
+  renderizarCarrinhoVendaExterna();
+  atualizarResumoVendaExterna();
+
+  modal.classList.remove("hidden");
+
+  buscarProdutosVendaExterna()
+    .catch((erro) => {
+      console.error("Falha ao carregar produtos para venda externa:", erro);
+
+      const lista = byId("vendaExternaListaProdutos");
+
+      if (lista) {
+        lista.innerHTML = `
+          <div class="empty-column">
+            Não foi possível carregar os produtos.
+          </div>
+        `;
+      }
+    });
+}
+
+function fecharModalVendaExterna() {
+  if (salvandoVendaExterna) return;
+
+  const modal = byId("modalVendaExterna");
+
+  if (modal) {
+    modal.classList.add("hidden");
+  }
+
+  carrinhoVendaExterna = [];
+  renderizarCarrinhoVendaExterna();
+  atualizarResumoVendaExterna();
+}
+
+function adicionarProdutoVendaExterna(productCode) {
+  const produto = produtosVendaExterna.find(
+    (item) =>
+      String(item.product_code) === String(productCode)
+  );
+
+  if (!produto) {
+    alert("Produto não encontrado.");
+    return;
+  }
+
+  if (!produtoVendaExternaPodeSerAdicionado(produto)) {
+    alert("Este produto está indisponível ou sem estoque.");
+    return;
+  }
+
+  const existente = carrinhoVendaExterna.find(
+    (item) =>
+      String(item.product_code) ===
+      String(produto.product_code)
+  );
+
+  if (existente) {
+    const novaQuantidade =
+      Number(existente.quantity || 0) + 1;
+
+    if (
+      produto.stock_control === true &&
+      novaQuantidade >
+        Number(produto.stock_quantity || 0)
+    ) {
+      alert(
+        `Estoque insuficiente de "${produto.name}".`
+      );
+      return;
+    }
+
+    existente.quantity = novaQuantidade;
+  } else {
+    carrinhoVendaExterna.push({
+      product_id: produto.id,
+      product_code: produto.product_code,
+      product_name: produto.name,
+      category: produto.category || "",
+      sale_unit_price: Number(produto.sale_price || 0),
+      quantity: 1,
+      observation: "",
+      stock_control: produto.stock_control === true,
+      stock_quantity: Number(produto.stock_quantity || 0)
+    });
+  }
+
+  renderizarCarrinhoVendaExterna();
+  atualizarResumoVendaExterna();
+}
+
+function alterarQuantidadeVendaExterna(index, alteracao) {
+  const item = carrinhoVendaExterna[index];
+
+  if (!item) return;
+
+  const novaQuantidade =
+    Number(item.quantity || 1) +
+    Number(alteracao || 0);
+
+  if (novaQuantidade <= 0) {
+    removerItemVendaExterna(index);
+    return;
+  }
+
+  if (
+    item.stock_control === true &&
+    novaQuantidade >
+      Number(item.stock_quantity || 0)
+  ) {
+    alert(
+      `Estoque insuficiente de "${item.product_name}".`
+    );
+    return;
+  }
+
+  item.quantity = novaQuantidade;
+
+  renderizarCarrinhoVendaExterna();
+  atualizarResumoVendaExterna();
+}
+
+function removerItemVendaExterna(index) {
+  if (
+    index < 0 ||
+    index >= carrinhoVendaExterna.length
+  ) {
+    return;
+  }
+
+  carrinhoVendaExterna.splice(index, 1);
+
+  renderizarCarrinhoVendaExterna();
+  atualizarResumoVendaExterna();
+}
+
+function renderizarCarrinhoVendaExterna() {
+  const container = byId("vendaExternaItens");
+
+  if (!container) return;
+
+  if (!carrinhoVendaExterna.length) {
+    container.innerHTML = `
+      <div class="empty-column">
+        Nenhum produto adicionado.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML =
+    carrinhoVendaExterna
+      .map((item, index) => {
+        const totalItem =
+          Number(item.sale_unit_price || 0) *
+          Number(item.quantity || 0);
+
+        return `
+          <div class="external-cart-item">
+
+            <div class="external-cart-info">
+
+              <strong>
+                ${escaparHtml(item.product_name)}
+              </strong>
+
+              <span>
+                #${escaparHtml(item.product_code)}
+                · ${formatarMoeda(item.sale_unit_price)} cada
+              </span>
+
+              <small>
+                Total: ${formatarMoeda(totalItem)}
+              </small>
+
+            </div>
+
+            <div class="external-cart-qty">
+
+              <button
+                type="button"
+                onclick="alterarQuantidadeVendaExterna(${index}, -1)"
+                aria-label="Diminuir quantidade"
+              >
+                −
+              </button>
+
+              <span>
+                ${escaparHtml(item.quantity)}
+              </span>
+
+              <button
+                type="button"
+                onclick="alterarQuantidadeVendaExterna(${index}, 1)"
+                aria-label="Aumentar quantidade"
+              >
+                +
+              </button>
+
+            </div>
+
+            <button
+              type="button"
+              class="external-cart-remove"
+              onclick="removerItemVendaExterna(${index})"
+              title="Remover item"
+              aria-label="Remover item"
+            >
+              🗑
+            </button>
+
+          </div>
+        `;
+      })
+      .join("");
+}
+
+function calcularSubtotalVendaExterna() {
+  return carrinhoVendaExterna.reduce(
+    (total, item) =>
+      total +
+      (
+        Number(item.sale_unit_price || 0) *
+        Number(item.quantity || 0)
+      ),
+    0
+  );
+}
+
+function atualizarResumoVendaExterna() {
+  const subtotal =
+    calcularSubtotalVendaExterna();
+
+  const taxaEntrega =
+    Math.max(
+      0,
+      converterValorDigitado(
+        byId("vendaExternaTaxaEntrega")?.value || 0
+      ) || 0
+    );
+
+  const taxaPlataforma =
+    Math.max(
+      0,
+      converterValorDigitado(
+        byId("vendaExternaTaxaPlataforma")?.value || 0
+      ) || 0
+    );
+
+  const tipo =
+    String(
+      byId("vendaExternaTipo")?.value ||
+      "retirada"
+    );
+
+  const taxaEntregaAplicada =
+    tipo === "delivery"
+      ? taxaEntrega
+      : 0;
+
+  const total =
+    subtotal +
+    taxaEntregaAplicada;
+
+  const liquido =
+    total -
+    taxaPlataforma;
+
+  if (byId("vendaExternaSubtotal")) {
+    byId("vendaExternaSubtotal").textContent =
+      formatarMoeda(subtotal);
+  }
+
+  if (byId("vendaExternaResumoTaxaEntrega")) {
+    byId("vendaExternaResumoTaxaEntrega").textContent =
+      formatarMoeda(taxaEntregaAplicada);
+  }
+
+  if (byId("vendaExternaResumoTaxaPlataforma")) {
+    byId("vendaExternaResumoTaxaPlataforma").textContent =
+      formatarMoeda(taxaPlataforma);
+  }
+
+  if (byId("vendaExternaTotal")) {
+    byId("vendaExternaTotal").textContent =
+      formatarMoeda(total);
+  }
+
+  if (byId("vendaExternaLiquido")) {
+    byId("vendaExternaLiquido").textContent =
+      formatarMoeda(liquido);
+  }
+}
+
+function atualizarClientePadraoVendaExterna() {
+  const origem =
+    String(
+      byId("vendaExternaOrigem")?.value ||
+      "IFOOD"
+    ).toUpperCase();
+
+  const cliente =
+    byId("vendaExternaCliente");
+
+  if (!cliente) return;
+
+  const valorAtual =
+    String(cliente.value || "").trim();
+
+  const nomesPadrao = [
+    "Cliente iFood",
+    "Cliente 99",
+    "Cliente Balcão",
+    "Cliente Telefone",
+    ""
+  ];
+
+  if (
+    nomesPadrao.includes(valorAtual)
+  ) {
+    cliente.value =
+      obterNomeClientePadraoVendaExterna(origem);
+  }
+}
+
+function validarVendaExterna() {
+  if (!supabaseClient) {
+    throw new Error("Supabase não configurado.");
+  }
+
+  const origem =
+    String(
+      byId("vendaExternaOrigem")?.value ||
+      ""
+    ).toUpperCase();
+
+  if (
+    !["IFOOD", "99", "BALCAO", "TELEFONE"].includes(origem)
+  ) {
+    throw new Error("Selecione uma origem válida.");
+  }
+
+  if (!carrinhoVendaExterna.length) {
+    throw new Error(
+      "Adicione pelo menos um produto à venda."
+    );
+  }
+
+  const cliente =
+    String(
+      byId("vendaExternaCliente")?.value ||
+      ""
+    ).trim();
+
+  if (!cliente) {
+    throw new Error("Informe o nome do cliente.");
+  }
+
+  const tipo =
+    String(
+      byId("vendaExternaTipo")?.value ||
+      ""
+    );
+
+  if (
+    !["retirada", "delivery"].includes(tipo)
+  ) {
+    throw new Error("Selecione o tipo do pedido.");
+  }
+
+  const taxaPlataforma =
+    converterValorDigitado(
+      byId("vendaExternaTaxaPlataforma")?.value || 0
+    );
+
+  if (
+    !Number.isFinite(taxaPlataforma) ||
+    taxaPlataforma < 0
+  ) {
+    throw new Error(
+      "Informe uma taxa da plataforma válida."
+    );
+  }
+
+  const taxaEntrega =
+    converterValorDigitado(
+      byId("vendaExternaTaxaEntrega")?.value || 0
+    );
+
+  if (
+    !Number.isFinite(taxaEntrega) ||
+    taxaEntrega < 0
+  ) {
+    throw new Error(
+      "Informe uma taxa de entrega válida."
+    );
+  }
+
+  return true;
+}
+
+async function registrarVendaExterna() {
+  if (salvandoVendaExterna) return;
+
+  const botao =
+    byId("btnRegistrarVendaExterna");
+
+  try {
+    validarVendaExterna();
+
+    salvandoVendaExterna = true;
+
+    if (botao) {
+      botao.disabled = true;
+      botao.textContent = "Registrando...";
+    }
+
+    const origem =
+      String(
+        byId("vendaExternaOrigem")?.value ||
+        "IFOOD"
+      ).toUpperCase();
+
+    const referencia =
+      String(
+        byId("vendaExternaReferencia")?.value ||
+        ""
+      ).trim();
+
+    const cliente =
+      String(
+        byId("vendaExternaCliente")?.value ||
+        ""
+      ).trim();
+
+    const tipo =
+      String(
+        byId("vendaExternaTipo")?.value ||
+        "retirada"
+      );
+
+    const taxaPlataforma =
+      Math.max(
+        0,
+        converterValorDigitado(
+          byId("vendaExternaTaxaPlataforma")?.value || 0
+        )
+      );
+
+    const taxaEntregaDigitada =
+      Math.max(
+        0,
+        converterValorDigitado(
+          byId("vendaExternaTaxaEntrega")?.value || 0
+        )
+      );
+
+    const taxaEntrega =
+      tipo === "delivery"
+        ? taxaEntregaDigitada
+        : 0;
+
+    const observacao =
+      String(
+        byId("vendaExternaObservacao")?.value ||
+        ""
+      ).trim();
+
+    const pOrder = {
+      customer_name:
+        cliente,
+
+      customer_phone:
+        null,
+
+      order_type:
+        tipo,
+
+      customer_address:
+        tipo === "delivery"
+          ? `Entrega via ${obterLabelOrigemPedido(origem)}`
+          : null,
+
+      customer_neighborhood:
+        null,
+
+      customer_city:
+        "Sorocaba",
+
+      customer_notes:
+        observacao || null,
+
+      delivery_fee:
+        taxaEntrega,
+
+      delivery_distance_km:
+        null,
+
+      order_source:
+        origem,
+
+      external_reference:
+        referencia || null,
+
+      platform_fee:
+        taxaPlataforma,
+
+      platform_notes:
+        observacao || null
+    };
+
+    const pItems =
+      carrinhoVendaExterna.map((item) => ({
+        product_code:
+          item.product_code,
+
+        quantity:
+          Number(item.quantity || 0),
+
+        sale_unit_price:
+          Number(item.sale_unit_price || 0),
+
+        observation:
+          item.observation || ""
+      }));
+
+    const { data, error } =
+      await supabaseClient.rpc(
+        "create_order_with_stock",
+        {
+          p_order: pOrder,
+          p_items: pItems
+        }
+      );
+
+    if (error) {
+      console.error(
+        "Erro ao registrar venda externa:",
+        error
+      );
+
+      throw new Error(
+        error.message ||
+        "Não foi possível registrar a venda externa."
+      );
+    }
+
+    if (
+      data &&
+      data.success === false
+    ) {
+      throw new Error(
+        data.message ||
+        "Não foi possível registrar a venda externa."
+      );
+    }
+
+    const modal =
+      byId("modalVendaExterna");
+
+    if (modal) {
+      modal.classList.add("hidden");
+    }
+
+    carrinhoVendaExterna = [];
+
+    ultimoHashPedidos = "";
+
+    await carregarPedidos();
+
+    alert(
+      `Venda externa registrada com sucesso.${
+        data?.order_id
+          ? `\nPedido #${data.order_id}`
+          : ""
+      }`
+    );
+
+  } catch (erro) {
+    console.error(
+      "Falha ao registrar venda externa:",
+      erro
+    );
+
+    alert(
+      "Não foi possível registrar a venda externa.\n\n" +
+      (
+        erro?.message ||
+        "Erro desconhecido."
+      )
+    );
+
+  } finally {
+    salvandoVendaExterna = false;
+
+    if (botao) {
+      botao.disabled = false;
+      botao.textContent = "Registrar venda";
+    }
+  }
+}
+
 function tocarNotificacaoNovoPedido() {
   try {
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -2629,6 +3517,7 @@ function iniciarRealtimeSupabase() {
 }
 
 const btnAtualizar = byId("btnAtualizar");
+const btnVendaExterna = byId("btnVendaExterna");
 const btnExportar = byId("btnExportar");
 const btnLimparTudo = byId("btnLimparTudo");
 const btnToggleLoja = byId("btnToggleLoja");
@@ -2639,8 +3528,59 @@ const filtroStatus = byId("filtroStatus");
 const filtroTipo = byId("filtroTipo");
 const ordenacao = byId("ordenacao");
 
+const vendaExternaOrigem = byId("vendaExternaOrigem");
+const vendaExternaBuscaProduto = byId("vendaExternaBuscaProduto");
+const vendaExternaTipo = byId("vendaExternaTipo");
+const vendaExternaTaxaPlataforma = byId("vendaExternaTaxaPlataforma");
+const vendaExternaTaxaEntrega = byId("vendaExternaTaxaEntrega");
+
 if (btnAtualizar) {
   btnAtualizar.addEventListener("click", () => carregarPedidos());
+}
+
+if (btnVendaExterna) {
+  btnVendaExterna.addEventListener(
+    "click",
+    abrirModalVendaExterna
+  );
+}
+
+if (vendaExternaOrigem) {
+  vendaExternaOrigem.addEventListener(
+    "change",
+    () => {
+      atualizarClientePadraoVendaExterna();
+      atualizarResumoVendaExterna();
+    }
+  );
+}
+
+if (vendaExternaBuscaProduto) {
+  vendaExternaBuscaProduto.addEventListener(
+    "input",
+    renderizarProdutosVendaExterna
+  );
+}
+
+if (vendaExternaTipo) {
+  vendaExternaTipo.addEventListener(
+    "change",
+    atualizarResumoVendaExterna
+  );
+}
+
+if (vendaExternaTaxaPlataforma) {
+  vendaExternaTaxaPlataforma.addEventListener(
+    "input",
+    atualizarResumoVendaExterna
+  );
+}
+
+if (vendaExternaTaxaEntrega) {
+  vendaExternaTaxaEntrega.addEventListener(
+    "input",
+    atualizarResumoVendaExterna
+  );
 }
 
 if (btnExportar) {
@@ -2713,8 +3653,15 @@ window.removerItemEdicao = removerItemEdicao;
 window.adicionarItemEdicao = adicionarItemEdicao;
 window.salvarEdicaoPedido = salvarEdicaoPedido;
 
+window.abrirModalVendaExterna = abrirModalVendaExterna;
+window.fecharModalVendaExterna = fecharModalVendaExterna;
+window.adicionarProdutoVendaExterna = adicionarProdutoVendaExterna;
+window.alterarQuantidadeVendaExterna = alterarQuantidadeVendaExterna;
+window.removerItemVendaExterna = removerItemVendaExterna;
+window.registrarVendaExterna = registrarVendaExterna;
+
 console.log(
-  "ADMIN JS NOVO CARREGADO - MOSTRANDO APENAS PEDIDOS DO DIA E LIMPANDO NA VIRADA"
+  "ADMIN JS CARREGADO - PEDIDOS DO DIA + VENDA EXTERNA"
 );
 
 (async function iniciarAdmin() {
