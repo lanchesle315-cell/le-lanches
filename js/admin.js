@@ -3004,31 +3004,23 @@ async function registrarVendaExterna() {
 
     carrinhoVendaExterna = [];
 
-    ultimoHashPedidos = "";
+   ultimoHashPedidos = "";
 
-    await carregarPedidos();
+await carregarPedidos();
 
-    alert(
-      `Venda externa registrada com sucesso.${
-        data?.order_id
-          ? `\nPedido #${data.order_id}`
-          : ""
-      }`
-    );
+} catch (erro) {
+  console.error(
+    "Falha ao registrar venda externa:",
+    erro
+  );
 
-  } catch (erro) {
-    console.error(
-      "Falha ao registrar venda externa:",
-      erro
-    );
-
-    alert(
-      "Não foi possível registrar a venda externa.\n\n" +
-      (
-        erro?.message ||
-        "Erro desconhecido."
-      )
-    );
+  alert(
+    "Não foi possível registrar a venda externa.\n\n" +
+    (
+      erro?.message ||
+      "Erro desconhecido."
+    )
+  );
 
   } finally {
     salvandoVendaExterna = false;
