@@ -69,6 +69,16 @@
           </button>
 
 
+          <!-- VENDA EXTERNA -->
+          <button
+            class="btn btn-green"
+            id="btnVendaExterna"
+            type="button"
+          >
+            ➕ Venda Externa
+          </button>
+
+
           <!-- PAINEL DE ITENS -->
           <button
             class="btn btn-dark"
@@ -580,6 +590,472 @@
     </footer>
 
   </main>
+
+
+
+  <!-- =====================================================
+       MODAL NOVA VENDA EXTERNA
+  ====================================================== -->
+
+  <div
+    id="modalVendaExterna"
+    class="modal-overlay hidden"
+  >
+
+    <div class="modal-box modal-box-large modal-venda-externa">
+
+      <div class="modal-header">
+
+        <div>
+
+          <h3>
+            ➕ Nova venda externa
+          </h3>
+
+          <span class="modal-subtitle">
+            Registre pedidos recebidos fora do site da Lê Lanches.
+          </span>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close"
+          id="btnFecharVendaExterna"
+          onclick="fecharModalVendaExterna()"
+          aria-label="Fechar venda externa"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="modal-content modal-content-edit">
+
+        <!-- =================================================
+             ORIGEM DA VENDA
+        ================================================== -->
+
+        <section class="edit-section">
+
+          <div class="edit-section-title">
+
+            <h4>
+              Origem da venda
+            </h4>
+
+            <span>
+              Informe por onde o pedido foi recebido.
+            </span>
+
+          </div>
+
+
+          <div class="external-form-grid">
+
+            <div class="external-field">
+
+              <label for="vendaExternaOrigem">
+                Origem
+              </label>
+
+              <select id="vendaExternaOrigem">
+
+                <option value="IFOOD">
+                  iFood
+                </option>
+
+                <option value="99">
+                  99
+                </option>
+
+                <option value="BALCAO">
+                  Balcão
+                </option>
+
+                <option value="TELEFONE">
+                  Telefone
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="external-field">
+
+              <label for="vendaExternaReferencia">
+                Referência externa
+              </label>
+
+              <input
+                id="vendaExternaReferencia"
+                type="text"
+                placeholder="Ex.: pedido #458721"
+                autocomplete="off"
+              >
+
+              <small>
+                Opcional para Balcão e Telefone.
+              </small>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             CLIENTE / TIPO DO PEDIDO
+        ================================================== -->
+
+        <section class="edit-section">
+
+          <div class="edit-section-title">
+
+            <h4>
+              Informações do pedido
+            </h4>
+
+            <span>
+              Dados básicos para identificar a venda.
+            </span>
+
+          </div>
+
+
+          <div class="external-form-grid">
+
+            <div class="external-field">
+
+              <label for="vendaExternaCliente">
+                Cliente
+              </label>
+
+              <input
+                id="vendaExternaCliente"
+                type="text"
+                placeholder="Ex.: Cliente iFood"
+                autocomplete="off"
+              >
+
+            </div>
+
+
+            <div class="external-field">
+
+              <label for="vendaExternaTipo">
+                Tipo
+              </label>
+
+              <select id="vendaExternaTipo">
+
+                <option value="retirada">
+                  Retirada
+                </option>
+
+                <option value="delivery">
+                  Delivery
+                </option>
+
+              </select>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             PRODUTOS
+        ================================================== -->
+
+        <section class="edit-section">
+
+          <div class="edit-section-title">
+
+            <h4>
+              Produtos
+            </h4>
+
+            <span>
+              Selecione produtos cadastrados no sistema para manter estoque,
+              ficha técnica e financeiro corretos.
+            </span>
+
+          </div>
+
+
+          <div class="external-product-search">
+
+            <div class="external-field">
+
+              <label for="vendaExternaBuscaProduto">
+                Buscar produto
+              </label>
+
+              <input
+                id="vendaExternaBuscaProduto"
+                type="text"
+                placeholder="Digite o nome do produto..."
+                autocomplete="off"
+              >
+
+            </div>
+
+          </div>
+
+
+          <div
+            id="vendaExternaListaProdutos"
+            class="external-products-list"
+          >
+
+            <div class="empty-column">
+              Carregando produtos...
+            </div>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             ITENS DA VENDA
+        ================================================== -->
+
+        <section class="edit-section">
+
+          <div class="edit-section-title">
+
+            <h4>
+              Itens da venda
+            </h4>
+
+            <span>
+              Confira os produtos e quantidades antes de registrar.
+            </span>
+
+          </div>
+
+
+          <div
+            id="vendaExternaItens"
+            class="edit-items-list external-cart-list"
+          >
+
+            <div class="empty-column">
+              Nenhum produto adicionado.
+            </div>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             VALORES DA PLATAFORMA
+        ================================================== -->
+
+        <section class="edit-section">
+
+          <div class="edit-section-title">
+
+            <h4>
+              Valores da venda
+            </h4>
+
+            <span>
+              A taxa da plataforma será usada no controle financeiro.
+            </span>
+
+          </div>
+
+
+          <div class="external-form-grid">
+
+            <div class="external-field">
+
+              <label for="vendaExternaTaxaPlataforma">
+                Taxa / comissão da plataforma
+              </label>
+
+              <input
+                id="vendaExternaTaxaPlataforma"
+                type="number"
+                min="0"
+                step="0.01"
+                value="0"
+                placeholder="0,00"
+              >
+
+              <small>
+                Informe R$ 0,00 quando não houver taxa.
+              </small>
+
+            </div>
+
+
+            <div class="external-field">
+
+              <label for="vendaExternaTaxaEntrega">
+                Taxa de entrega
+              </label>
+
+              <input
+                id="vendaExternaTaxaEntrega"
+                type="number"
+                min="0"
+                step="0.01"
+                value="0"
+                placeholder="0,00"
+              >
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             OBSERVAÇÃO
+        ================================================== -->
+
+        <section class="edit-section">
+
+          <label
+            class="edit-label"
+            for="vendaExternaObservacao"
+          >
+            Observação
+          </label>
+
+
+          <textarea
+            id="vendaExternaObservacao"
+            rows="3"
+            placeholder="Ex.: sem cebola, pagamento realizado pelo iFood..."
+          ></textarea>
+
+        </section>
+
+
+
+        <!-- =================================================
+             RESUMO
+        ================================================== -->
+
+        <section class="edit-summary external-summary">
+
+          <div>
+
+            <span>
+              Subtotal dos produtos
+            </span>
+
+            <strong id="vendaExternaSubtotal">
+              R$ 0,00
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Taxa de entrega
+            </span>
+
+            <strong id="vendaExternaResumoTaxaEntrega">
+              R$ 0,00
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Taxa / comissão plataforma
+            </span>
+
+            <strong id="vendaExternaResumoTaxaPlataforma">
+              R$ 0,00
+            </strong>
+
+          </div>
+
+
+          <div class="edit-summary-total">
+
+            <span>
+              Total da venda
+            </span>
+
+            <strong id="vendaExternaTotal">
+              R$ 0,00
+            </strong>
+
+          </div>
+
+
+          <div class="external-net-total">
+
+            <span>
+              Valor líquido após plataforma
+            </span>
+
+            <strong id="vendaExternaLiquido">
+              R$ 0,00
+            </strong>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             AÇÕES
+        ================================================== -->
+
+        <div class="modal-actions edit-modal-actions">
+
+          <button
+            class="btn btn-dark"
+            type="button"
+            onclick="fecharModalVendaExterna()"
+          >
+            Cancelar
+          </button>
+
+
+          <button
+            id="btnRegistrarVendaExterna"
+            class="btn btn-green"
+            type="button"
+            onclick="registrarVendaExterna()"
+          >
+            Registrar venda
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
 
 
 
