@@ -626,30 +626,625 @@
               </h2>
 
               <p>
-                Acompanhe faturamento, custos, despesas e resultado.
+                Acompanhe faturamento, custos, despesas, margens e resultado líquido.
               </p>
+
+            </div>
+
+
+            <button
+              id="btnAtualizarFinanceiro"
+              class="btn-master btn-yellow"
+              type="button"
+            >
+              🔄 Atualizar financeiro
+            </button>
+
+          </div>
+
+
+          <div class="financial-period-toolbar">
+
+            <div class="financial-period-filter">
+
+              <button
+                type="button"
+                class="financial-period-btn active"
+                data-financial-period="today"
+              >
+                Hoje
+              </button>
+
+              <button
+                type="button"
+                class="financial-period-btn"
+                data-financial-period="7"
+              >
+                7 dias
+              </button>
+
+              <button
+                type="button"
+                class="financial-period-btn"
+                data-financial-period="30"
+              >
+                30 dias
+              </button>
+
+              <button
+                type="button"
+                class="financial-period-btn"
+                data-financial-period="month"
+              >
+                Este mês
+              </button>
+
+              <button
+                type="button"
+                class="financial-period-btn"
+                data-financial-period="custom"
+              >
+                Personalizado
+              </button>
+
+            </div>
+
+
+            <div
+              id="masterFinanceiroPeriodoPersonalizado"
+              class="financial-custom-period hidden"
+            >
+
+              <div class="financial-date-field">
+
+                <label for="masterFinanceiroDataInicio">
+                  De
+                </label>
+
+                <input
+                  type="date"
+                  id="masterFinanceiroDataInicio"
+                >
+
+              </div>
+
+
+              <div class="financial-date-field">
+
+                <label for="masterFinanceiroDataFim">
+                  Até
+                </label>
+
+                <input
+                  type="date"
+                  id="masterFinanceiroDataFim"
+                >
+
+              </div>
+
+
+              <button
+                type="button"
+                id="btnAplicarPeriodoFinanceiro"
+                class="btn-master btn-secondary"
+              >
+                Aplicar
+              </button>
 
             </div>
 
           </div>
 
 
-          <div class="master-placeholder">
+          <div class="financial-period-label">
 
             <span>
-              📊
+              Período analisado
             </span>
 
-            <h3>
-              Financeiro
-            </h3>
-
-            <p>
-              Nesta área teremos faturamento, custo dos produtos,
-              lucro bruto, despesas e lucro líquido.
-            </p>
+            <strong id="masterFinanceiroPeriodoLabel">
+              Hoje
+            </strong>
 
           </div>
+
+
+          <div class="financial-summary-grid">
+
+            <article class="financial-summary-card revenue">
+
+              <span class="financial-summary-icon">
+                💰
+              </span>
+
+              <div>
+
+                <span>
+                  Faturamento total
+                </span>
+
+                <strong id="masterFinanceiroFaturamento">
+                  R$ 0,00
+                </strong>
+
+                <small>
+                  Produtos + taxas de entrega
+                </small>
+
+              </div>
+
+            </article>
+
+
+            <article class="financial-summary-card">
+
+              <span class="financial-summary-icon">
+                🍔
+              </span>
+
+              <div>
+
+                <span>
+                  Venda de produtos
+                </span>
+
+                <strong id="masterFinanceiroVendaProdutos">
+                  R$ 0,00
+                </strong>
+
+                <small>
+                  Subtotal dos pedidos
+                </small>
+
+              </div>
+
+            </article>
+
+
+            <article class="financial-summary-card">
+
+              <span class="financial-summary-icon">
+                🛵
+              </span>
+
+              <div>
+
+                <span>
+                  Taxas de entrega
+                </span>
+
+                <strong id="masterFinanceiroTaxaEntrega">
+                  R$ 0,00
+                </strong>
+
+                <small>
+                  Receita de delivery
+                </small>
+
+              </div>
+
+            </article>
+
+
+            <article class="financial-summary-card cost">
+
+              <span class="financial-summary-icon">
+                🧮
+              </span>
+
+              <div>
+
+                <span>
+                  Custo dos produtos
+                </span>
+
+                <strong id="masterFinanceiroCustoProdutos">
+                  R$ 0,00
+                </strong>
+
+                <small>
+                  Custo das vendas
+                </small>
+
+              </div>
+
+            </article>
+
+
+            <article class="financial-summary-card gross-profit">
+
+              <span class="financial-summary-icon">
+                📈
+              </span>
+
+              <div>
+
+                <span>
+                  Lucro bruto
+                </span>
+
+                <strong id="masterFinanceiroLucroBruto">
+                  R$ 0,00
+                </strong>
+
+                <small>
+                  Faturamento - custo
+                </small>
+
+              </div>
+
+            </article>
+
+
+            <article class="financial-summary-card expense">
+
+              <span class="financial-summary-icon">
+                💸
+              </span>
+
+              <div>
+
+                <span>
+                  Despesas
+                </span>
+
+                <strong id="masterFinanceiroDespesas">
+                  R$ 0,00
+                </strong>
+
+                <small>
+                  Despesas ativas do período
+                </small>
+
+              </div>
+
+            </article>
+
+
+            <article class="financial-summary-card net-profit highlight">
+
+              <span class="financial-summary-icon">
+                💵
+              </span>
+
+              <div>
+
+                <span>
+                  Lucro líquido
+                </span>
+
+                <strong id="masterFinanceiroLucroLiquido">
+                  R$ 0,00
+                </strong>
+
+                <small>
+                  Lucro bruto - despesas
+                </small>
+
+              </div>
+
+            </article>
+
+
+            <article class="financial-summary-card">
+
+              <span class="financial-summary-icon">
+                📊
+              </span>
+
+              <div>
+
+                <span>
+                  Margem líquida
+                </span>
+
+                <strong id="masterFinanceiroMargemLiquida">
+                  0,0%
+                </strong>
+
+                <small>
+                  Lucro líquido / faturamento
+                </small>
+
+              </div>
+
+            </article>
+
+          </div>
+
+
+          <div class="financial-secondary-grid">
+
+            <article class="financial-secondary-card">
+
+              <span>
+                Margem bruta
+              </span>
+
+              <strong id="masterFinanceiroMargemBruta">
+                0,0%
+              </strong>
+
+            </article>
+
+
+            <article class="financial-secondary-card">
+
+              <span>
+                Ticket médio
+              </span>
+
+              <strong id="masterFinanceiroTicketMedio">
+                R$ 0,00
+              </strong>
+
+            </article>
+
+
+            <article class="financial-secondary-card">
+
+              <span>
+                Pedidos
+              </span>
+
+              <strong id="masterFinanceiroPedidos">
+                0
+              </strong>
+
+            </article>
+
+          </div>
+
+
+          <div class="financial-result-flow">
+
+            <div class="financial-result-step">
+
+              <span>
+                Faturamento
+              </span>
+
+              <strong id="masterFinanceiroFluxoFaturamento">
+                R$ 0,00
+              </strong>
+
+            </div>
+
+
+            <span class="financial-result-operator">
+              −
+            </span>
+
+
+            <div class="financial-result-step">
+
+              <span>
+                Custo dos produtos
+              </span>
+
+              <strong id="masterFinanceiroFluxoCusto">
+                R$ 0,00
+              </strong>
+
+            </div>
+
+
+            <span class="financial-result-operator">
+              =
+            </span>
+
+
+            <div class="financial-result-step gross">
+
+              <span>
+                Lucro bruto
+              </span>
+
+              <strong id="masterFinanceiroFluxoLucroBruto">
+                R$ 0,00
+              </strong>
+
+            </div>
+
+
+            <span class="financial-result-operator">
+              −
+            </span>
+
+
+            <div class="financial-result-step">
+
+              <span>
+                Despesas
+              </span>
+
+              <strong id="masterFinanceiroFluxoDespesas">
+                R$ 0,00
+              </strong>
+
+            </div>
+
+
+            <span class="financial-result-operator">
+              =
+            </span>
+
+
+            <div class="financial-result-step net">
+
+              <span>
+                Lucro líquido
+              </span>
+
+              <strong id="masterFinanceiroFluxoLucroLiquido">
+                R$ 0,00
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <div class="financial-panels-grid">
+
+            <section class="master-panel">
+
+              <div class="panel-title">
+
+                <div>
+
+                  <h3>
+                    🏆 Produtos no período
+                  </h3>
+
+                  <p>
+                    Faturamento, custo, lucro e margem por produto.
+                  </p>
+
+                </div>
+
+              </div>
+
+
+              <div class="table-wrap">
+
+                <table class="master-table financial-products-table">
+
+                  <thead>
+
+                    <tr>
+
+                      <th>
+                        Produto
+                      </th>
+
+                      <th>
+                        Qtd.
+                      </th>
+
+                      <th>
+                        Faturamento
+                      </th>
+
+                      <th>
+                        Custo
+                      </th>
+
+                      <th>
+                        Lucro
+                      </th>
+
+                      <th>
+                        Margem
+                      </th>
+
+                    </tr>
+
+                  </thead>
+
+
+                  <tbody id="masterFinanceiroProdutosTabela">
+
+                    <tr>
+
+                      <td
+                        colspan="6"
+                        class="table-empty"
+                      >
+                        Nenhuma venda encontrada no período.
+                      </td>
+
+                    </tr>
+
+                  </tbody>
+
+                </table>
+
+              </div>
+
+            </section>
+
+
+            <section class="master-panel">
+
+              <div class="panel-title">
+
+                <div>
+
+                  <h3>
+                    💸 Despesas por categoria
+                  </h3>
+
+                  <p>
+                    Distribuição dos gastos ativos no período.
+                  </p>
+
+                </div>
+
+                <button
+                  type="button"
+                  class="panel-link"
+                  data-go-page="despesas"
+                >
+                  Abrir despesas
+                </button>
+
+              </div>
+
+
+              <div class="table-wrap">
+
+                <table class="master-table financial-expenses-table">
+
+                  <thead>
+
+                    <tr>
+
+                      <th>
+                        Categoria
+                      </th>
+
+                      <th>
+                        Lançamentos
+                      </th>
+
+                      <th>
+                        Total
+                      </th>
+
+                    </tr>
+
+                  </thead>
+
+
+                  <tbody id="masterFinanceiroDespesasTabela">
+
+                    <tr>
+
+                      <td
+                        colspan="3"
+                        class="table-empty"
+                      >
+                        Nenhuma despesa encontrada no período.
+                      </td>
+
+                    </tr>
+
+                  </tbody>
+
+                </table>
+
+              </div>
+
+            </section>
+
+          </div>
+
+
+          <div
+            id="masterFinanceiroMensagem"
+            class="master-form-message"
+          ></div>
 
         </section>
 
