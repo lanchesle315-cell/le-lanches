@@ -2643,34 +2643,58 @@
               Forma de pagamento
             </label>
 
-            <select
-              id="formaPagamento"
-              onchange="atualizarPagamento()"
-            >
+<select
+  id="formaPagamento"
+  onchange="atualizarPagamento()"
+>
 
-              <option value="">
-                Selecione
-              </option>
+  <option value="">
+    Selecione
+  </option>
 
-              <option value="Dinheiro">
-                Dinheiro
-              </option>
+  <option value="Dinheiro">
+    Dinheiro
+  </option>
 
-              <option value="Cartão">
-                Cartão
-              </option>
+  <option value="Cartão">
+    Cartão
+  </option>
 
-            </select>
+  <option value="Pix">
+    Pix
+  </option>
+
+</select>
 
 
-            <div
-              id="boxPix"
-              style="display:none"
-            >
+<div
+  id="boxPix"
+  class="ll-pix-box"
+  style="display:none"
+>
 
-              <b id="chavePixTexto"></b>
+  <div class="ll-pix-info">
 
-            </div>
+    <span class="ll-pix-label">
+      Chave PIX
+    </span>
+
+    <strong id="chavePixTexto">
+      15996314700
+    </strong>
+
+  </div>
+
+  <button
+    type="button"
+    class="ll-btn-copy-pix"
+    onclick="copiarPix()"
+  >
+    <i class="bi bi-copy"></i>
+    Copiar chave
+  </button>
+
+</div>
 
           </div>
 
