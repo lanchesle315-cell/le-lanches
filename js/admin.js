@@ -2450,7 +2450,6 @@ function abrirModalVendaExterna() {
   const origem = byId("vendaExternaOrigem");
   const referencia = byId("vendaExternaReferencia");
   const cliente = byId("vendaExternaCliente");
-  const tipo = byId("vendaExternaTipo");
   const busca = byId("vendaExternaBuscaProduto");
   const taxaPlataforma = byId("vendaExternaTaxaPlataforma");
   const taxaEntrega = byId("vendaExternaTaxaEntrega");
@@ -2459,7 +2458,6 @@ function abrirModalVendaExterna() {
   if (origem) origem.value = "IFOOD";
   if (referencia) referencia.value = "";
   if (cliente) cliente.value = "";
-  if (tipo) tipo.value = "retirada";
   if (busca) busca.value = "";
   if (taxaPlataforma) taxaPlataforma.value = "0,00";
   if (taxaEntrega) taxaEntrega.value = "0,00";
@@ -2741,16 +2739,8 @@ function atualizarResumoVendaExterna() {
       ? Math.max(0, taxaEntregaValor)
       : 0;
 
-  const tipo =
-    String(
-      byId("vendaExternaTipo")?.value ||
-      "retirada"
-    );
-
   const taxaEntregaAplicada =
-    tipo === "delivery"
-      ? taxaEntregaDigitada
-      : 0;
+    taxaEntregaDigitada;
 
   const total =
     subtotal +
@@ -2824,18 +2814,6 @@ function validarVendaExterna() {
     throw new Error("Informe o nome do cliente.");
   }
 
-  const tipo =
-    String(
-      byId("vendaExternaTipo")?.value ||
-      ""
-    );
-
-  if (
-    !["retirada", "delivery"].includes(tipo)
-  ) {
-    throw new Error("Selecione o tipo do pedido.");
-  }
-
   const taxaPlataforma =
     converterValorDigitado(
       byId("vendaExternaTaxaPlataforma")?.value || 0
@@ -2901,11 +2879,7 @@ async function registrarVendaExterna() {
         ""
       ).trim();
 
-    const tipo =
-      String(
-        byId("vendaExternaTipo")?.value ||
-        "retirada"
-      );
+    const tipo = "delivery";
 
     const taxaPlataforma =
       Math.max(
@@ -2924,9 +2898,7 @@ async function registrarVendaExterna() {
       );
 
     const taxaEntrega =
-      tipo === "delivery"
-        ? taxaEntregaDigitada
-        : 0;
+      taxaEntregaDigitada;
 
     const observacao =
       String(
@@ -2945,9 +2917,7 @@ async function registrarVendaExterna() {
         tipo,
 
       customer_address:
-        tipo === "delivery"
-          ? `Entrega via ${obterLabelOrigemPedido(origem)}`
-          : null,
+        `Entrega via ${obterLabelOrigemPedido(origem)}`,
 
       customer_neighborhood:
         null,
@@ -3518,7 +3488,6 @@ const ordenacao = byId("ordenacao");
 
 const vendaExternaOrigem = byId("vendaExternaOrigem");
 const vendaExternaBuscaProduto = byId("vendaExternaBuscaProduto");
-const vendaExternaTipo = byId("vendaExternaTipo");
 const vendaExternaTaxaPlataforma = byId("vendaExternaTaxaPlataforma");
 const vendaExternaTaxaEntrega = byId("vendaExternaTaxaEntrega");
 
@@ -3547,13 +3516,6 @@ if (vendaExternaBuscaProduto) {
   vendaExternaBuscaProduto.addEventListener(
     "input",
     renderizarProdutosVendaExterna
-  );
-}
-
-if (vendaExternaTipo) {
-  vendaExternaTipo.addEventListener(
-    "change",
-    atualizarResumoVendaExterna
   );
 }
 
