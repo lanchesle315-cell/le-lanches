@@ -7321,7 +7321,7 @@ function iniciarAtualizacaoDisponibilidade() {
       }
 
     },
-    30000
+    2000
   );
 
 }
