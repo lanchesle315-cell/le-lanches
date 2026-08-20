@@ -2708,6 +2708,26 @@ function calcularSubtotalVendaExterna() {
   );
 }
 
+function formatarCampoMoedaVendaExterna(campo) {
+  if (!campo) return;
+
+  const texto = String(campo.value ?? "").trim();
+
+  if (texto === "") {
+    campo.value = "0,00";
+    return;
+  }
+
+  const valor = converterValorDigitado(texto);
+
+  if (!Number.isFinite(valor) || valor < 0) {
+    campo.value = "0,00";
+    return;
+  }
+
+  campo.value = valor.toFixed(2).replace(".", ",");
+}
+
 function atualizarResumoVendaExterna() {
   const subtotal =
     calcularSubtotalVendaExterna();
