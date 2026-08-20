@@ -1,6 +1,6 @@
 /* =========================================================
-   LÊ LANCHES
-   PAINEL DE ITENS
+   LÊ LANCHES - PAINEL DE ITENS
+   Controle de produtos e opções individuais
 ========================================================= */
 
 
@@ -192,28 +192,52 @@ const CATALOGO_ITENS = [
     code: 'A01',
     name: 'Adicionais R$ 3,00',
     category: 'Adicionais',
-    icon: '➕'
+    icon: '➕',
+
+    options: [
+      'Ovo',
+      'Mussarela',
+      'Salsicha'
+    ]
   },
 
   {
     code: 'A02',
     name: 'Adicionais R$ 5,00',
     category: 'Adicionais',
-    icon: '➕'
+    icon: '➕',
+
+    options: [
+      'Bacon',
+      'Calabresa',
+      'Hambúrguer tradicional'
+    ]
   },
 
   {
     code: 'A03',
     name: 'Adicionais R$ 6,00',
     category: 'Adicionais',
-    icon: '➕'
+    icon: '➕',
+
+    options: [
+      'Catupiry',
+      'Cheddar',
+      'Cream Cheese'
+    ]
   },
 
   {
     code: 'A04',
     name: 'Adicionais R$ 8,00',
     category: 'Adicionais',
-    icon: '➕'
+    icon: '➕',
+
+    options: [
+      'Hambúrguer Smash',
+      'Frango',
+      'Costela'
+    ]
   },
 
 
@@ -225,63 +249,114 @@ const CATALOGO_ITENS = [
     code: 'R01',
     name: 'Água',
     category: 'Bebidas',
-    icon: '🥤'
+    icon: '🥤',
+
+    options: [
+      'Com gás',
+      'Sem gás'
+    ]
   },
 
   {
     code: 'R02',
     name: 'Suco Del Valle 450ml',
     category: 'Bebidas',
-    icon: '🥤'
+    icon: '🥤',
+
+    options: [
+      'Uva',
+      'Laranja'
+    ]
   },
 
   {
     code: 'R03',
     name: 'Suco Bellas 500ml',
     category: 'Bebidas',
-    icon: '🥤'
+    icon: '🥤',
+
+    options: [
+      'Goiaba',
+      'Laranja',
+      'Caju',
+      'Maracujá',
+      'Acerola',
+      'Guaraná com açaí'
+    ]
   },
 
   {
     code: 'R04',
     name: 'Refrigerante Lata',
     category: 'Bebidas',
-    icon: '🥤'
+    icon: '🥤',
+
+    options: [
+      'Coca-Cola',
+      'Coca-Cola Zero',
+      'Fanta Laranja',
+      'Fanta Uva',
+      'Sprite'
+    ]
   },
 
   {
     code: 'R05',
     name: 'Cerveja Lata',
     category: 'Bebidas',
-    icon: '🍺'
+    icon: '🍺',
+
+    options: [
+      'Brahma',
+      'Skol'
+    ]
   },
 
   {
     code: 'R06',
     name: 'Cerveja Long Neck 330ml',
     category: 'Bebidas',
-    icon: '🍺'
+    icon: '🍺',
+
+    options: [
+      'Heineken'
+    ]
   },
 
   {
     code: 'R07',
     name: 'Refrigerante 2 Litros',
     category: 'Bebidas',
-    icon: '🥤'
+    icon: '🥤',
+
+    options: [
+      'Fanta',
+      'Sprite'
+    ]
   },
 
   {
     code: 'R08',
     name: 'Vedete 2 Litros',
     category: 'Bebidas',
-    icon: '🥤'
+    icon: '🥤',
+
+    options: [
+      'Tubaína',
+      'Guaraná'
+    ]
   },
 
   {
     code: 'R09',
     name: 'Coca-Cola 2 Litros',
     category: 'Bebidas',
-    icon: '🥤'
+    icon: '🥤',
+
+    options: [
+      'Coca-Cola',
+      'Coca-Cola Zero'
+    ]
   }
 
 ];
@@ -293,11 +368,14 @@ const CATALOGO_ITENS = [
 
 let disponibilidade = {};
 
-let filtroAtual = 'todos';
+let filtroAtual =
+  'todos';
 
-let termoBusca = '';
+let termoBusca =
+  '';
 
-let timeoutToast = null;
+let timeoutToast =
+  null;
 
 
 /* =========================================================
@@ -305,37 +383,117 @@ let timeoutToast = null;
 ========================================================= */
 
 const listaItens =
-  document.getElementById('listaItens');
+  document.getElementById(
+    'listaItens'
+  );
 
 const loadingItens =
-  document.getElementById('loadingItens');
+  document.getElementById(
+    'loadingItens'
+  );
 
 const listaVazia =
-  document.getElementById('listaVazia');
+  document.getElementById(
+    'listaVazia'
+  );
 
 const buscaItem =
-  document.getElementById('buscaItem');
+  document.getElementById(
+    'buscaItem'
+  );
 
 const btnAtualizarItens =
-  document.getElementById('btnAtualizarItens');
+  document.getElementById(
+    'btnAtualizarItens'
+  );
 
 
 /* =========================================================
-   NORMALIZA TEXTO
+   UTILITÁRIOS
 ========================================================= */
 
-function normalizarTexto(texto) {
+function normalizarTexto(
+  texto
+) {
 
   return String(
     texto || ''
   )
-    .normalize('NFD')
+    .normalize(
+      'NFD'
+    )
     .replace(
       /[\u0300-\u036f]/g,
       ''
     )
     .toLowerCase()
     .trim();
+
+}
+
+
+function escaparHtml(
+  texto
+) {
+
+  return String(
+    texto || ''
+  )
+    .replace(
+      /&/g,
+      '&amp;'
+    )
+    .replace(
+      /</g,
+      '&lt;'
+    )
+    .replace(
+      />/g,
+      '&gt;'
+    )
+    .replace(
+      /"/g,
+      '&quot;'
+    )
+    .replace(
+      /'/g,
+      '&#039;'
+    );
+
+}
+
+
+/* =========================================================
+   GERAR CÓDIGO DA OPÇÃO
+========================================================= */
+
+function slugOpcao(
+  texto
+) {
+
+  return normalizarTexto(
+    texto
+  )
+    .replace(
+      /[^a-z0-9]+/g,
+      '-'
+    )
+    .replace(
+      /^-+|-+$/g,
+      ''
+    );
+
+}
+
+
+function codigoOpcao(
+  item,
+  opcao
+) {
+
+  return (
+    `${item.code}::${slugOpcao(opcao)}`
+  );
 
 }
 
@@ -350,13 +508,19 @@ function mostrarToast(
 ) {
 
   const toast =
-    document.getElementById('toast');
+    document.getElementById(
+      'toast'
+    );
 
   const texto =
-    document.getElementById('toastTexto');
+    document.getElementById(
+      'toastTexto'
+    );
 
   const icon =
-    document.getElementById('toastIcon');
+    document.getElementById(
+      'toastIcon'
+    );
 
 
   if (
@@ -364,7 +528,9 @@ function mostrarToast(
     !texto ||
     !icon
   ) {
+
     return;
+
   }
 
 
@@ -422,15 +588,96 @@ function mostrarToast(
 
 
 /* =========================================================
-   CRIAR REGISTROS AUSENTES
+   DISPONIBILIDADE
+========================================================= */
+
+function itemEstaDisponivel(
+  code
+) {
+
+  return (
+    disponibilidade[
+      code
+    ] !== false
+  );
+
+}
+
+
+function itemTemOpcoes(
+  item
+) {
+
+  return (
+    Array.isArray(
+      item.options
+    ) &&
+    item.options.length > 0
+  );
+
+}
+
+
+function opcaoEstaDisponivel(
+  item,
+  opcao
+) {
+
+  return itemEstaDisponivel(
+    codigoOpcao(
+      item,
+      opcao
+    )
+  );
+
+}
+
+
+function itemPossuiAlgoCongelado(
+  item
+) {
+
+  if (
+    !itemEstaDisponivel(
+      item.code
+    )
+  ) {
+
+    return true;
+
+  }
+
+
+  return (
+    itemTemOpcoes(
+      item
+    ) &&
+    item.options.some(
+      opcao =>
+        !opcaoEstaDisponivel(
+          item,
+          opcao
+        )
+    )
+  );
+
+}
+
+
+/* =========================================================
+   GARANTIR REGISTROS NO BANCO
 ========================================================= */
 
 async function garantirItensNoBanco() {
 
-  if (!supabaseClient) {
+  if (
+    !supabaseClient
+  ) {
+
     throw new Error(
       'Supabase não configurado.'
     );
+
   }
 
 
@@ -439,36 +686,57 @@ async function garantirItensNoBanco() {
     error
   } =
     await supabaseClient
-      .from('product_availability')
+      .from(
+        'product_availability'
+      )
       .select(
-        'product_code, product_name, available'
+        'product_code'
       );
 
 
-  if (error) {
+  if (
+    error
+  ) {
+
     throw error;
+
   }
 
 
   const existentes =
     new Set(
-      (data || [])
-        .map(
-          item => item.product_code
-        )
+      (
+        data ||
+        []
+      ).map(
+        item =>
+          item.product_code
+      )
     );
 
 
   const ausentes =
-    CATALOGO_ITENS
-      .filter(
-        item =>
-          !existentes.has(
-            item.code
-          )
+    [];
+
+
+  for (
+    const item
+    of CATALOGO_ITENS
+  ) {
+
+    /*
+     * Produto principal
+     */
+
+    if (
+      !existentes.has(
+        item.code
       )
-      .map(
-        item => ({
+    ) {
+
+      ausentes.push(
+        {
+
           product_code:
             item.code,
 
@@ -477,12 +745,63 @@ async function garantirItensNoBanco() {
 
           available:
             true
-        })
+
+        }
       );
 
+    }
 
-  if (!ausentes.length) {
+
+    /*
+     * Opções internas
+     */
+
+    for (
+      const opcao
+      of item.options || []
+    ) {
+
+      const code =
+        codigoOpcao(
+          item,
+          opcao
+        );
+
+
+      if (
+        !existentes.has(
+          code
+        )
+      ) {
+
+        ausentes.push(
+          {
+
+            product_code:
+              code,
+
+            product_name:
+              `${item.name} - ${opcao}`,
+
+            available:
+              true
+
+          }
+        );
+
+      }
+
+    }
+
+  }
+
+
+  if (
+    !ausentes.length
+  ) {
+
     return;
+
   }
 
 
@@ -490,14 +809,20 @@ async function garantirItensNoBanco() {
     error: insertError
   } =
     await supabaseClient
-      .from('product_availability')
+      .from(
+        'product_availability'
+      )
       .insert(
         ausentes
       );
 
 
-  if (insertError) {
+  if (
+    insertError
+  ) {
+
     throw insertError;
+
   }
 
 }
@@ -509,7 +834,9 @@ async function garantirItensNoBanco() {
 
 async function carregarDisponibilidade() {
 
-  if (!supabaseClient) {
+  if (
+    !supabaseClient
+  ) {
 
     throw new Error(
       'Supabase não configurado no config.js.'
@@ -523,18 +850,25 @@ async function carregarDisponibilidade() {
     error
   } =
     await supabaseClient
-      .from('product_availability')
+      .from(
+        'product_availability'
+      )
       .select(
         'product_code, product_name, available'
       );
 
 
-  if (error) {
+  if (
+    error
+  ) {
+
     throw error;
+
   }
 
 
-  disponibilidade = {};
+  disponibilidade =
+    {};
 
 
   for (
@@ -553,27 +887,7 @@ async function carregarDisponibilidade() {
 
 
 /* =========================================================
-   STATUS
-========================================================= */
-
-function itemEstaDisponivel(code) {
-
-  if (
-    disponibilidade[code] === undefined
-  ) {
-    return true;
-  }
-
-
-  return (
-    disponibilidade[code] !== false
-  );
-
-}
-
-
-/* =========================================================
-   FILTRAGEM
+   FILTROS
 ========================================================= */
 
 function obterItensFiltrados() {
@@ -587,30 +901,40 @@ function obterItensFiltrados() {
   return CATALOGO_ITENS.filter(
     item => {
 
-      const disponivel =
-        itemEstaDisponivel(
-          item.code
+      const congelado =
+        itemPossuiAlgoCongelado(
+          item
         );
 
 
       if (
-        filtroAtual === 'disponiveis' &&
-        !disponivel
+        filtroAtual ===
+          'disponiveis' &&
+        congelado
       ) {
+
         return false;
+
       }
 
 
       if (
-        filtroAtual === 'congelados' &&
-        disponivel
+        filtroAtual ===
+          'congelados' &&
+        !congelado
       ) {
+
         return false;
+
       }
 
 
-      if (!busca) {
+      if (
+        !busca
+      ) {
+
         return true;
+
       }
 
 
@@ -619,8 +943,14 @@ function obterItensFiltrados() {
           [
             item.code,
             item.name,
-            item.category
-          ].join(' ')
+            item.category,
+            ...(
+              item.options ||
+              []
+            )
+          ].join(
+            ' '
+          )
         );
 
 
@@ -644,55 +974,445 @@ function atualizarResumo() {
     CATALOGO_ITENS.length;
 
 
-  const disponiveis =
-    CATALOGO_ITENS.filter(
-      item =>
-        itemEstaDisponivel(
-          item.code
-        )
-    ).length;
-
-
   const congelados =
-    total - disponiveis;
+    CATALOGO_ITENS
+      .filter(
+        item =>
+          itemPossuiAlgoCongelado(
+            item
+          )
+      )
+      .length;
 
 
-  document
-    .getElementById(
+  const disponiveis =
+    total -
+    congelados;
+
+
+  const elTotal =
+    document.getElementById(
       'totalItens'
-    )
-    .textContent =
+    );
+
+  const elDisponiveis =
+    document.getElementById(
+      'totalDisponiveis'
+    );
+
+  const elCongelados =
+    document.getElementById(
+      'totalCongelados'
+    );
+
+
+  if (
+    elTotal
+  ) {
+
+    elTotal.textContent =
       total;
 
+  }
 
-  document
-    .getElementById(
-      'totalDisponiveis'
-    )
-    .textContent =
+
+  if (
+    elDisponiveis
+  ) {
+
+    elDisponiveis.textContent =
       disponiveis;
 
+  }
 
-  document
-    .getElementById(
-      'totalCongelados'
-    )
-    .textContent =
+
+  if (
+    elCongelados
+  ) {
+
+    elCongelados.textContent =
       congelados;
+
+  }
 
 }
 
 
 /* =========================================================
-   CARD DO ITEM
+   SALVAR DISPONIBILIDADE
 ========================================================= */
 
-function criarCardItem(item) {
+async function salvarDisponibilidade(
+  code,
+  nome,
+  novoStatus,
+  button = null
+) {
 
-  const disponivel =
+  if (
+    !supabaseClient
+  ) {
+
+    mostrarToast(
+      'Supabase não configurado.',
+      'error'
+    );
+
+    return false;
+
+  }
+
+
+  const anterior =
+    itemEstaDisponivel(
+      code
+    );
+
+
+  try {
+
+    if (
+      button
+    ) {
+
+      button.disabled =
+        true;
+
+
+      button.dataset.textoAnterior =
+        button.textContent;
+
+
+      button.textContent =
+        'Salvando...';
+
+    }
+
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from(
+          'product_availability'
+        )
+        .upsert(
+          {
+
+            product_code:
+              code,
+
+            product_name:
+              nome,
+
+            available:
+              novoStatus,
+
+            updated_at:
+              new Date()
+                .toISOString()
+
+          },
+          {
+
+            onConflict:
+              'product_code'
+
+          }
+        );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    disponibilidade[
+      code
+    ] =
+      novoStatus;
+
+
+    atualizarResumo();
+
+    renderizarItens();
+
+
+    mostrarToast(
+      novoStatus
+        ? `${nome} está disponível novamente.`
+        : `${nome} foi congelado.`
+    );
+
+
+    return true;
+
+  } catch (
+    erro
+  ) {
+
+    console.error(
+      'Erro ao atualizar disponibilidade:',
+      erro
+    );
+
+
+    disponibilidade[
+      code
+    ] =
+      anterior;
+
+
+    renderizarItens();
+
+
+    mostrarToast(
+      'Não foi possível alterar o item.',
+      'error'
+    );
+
+
+    return false;
+
+  }
+
+}
+
+
+/* =========================================================
+   ALTERAR PRODUTO COMPLETO
+========================================================= */
+
+async function alterarProdutoInteiro(
+  item,
+  novoStatus,
+  button
+) {
+
+  await salvarDisponibilidade(
+    item.code,
+    item.name,
+    novoStatus,
+    button
+  );
+
+}
+
+
+/* =========================================================
+   ALTERAR UMA OPÇÃO
+========================================================= */
+
+async function alterarOpcao(
+  item,
+  opcao,
+  novoStatus,
+  button
+) {
+
+  await salvarDisponibilidade(
+    codigoOpcao(
+      item,
+      opcao
+    ),
+    `${item.name} - ${opcao}`,
+    novoStatus,
+    button
+  );
+
+}
+
+
+/* =========================================================
+   LISTA INTERNA DE OPÇÕES
+========================================================= */
+
+function criarListaOpcoes(
+  item
+) {
+
+  const linhas =
+    item.options
+      .map(
+        opcao => {
+
+          const disponivel =
+            opcaoEstaDisponivel(
+              item,
+              opcao
+            );
+
+
+          return `
+
+            <div
+              class="availability-option-row"
+              style="
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                gap:12px;
+                padding:10px 12px;
+                margin-top:8px;
+                border:1px solid rgba(255,255,255,.08);
+                border-radius:10px;
+                background:rgba(255,255,255,.025);
+              "
+            >
+
+              <div
+                style="
+                  min-width:0;
+                "
+              >
+
+                <strong
+                  style="
+                    display:block;
+                    color:#fff;
+                  "
+                >
+                  ${escaparHtml(opcao)}
+                </strong>
+
+
+                <small
+                  style="
+                    color:${
+                      disponivel
+                        ? '#5ee68a'
+                        : '#ff7b7b'
+                    };
+                  "
+                >
+
+                  ${
+                    disponivel
+                      ? '● Disponível'
+                      : '● Esgotado'
+                  }
+
+                </small>
+
+              </div>
+
+
+              <button
+                type="button"
+                class="option-toggle-btn"
+                data-option="${escaparHtml(opcao)}"
+                style="
+                  border:1px solid ${
+                    disponivel
+                      ? 'rgba(255,80,80,.45)'
+                      : 'rgba(46,204,113,.45)'
+                  };
+                  background:${
+                    disponivel
+                      ? 'rgba(120,30,30,.25)'
+                      : 'rgba(20,100,55,.25)'
+                  };
+                  color:${
+                    disponivel
+                      ? '#ff7b7b'
+                      : '#5ee68a'
+                  };
+                  border-radius:9px;
+                  padding:8px 10px;
+                  font-weight:700;
+                  cursor:pointer;
+                  white-space:nowrap;
+                "
+              >
+
+                ${
+                  disponivel
+                    ? '❄️ Congelar'
+                    : '✓ Liberar'
+                }
+
+              </button>
+
+            </div>
+
+          `;
+
+        }
+      )
+      .join(
+        ''
+      );
+
+
+  return `
+
+    <div
+      class="item-options-panel"
+      style="
+        display:none;
+        margin-top:12px;
+        padding-top:12px;
+        border-top:1px solid rgba(255,255,255,.08);
+      "
+    >
+
+      <div
+        style="
+          font-size:13px;
+          color:#aaa;
+          margin-bottom:4px;
+        "
+      >
+        Escolha exatamente o que deseja bloquear:
+      </div>
+
+      ${linhas}
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   CRIAR CARD
+========================================================= */
+
+function criarCardItem(
+  item
+) {
+
+  const produtoDisponivel =
     itemEstaDisponivel(
       item.code
     );
+
+
+  const temOpcoes =
+    itemTemOpcoes(
+      item
+    );
+
+
+  const opcoesCongeladas =
+    temOpcoes
+
+      ? item.options
+          .filter(
+            opcao =>
+              !opcaoEstaDisponivel(
+                item,
+                opcao
+              )
+          )
+          .length
+
+      : 0;
 
 
   const card =
@@ -702,9 +1422,54 @@ function criarCardItem(item) {
 
 
   card.className =
-    disponivel
-      ? 'item-card'
-      : 'item-card is-frozen';
+    (
+      !produtoDisponivel ||
+      opcoesCongeladas > 0
+    )
+
+      ? 'item-card is-frozen'
+
+      : 'item-card';
+
+
+  let statusTexto =
+    '● DISPONÍVEL';
+
+
+  let statusClasse =
+    'available';
+
+
+  if (
+    !produtoDisponivel
+  ) {
+
+    statusTexto =
+      '● ESGOTADO';
+
+    statusClasse =
+      'frozen';
+
+  } else if (
+    opcoesCongeladas > 0
+  ) {
+
+    statusTexto =
+      `● ${opcoesCongeladas} OPÇÃO${
+        opcoesCongeladas > 1
+          ? 'ÕES'
+          : ''
+      } ESGOTADA${
+        opcoesCongeladas > 1
+          ? 'S'
+          : ''
+      }`;
+
+
+    statusClasse =
+      'frozen';
+
+  }
 
 
   card.innerHTML = `
@@ -715,19 +1480,14 @@ function criarCardItem(item) {
         ${item.code}
       </span>
 
-      <span class="
-        item-status
-        ${disponivel
-          ? 'available'
-          : 'frozen'}
-      ">
 
-        ${
-          disponivel
-            ? '● DISPONÍVEL'
-            : '● ESGOTADO'
-        }
-
+      <span
+        class="
+          item-status
+          ${statusClasse}
+        "
+      >
+        ${statusTexto}
       </span>
 
     </div>
@@ -736,11 +1496,11 @@ function criarCardItem(item) {
     <div class="item-info">
 
       <h4>
-        ${item.name}
+        ${escaparHtml(item.name)}
       </h4>
 
       <span>
-        ${item.category}
+        ${escaparHtml(item.category)}
       </span>
 
     </div>
@@ -748,50 +1508,174 @@ function criarCardItem(item) {
 
     <div class="item-actions">
 
-      <button
-        type="button"
-        class="
-          item-toggle
-          ${
-            disponivel
-              ? 'freeze'
-              : 'unfreeze'
-          }
-        "
-        data-code="${item.code}"
-      >
+      ${
+        temOpcoes
 
-        ${
-          disponivel
-            ? '❄️ Congelar item'
-            : '✓ Disponibilizar item'
-        }
+          ? `
 
-      </button>
+            <button
+              type="button"
+              class="
+                item-toggle
+                manage-options
+              "
+            >
+              ⚙️ Gerenciar opções
+            </button>
+
+          `
+
+          : `
+
+            <button
+              type="button"
+              class="
+                item-toggle
+                ${
+                  produtoDisponivel
+                    ? 'freeze'
+                    : 'unfreeze'
+                }
+                simple-toggle
+              "
+            >
+
+              ${
+                produtoDisponivel
+                  ? '❄️ Congelar item'
+                  : '✓ Disponibilizar item'
+              }
+
+            </button>
+
+          `
+      }
 
     </div>
+
+
+    ${
+      temOpcoes
+        ? criarListaOpcoes(
+            item
+          )
+        : ''
+    }
 
   `;
 
 
-  const button =
-    card.querySelector(
-      '.item-toggle'
+  /* =======================================================
+     PRODUTO COM OPÇÕES
+  ======================================================= */
+
+  if (
+    temOpcoes
+  ) {
+
+    const btnGerenciar =
+      card.querySelector(
+        '.manage-options'
+      );
+
+
+    const painel =
+      card.querySelector(
+        '.item-options-panel'
+      );
+
+
+    btnGerenciar.addEventListener(
+      'click',
+      () => {
+
+        const aberto =
+          painel.style.display !==
+          'none';
+
+
+        painel.style.display =
+          aberto
+            ? 'none'
+            : 'block';
+
+
+        btnGerenciar.textContent =
+          aberto
+            ? '⚙️ Gerenciar opções'
+            : '▲ Fechar opções';
+
+      }
     );
 
 
-  button.addEventListener(
-    'click',
-    () => {
+    card
+      .querySelectorAll(
+        '.option-toggle-btn'
+      )
+      .forEach(
+        button => {
 
-      alterarDisponibilidade(
-        item,
-        !disponivel,
-        button
+          button.addEventListener(
+            'click',
+            async event => {
+
+              event.stopPropagation();
+
+
+              const opcao =
+                button.dataset.option;
+
+
+              const disponivel =
+                opcaoEstaDisponivel(
+                  item,
+                  opcao
+                );
+
+
+              await alterarOpcao(
+                item,
+                opcao,
+                !disponivel,
+                button
+              );
+
+            }
+          );
+
+        }
       );
 
-    }
-  );
+  }
+
+
+  /* =======================================================
+     PRODUTO SIMPLES
+  ======================================================= */
+
+  else {
+
+    const button =
+      card.querySelector(
+        '.simple-toggle'
+      );
+
+
+    button.addEventListener(
+      'click',
+      () => {
+
+        alterarProdutoInteiro(
+          item,
+          !produtoDisponivel,
+          button
+        );
+
+      }
+    );
+
+  }
 
 
   return card;
@@ -800,13 +1684,17 @@ function criarCardItem(item) {
 
 
 /* =========================================================
-   RENDER
+   RENDERIZAR
 ========================================================= */
 
 function renderizarItens() {
 
-  if (!listaItens) {
+  if (
+    !listaItens
+  ) {
+
     return;
+
   }
 
 
@@ -814,7 +1702,8 @@ function renderizarItens() {
     obterItensFiltrados();
 
 
-  listaItens.innerHTML = '';
+  listaItens.innerHTML =
+    '';
 
 
   loadingItens
@@ -823,12 +1712,15 @@ function renderizarItens() {
     );
 
 
-  if (!itens.length) {
+  if (
+    !itens.length
+  ) {
 
     listaVazia
       ?.classList.remove(
         'hidden'
       );
+
 
     return;
 
@@ -841,7 +1733,8 @@ function renderizarItens() {
     );
 
 
-  const categorias = {};
+  const categorias =
+    {};
 
 
   for (
@@ -857,7 +1750,8 @@ function renderizarItens() {
 
       categorias[
         item.category
-      ] = [];
+      ] =
+        [];
 
     }
 
@@ -892,7 +1786,8 @@ function renderizarItens() {
 
 
     const icon =
-      produtos[0]?.icon || '🍔';
+      produtos[0]?.icon ||
+      '🍔';
 
 
     section.innerHTML = `
@@ -905,19 +1800,24 @@ function renderizarItens() {
             ${icon}
           </div>
 
+
           <div>
 
             <h3>
-              ${categoria}
+              ${escaparHtml(categoria)}
             </h3>
 
+
             <span class="category-count">
+
               ${produtos.length}
+
               ${
                 produtos.length === 1
                   ? 'item'
                   : 'itens'
               }
+
             </span>
 
           </div>
@@ -962,133 +1862,6 @@ function renderizarItens() {
 
 
 /* =========================================================
-   ALTERAR DISPONIBILIDADE
-========================================================= */
-
-async function alterarDisponibilidade(
-  item,
-  novoStatus,
-  button
-) {
-
-  if (!supabaseClient) {
-
-    mostrarToast(
-      'Supabase não configurado.',
-      'error'
-    );
-
-    return;
-
-  }
-
-
-  const statusAnterior =
-    itemEstaDisponivel(
-      item.code
-    );
-
-
-  try {
-
-    button.disabled = true;
-
-
-    button.textContent =
-      'Salvando...';
-
-
-    const {
-      error
-    } =
-      await supabaseClient
-        .from(
-          'product_availability'
-        )
-        .upsert(
-          {
-
-            product_code:
-              item.code,
-
-            product_name:
-              item.name,
-
-            available:
-              novoStatus,
-
-            updated_at:
-              new Date()
-                .toISOString()
-
-          },
-          {
-
-            onConflict:
-              'product_code'
-
-          }
-        );
-
-
-    if (error) {
-      throw error;
-    }
-
-
-    disponibilidade[
-      item.code
-    ] =
-      novoStatus;
-
-
-    atualizarResumo();
-
-    renderizarItens();
-
-
-    if (novoStatus) {
-
-      mostrarToast(
-        `${item.name} está disponível novamente.`
-      );
-
-    } else {
-
-      mostrarToast(
-        `${item.name} foi congelado.`
-      );
-
-    }
-
-  } catch (erro) {
-
-    console.error(
-      'Erro ao atualizar item:',
-      erro
-    );
-
-
-    disponibilidade[
-      item.code
-    ] =
-      statusAnterior;
-
-
-    renderizarItens();
-
-
-    mostrarToast(
-      'Não foi possível alterar o item.',
-      'error'
-    );
-
-  }
-
-}
-
-
-/* =========================================================
    INICIALIZAÇÃO
 ========================================================= */
 
@@ -1102,19 +1875,30 @@ async function iniciarPainelItens() {
       );
 
 
-    listaItens.innerHTML = '';
+    if (
+      listaItens
+    ) {
+
+      listaItens.innerHTML =
+        '';
+
+    }
 
 
     await garantirItensNoBanco();
+
 
     await carregarDisponibilidade();
 
 
     atualizarResumo();
 
+
     renderizarItens();
 
-  } catch (erro) {
+  } catch (
+    erro
+  ) {
 
     console.error(
       'Erro ao iniciar painel de itens:',
@@ -1134,19 +1918,32 @@ async function iniciarPainelItens() {
       );
 
 
-    listaVazia.innerHTML = `
+    if (
+      listaVazia
+    ) {
 
-      <i class="bi bi-exclamation-triangle"></i>
+      listaVazia.innerHTML = `
 
-      <strong>
-        Não foi possível carregar os itens
-      </strong>
+        <i
+          class="
+            bi
+            bi-exclamation-triangle
+          "
+        ></i>
 
-      <span>
-        Verifique a conexão com o Supabase.
-      </span>
 
-    `;
+        <strong>
+          Não foi possível carregar os itens
+        </strong>
+
+
+        <span>
+          Verifique a conexão com o Supabase.
+        </span>
+
+      `;
+
+    }
 
 
     mostrarToast(
@@ -1160,7 +1957,7 @@ async function iniciarPainelItens() {
 
 
 /* =========================================================
-   EVENTOS
+   BUSCA
 ========================================================= */
 
 buscaItem
@@ -1169,13 +1966,19 @@ buscaItem
     event => {
 
       termoBusca =
-        event.target.value || '';
+        event.target.value ||
+        '';
+
 
       renderizarItens();
 
     }
   );
 
+
+/* =========================================================
+   FILTROS
+========================================================= */
 
 document
   .querySelectorAll(
@@ -1193,10 +1996,13 @@ document
               '.filter-btn'
             )
             .forEach(
-              btn =>
+              btn => {
+
                 btn.classList.remove(
                   'active'
-                )
+                );
+
+              }
             );
 
 
@@ -1219,6 +2025,10 @@ document
   );
 
 
+/* =========================================================
+   ATUALIZAR
+========================================================= */
+
 btnAtualizarItens
   ?.addEventListener(
     'click',
@@ -1232,7 +2042,9 @@ btnAtualizarItens
 
         await carregarDisponibilidade();
 
+
         atualizarResumo();
+
 
         renderizarItens();
 
@@ -1241,7 +2053,9 @@ btnAtualizarItens
           'Lista atualizada.'
         );
 
-      } catch (erro) {
+      } catch (
+        erro
+      ) {
 
         console.error(
           erro
@@ -1263,6 +2077,10 @@ btnAtualizarItens
     }
   );
 
+
+/* =========================================================
+   START
+========================================================= */
 
 document.addEventListener(
   'DOMContentLoaded',
