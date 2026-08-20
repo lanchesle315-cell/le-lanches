@@ -2349,7 +2349,7 @@ async function lojaEstaAbertaAgora() {
 
 async function carregarStatusLoja() {
   const config = await atualizarConfiguracaoLojaStatus();
-  const aberta = await lojaEstaAbertaAgora();
+  const aberta = calcularLojaAbertaComConfig(config);
   const modo = obterModoLoja(config);
 
   aplicarStatusLoja(aberta, modo);
@@ -2377,24 +2377,73 @@ function aplicarStatusLoja(aberta, modo = "automatico") {
     if (modo === "automatico") {
       btnAuto.classList.add("ativo");
       btnAuto.textContent = "Automático ✓";
+      btnAuto.title = "Clique para mudar para o modo manual";
     } else {
-      btnAuto.textContent = "Automático";
+      btnAuto.textContent = "Manual ✓";
+      btnAuto.title = "Clique para voltar ao modo automático";
     }
   }
 
   if (modo === "automatico") {
-    btn.title = "Modo automático (horário)";
+    btn.title = aberta
+      ? "Loja aberta pelo horário automático. Clique para fechar manualmente."
+      : "Loja fechada pelo horário automático. Clique para abrir manualmente.";
   } else if (modo === "aberta") {
-    btn.title = "Aberta manualmente";
+    btn.title = "Loja aberta manualmente. Clique para fechar.";
   } else if (modo === "fechada") {
-    btn.title = "Fechada manualmente";
+    btn.title = "Loja fechada manualmente. Clique para abrir.";
   }
+}
+
+function calcularLojaAbertaComConfig(config) {
+  if (!config) return false;
+
+  if (config.manual_force_open === true) return true;
+  if (config.manual_force_closed === true) return false;
+
+  if (config.auto_open === true) {
+    return obterStatusAutomaticoLoja(config);
+  }
+
+  return false;
+}
+
+async function salvarConfiguracaoLoja(payload) {
+  if (!supabaseClient) {
+    throw new Error("Supabase não configurado.");
+  }
+
+  const { data, error } = await supabaseClient
+    .from(TABELA_CONFIG_LOJA)
+    .update(payload)
+    .eq("id", STORE_SETTINGS_ID)
+    .select(
+      "id, open_time, close_time, auto_open, manual_force_open, manual_force_closed, updated_at"
+    );
+
+  if (error) {
+    console.error("Erro ao salvar configuração da loja:", error);
+    throw error;
+  }
+
+  if (!Array.isArray(data) || data.length === 0) {
+    throw new Error(
+      "Nenhuma configuração foi atualizada. Verifique se existe o registro id=1 na tabela store_settings e se a policy UPDATE permite alteração."
+    );
+  }
+
+  configuracaoLoja = {
+    ...(configuracaoLoja || obterConfiguracaoLojaPadrao()),
+    ...data[0]
+  };
+
+  return configuracaoLoja;
 }
 
 async function definirModoLoja(modo) {
   if (!supabaseClient) {
     alert("Supabase não configurado.");
-    return;
+    return false;
   }
 
   let payload = null;
@@ -2421,21 +2470,26 @@ async function definirModoLoja(modo) {
       updated_at: new Date().toISOString()
     };
   } else {
-    return;
+    return false;
   }
 
-  const { error } = await supabaseClient
-    .from(TABELA_CONFIG_LOJA)
-    .update(payload)
-    .eq("id", STORE_SETTINGS_ID);
+  try {
+    const config = await salvarConfiguracaoLoja(payload);
+    const aberta = calcularLojaAbertaComConfig(config);
+    const modoAtual = obterModoLoja(config);
 
-  if (error) {
-    console.error("Erro ao definir modo da loja:", error);
-    alert("Não foi possível atualizar o modo da loja.");
-    return;
+    aplicarStatusLoja(aberta, modoAtual);
+    return true;
+  } catch (erro) {
+    console.error("Erro ao definir modo da loja:", erro);
+
+    alert(
+      "Não foi possível atualizar o modo da loja.\n\n" +
+      (erro?.message || "Erro desconhecido.")
+    );
+
+    return false;
   }
-
-  await carregarStatusLoja();
 }
 
 async function alternarStatusLoja() {
@@ -2444,30 +2498,81 @@ async function alternarStatusLoja() {
     return;
   }
 
+  const btn = byId("btnToggleLoja");
+
   try {
-    const abertaAgora = await lojaEstaAbertaAgora();
-    const novoStatus = !abertaAgora;
+    if (btn) btn.disabled = true;
 
-    const { error } = await supabaseClient
-      .from(TABELA_CONFIG_LOJA)
-      .update({
-        auto_open: false,
-        manual_force_open: novoStatus,
-        manual_force_closed: !novoStatus,
-        updated_at: new Date().toISOString()
-      })
-      .eq("id", STORE_SETTINGS_ID);
+    const config =
+      (await atualizarConfiguracaoLojaStatus()) ||
+      obterConfiguracaoLojaPadrao();
 
-    if (error) {
-      console.error("Erro ao atualizar status da loja:", error);
-      alert("Não foi possível atualizar o status da loja.");
+    const abertaAgora = calcularLojaAbertaComConfig(config);
+    const novoModo = abertaAgora ? "fechada" : "aberta";
+
+    await definirModoLoja(novoModo);
+  } catch (erro) {
+    console.error("Falha ao alternar status da loja:", erro);
+
+    alert(
+      "Não foi possível atualizar o status da loja.\n\n" +
+      (erro?.message || "Erro desconhecido.")
+    );
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function alternarModoLoja() {
+  if (!supabaseClient) {
+    alert("Supabase não configurado.");
+    return;
+  }
+
+  const btnAuto = byId("btnModoAutomatico");
+
+  try {
+    if (btnAuto) btnAuto.disabled = true;
+
+    const config =
+      (await atualizarConfiguracaoLojaStatus()) ||
+      obterConfiguracaoLojaPadrao();
+
+    const modoAtual = obterModoLoja(config);
+
+    /*
+     * Se já está manual, volta para o automático.
+     */
+    if (modoAtual !== "automatico") {
+      await definirModoLoja("automatico");
       return;
     }
 
-    await carregarStatusLoja();
+    /*
+     * Se está automático, muda para manual mantendo
+     * o estado atual da loja.
+     *
+     * Exemplo:
+     * - Automático está ABERTO -> entra em Manual ABERTO.
+     * - Automático está FECHADO -> entra em Manual FECHADO.
+     *
+     * Depois basta clicar no botão "Aberta/Fechada"
+     * para alternar manualmente.
+     */
+    const abertaAgora = calcularLojaAbertaComConfig(config);
+
+    await definirModoLoja(
+      abertaAgora ? "aberta" : "fechada"
+    );
   } catch (erro) {
-    console.error("Falha ao alternar status da loja:", erro);
-    alert("Não foi possível atualizar o status da loja.");
+    console.error("Falha ao alternar modo da loja:", erro);
+
+    alert(
+      "Não foi possível alterar entre Automático e Manual.\n\n" +
+      (erro?.message || "Erro desconhecido.")
+    );
+  } finally {
+    if (btnAuto) btnAuto.disabled = false;
   }
 }
 
@@ -2556,7 +2661,7 @@ if (btnToggleLoja) {
 
 if (btnModoAutomatico) {
   btnModoAutomatico.addEventListener("click", async () => {
-    await removerOverrideLoja();
+    await alternarModoLoja();
   });
 }
 
