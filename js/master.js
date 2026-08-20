@@ -59,6 +59,11 @@ let buscaDespesaMaster = '';
 let filtroPeriodoDespesaMaster = 'all';
 let filtroCategoriaDespesaMaster = 'all';
 
+let periodoFinanceiroMaster = 'today';
+let dataInicioFinanceiroMaster = null;
+let dataFimFinanceiroMaster = null;
+let carregandoFinanceiroMaster = false;
+
 
 /* =========================================================
    UTILITÁRIOS
@@ -670,6 +675,22 @@ function abrirPaginaMaster(pagina) {
   }
 
   if (
+    pagina === 'financeiro'
+  ) {
+
+    carregarFinanceiroMaster()
+      .catch(
+        erro => {
+
+          console.error(
+            'Erro ao carregar Financeiro:',
+            erro
+          );
+        }
+      );
+  }
+
+  if (
     pagina === 'produtos'
   ) {
 
@@ -1042,6 +1063,1253 @@ function atualizarCardsFinanceiros(itens) {
       );
   }
 }
+
+
+/* =========================================================
+   FINANCEIRO - PERÍODO
+========================================================= */
+
+function criarDataLocalFinanceiro(
+  ano,
+  mes,
+  dia,
+  fimDoDia = false
+) {
+
+  return new Date(
+    ano,
+    mes,
+    dia,
+    fimDoDia ? 23 : 0,
+    fimDoDia ? 59 : 0,
+    fimDoDia ? 59 : 0,
+    fimDoDia ? 999 : 0
+  );
+}
+
+
+function dataISOParaLocalFinanceiro(
+  valor,
+  fimDoDia = false
+) {
+
+  const partes =
+    String(valor || '')
+      .split('-')
+      .map(Number);
+
+  if (
+    partes.length !== 3 ||
+    !partes[0] ||
+    !partes[1] ||
+    !partes[2]
+  ) {
+
+    return null;
+  }
+
+  return criarDataLocalFinanceiro(
+    partes[0],
+    partes[1] - 1,
+    partes[2],
+    fimDoDia
+  );
+}
+
+
+function obterPeriodoFinanceiroMaster() {
+
+  const agora =
+    new Date();
+
+  let inicio = null;
+  let fim = null;
+  let label = '';
+
+  if (
+    periodoFinanceiroMaster === 'today'
+  ) {
+
+    inicio =
+      criarDataLocalFinanceiro(
+        agora.getFullYear(),
+        agora.getMonth(),
+        agora.getDate()
+      );
+
+    fim =
+      criarDataLocalFinanceiro(
+        agora.getFullYear(),
+        agora.getMonth(),
+        agora.getDate(),
+        true
+      );
+
+    label = 'Hoje';
+
+  } else if (
+    periodoFinanceiroMaster === 'month'
+  ) {
+
+    inicio =
+      criarDataLocalFinanceiro(
+        agora.getFullYear(),
+        agora.getMonth(),
+        1
+      );
+
+    fim =
+      criarDataLocalFinanceiro(
+        agora.getFullYear(),
+        agora.getMonth() + 1,
+        0,
+        true
+      );
+
+    label =
+      agora.toLocaleDateString(
+        'pt-BR',
+        {
+          month: 'long',
+          year: 'numeric'
+        }
+      );
+
+  } else if (
+    periodoFinanceiroMaster === 'custom'
+  ) {
+
+    inicio =
+      dataISOParaLocalFinanceiro(
+        dataInicioFinanceiroMaster
+      );
+
+    fim =
+      dataISOParaLocalFinanceiro(
+        dataFimFinanceiroMaster,
+        true
+      );
+
+    if (
+      !inicio ||
+      !fim
+    ) {
+
+      throw new Error(
+        'Informe a data inicial e a data final.'
+      );
+    }
+
+    if (
+      inicio.getTime() >
+      fim.getTime()
+    ) {
+
+      throw new Error(
+        'A data inicial não pode ser maior que a data final.'
+      );
+    }
+
+    label =
+      `${inicio.toLocaleDateString('pt-BR')} até ${fim.toLocaleDateString('pt-BR')}`;
+
+  } else {
+
+    const dias =
+      Number(
+        periodoFinanceiroMaster
+      );
+
+    const quantidadeDias =
+      Number.isFinite(dias) &&
+      dias > 0
+        ? dias
+        : 7;
+
+    inicio =
+      criarDataLocalFinanceiro(
+        agora.getFullYear(),
+        agora.getMonth(),
+        agora.getDate()
+      );
+
+    inicio.setDate(
+      inicio.getDate() -
+      (quantidadeDias - 1)
+    );
+
+    fim =
+      criarDataLocalFinanceiro(
+        agora.getFullYear(),
+        agora.getMonth(),
+        agora.getDate(),
+        true
+      );
+
+    label =
+      `Últimos ${quantidadeDias} dias`;
+  }
+
+  return {
+    inicio,
+    fim,
+    label
+  };
+}
+
+
+/* =========================================================
+   FINANCEIRO - BUSCAR DADOS
+========================================================= */
+
+async function buscarDadosFinanceirosMaster(
+  inicio,
+  fim
+) {
+
+  if (!supabaseClient) {
+
+    return {
+      pedidos: [],
+      itens: [],
+      despesas: []
+    };
+  }
+
+  const inicioISO =
+    inicio.toISOString();
+
+  const fimISO =
+    fim.toISOString();
+
+  const [
+    respostaPedidos,
+    respostaItens,
+    respostaDespesas
+  ] =
+    await Promise.all(
+      [
+        supabaseClient
+          .from('orders')
+          .select(
+            `
+            id,
+            subtotal,
+            delivery_fee,
+            total,
+            status,
+            created_at
+            `
+          )
+          .gte(
+            'created_at',
+            inicioISO
+          )
+          .lte(
+            'created_at',
+            fimISO
+          )
+          .order(
+            'created_at',
+            {
+              ascending: false
+            }
+          ),
+
+        supabaseClient
+          .from('order_items')
+          .select(
+            `
+            id,
+            order_id,
+            product_id,
+            product_code,
+            product_name,
+            quantity,
+            sale_unit_price,
+            cost_unit_price,
+            sale_total,
+            cost_total,
+            gross_profit,
+            created_at
+            `
+          )
+          .gte(
+            'created_at',
+            inicioISO
+          )
+          .lte(
+            'created_at',
+            fimISO
+          ),
+
+        supabaseClient
+          .from('expenses')
+          .select(
+            `
+            id,
+            description,
+            category,
+            amount,
+            expense_date,
+            active
+            `
+          )
+          .eq(
+            'active',
+            true
+          )
+          .gte(
+            'expense_date',
+            [
+              inicio.getFullYear(),
+              String(
+                inicio.getMonth() + 1
+              ).padStart(2, '0'),
+              String(
+                inicio.getDate()
+              ).padStart(2, '0')
+            ].join('-')
+          )
+          .lte(
+            'expense_date',
+            [
+              fim.getFullYear(),
+              String(
+                fim.getMonth() + 1
+              ).padStart(2, '0'),
+              String(
+                fim.getDate()
+              ).padStart(2, '0')
+            ].join('-')
+          )
+      ]
+    );
+
+  if (
+    respostaPedidos.error
+  ) {
+
+    throw respostaPedidos.error;
+  }
+
+  if (
+    respostaItens.error
+  ) {
+
+    throw respostaItens.error;
+  }
+
+  if (
+    respostaDespesas.error
+  ) {
+
+    throw respostaDespesas.error;
+  }
+
+  const pedidos =
+    Array.isArray(
+      respostaPedidos.data
+    )
+      ? respostaPedidos.data
+      : [];
+
+  const idsPedidos =
+    new Set(
+      pedidos.map(
+        pedido =>
+          String(
+            pedido.id
+          )
+      )
+    );
+
+  const itens =
+    (
+      Array.isArray(
+        respostaItens.data
+      )
+        ? respostaItens.data
+        : []
+    ).filter(
+      item =>
+        idsPedidos.has(
+          String(
+            item.order_id
+          )
+        )
+    );
+
+  const despesas =
+    Array.isArray(
+      respostaDespesas.data
+    )
+      ? respostaDespesas.data
+      : [];
+
+  return {
+    pedidos,
+    itens,
+    despesas
+  };
+}
+
+
+/* =========================================================
+   FINANCEIRO - RESUMO
+========================================================= */
+
+function calcularResumoFinanceiroMaster(
+  pedidos,
+  itens,
+  despesas
+) {
+
+  const vendaProdutos =
+    pedidos.reduce(
+      (
+        total,
+        pedido
+      ) =>
+        total +
+        numeroSeguro(
+          pedido.subtotal
+        ),
+      0
+    );
+
+  const taxaEntrega =
+    pedidos.reduce(
+      (
+        total,
+        pedido
+      ) =>
+        total +
+        numeroSeguro(
+          pedido.delivery_fee
+        ),
+      0
+    );
+
+  const faturamento =
+    pedidos.reduce(
+      (
+        total,
+        pedido
+      ) =>
+        total +
+        numeroSeguro(
+          pedido.total
+        ),
+      0
+    );
+
+  const custoProdutos =
+    itens.reduce(
+      (
+        total,
+        item
+      ) =>
+        total +
+        numeroSeguro(
+          item.cost_total
+        ),
+      0
+    );
+
+  const totalDespesas =
+    despesas.reduce(
+      (
+        total,
+        despesa
+      ) =>
+        total +
+        numeroSeguro(
+          despesa.amount
+        ),
+      0
+    );
+
+  const lucroBruto =
+    faturamento -
+    custoProdutos;
+
+  const lucroLiquido =
+    lucroBruto -
+    totalDespesas;
+
+  const margemBruta =
+    faturamento > 0
+      ? (
+          lucroBruto /
+          faturamento
+        ) * 100
+      : 0;
+
+  const margemLiquida =
+    faturamento > 0
+      ? (
+          lucroLiquido /
+          faturamento
+        ) * 100
+      : 0;
+
+  const quantidadePedidos =
+    pedidos.length;
+
+  const ticketMedio =
+    quantidadePedidos > 0
+      ? faturamento /
+        quantidadePedidos
+      : 0;
+
+  return {
+    faturamento,
+    vendaProdutos,
+    taxaEntrega,
+    custoProdutos,
+    lucroBruto,
+    totalDespesas,
+    lucroLiquido,
+    margemBruta,
+    margemLiquida,
+    quantidadePedidos,
+    ticketMedio
+  };
+}
+
+
+function atualizarElementoFinanceiro(
+  id,
+  valor
+) {
+
+  const elemento =
+    byId(id);
+
+  if (elemento) {
+
+    elemento.textContent =
+      valor;
+  }
+}
+
+
+function formatarPercentualFinanceiro(
+  valor
+) {
+
+  return numeroSeguro(
+    valor
+  ).toLocaleString(
+    'pt-BR',
+    {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1
+    }
+  ) + '%';
+}
+
+
+function renderizarResumoFinanceiroMaster(
+  resumo,
+  labelPeriodo
+) {
+
+  atualizarElementoFinanceiro(
+    'masterFinanceiroPeriodoLabel',
+    labelPeriodo
+  );
+
+  atualizarElementoFinanceiro(
+    'masterFinanceiroFaturamento',
+    formatarMoeda(
+      resumo.faturamento
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterFinanceiroVendaProdutos',
+    formatarMoeda(
+      resumo.vendaProdutos
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterFinanceiroTaxaEntrega',
+    formatarMoeda(
+      resumo.taxaEntrega
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterFinanceiroCustoProdutos',
+    formatarMoeda(
+      resumo.custoProdutos
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterFinanceiroLucroBruto',
+    formatarMoeda(
+      resumo.lucroBruto
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterFinanceiroDespesas',
+    formatarMoeda(
+      resumo.totalDespesas
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterFinanceiroLucroLiquido',
+    formatarMoeda(
+      resumo.lucroLiquido
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterFinanceiroMargemLiquida',
+    formatarPercentualFinanceiro(
+      resumo.margemLiquida
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterFinanceiroMargemBruta',
+    formatarPercentualFinanceiro(
+      resumo.margemBruta
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterFinanceiroTicketMedio',
+    formatarMoeda(
+      resumo.ticketMedio
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterFinanceiroPedidos',
+    formatarNumero(
+      resumo.quantidadePedidos
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterFinanceiroFluxoFaturamento',
+    formatarMoeda(
+      resumo.faturamento
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterFinanceiroFluxoCusto',
+    formatarMoeda(
+      resumo.custoProdutos
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterFinanceiroFluxoLucroBruto',
+    formatarMoeda(
+      resumo.lucroBruto
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterFinanceiroFluxoDespesas',
+    formatarMoeda(
+      resumo.totalDespesas
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterFinanceiroFluxoLucroLiquido',
+    formatarMoeda(
+      resumo.lucroLiquido
+    )
+  );
+}
+
+
+/* =========================================================
+   FINANCEIRO - PRODUTOS
+========================================================= */
+
+function renderizarProdutosFinanceiroMaster(
+  itens
+) {
+
+  const tbody =
+    byId(
+      'masterFinanceiroProdutosTabela'
+    );
+
+  if (!tbody) {
+
+    return;
+  }
+
+  const agrupados =
+    new Map();
+
+  itens.forEach(
+    item => {
+
+      const chave =
+        String(
+          item.product_id ||
+          item.product_code ||
+          item.product_name ||
+          'produto'
+        );
+
+      if (
+        !agrupados.has(
+          chave
+        )
+      ) {
+
+        agrupados.set(
+          chave,
+          {
+            nome:
+              item.product_name ||
+              'Produto',
+            quantidade: 0,
+            faturamento: 0,
+            custo: 0
+          }
+        );
+      }
+
+      const atual =
+        agrupados.get(
+          chave
+        );
+
+      atual.quantidade +=
+        numeroSeguro(
+          item.quantity
+        );
+
+      atual.faturamento +=
+        numeroSeguro(
+          item.sale_total
+        );
+
+      atual.custo +=
+        numeroSeguro(
+          item.cost_total
+        );
+    }
+  );
+
+  const produtos =
+    Array.from(
+      agrupados.values()
+    )
+      .map(
+        item => {
+
+          const lucro =
+            item.faturamento -
+            item.custo;
+
+          const margem =
+            item.faturamento > 0
+              ? (
+                  lucro /
+                  item.faturamento
+                ) * 100
+              : 0;
+
+          return {
+            ...item,
+            lucro,
+            margem
+          };
+        }
+      )
+      .sort(
+        (a, b) =>
+          b.faturamento -
+          a.faturamento
+      );
+
+  if (
+    produtos.length === 0
+  ) {
+
+    tbody.innerHTML =
+      `
+        <tr>
+          <td
+            colspan="6"
+            class="table-empty"
+          >
+            Nenhuma venda encontrada no período.
+          </td>
+        </tr>
+      `;
+
+    return;
+  }
+
+  tbody.innerHTML =
+    produtos
+      .map(
+        item => `
+
+          <tr>
+
+            <td>
+              <strong>
+                ${escaparHtml(
+                  item.nome
+                )}
+              </strong>
+            </td>
+
+            <td>
+              ${formatarQuantidade(
+                item.quantidade
+              )}
+            </td>
+
+            <td>
+              ${formatarMoeda(
+                item.faturamento
+              )}
+            </td>
+
+            <td>
+              ${formatarMoeda(
+                item.custo
+              )}
+            </td>
+
+            <td>
+              <strong>
+                ${formatarMoeda(
+                  item.lucro
+                )}
+              </strong>
+            </td>
+
+            <td>
+              ${formatarPercentualFinanceiro(
+                item.margem
+              )}
+            </td>
+
+          </tr>
+
+        `
+      )
+      .join('');
+}
+
+
+/* =========================================================
+   FINANCEIRO - DESPESAS POR CATEGORIA
+========================================================= */
+
+function renderizarDespesasFinanceiroMaster(
+  despesas
+) {
+
+  const tbody =
+    byId(
+      'masterFinanceiroDespesasTabela'
+    );
+
+  if (!tbody) {
+
+    return;
+  }
+
+  const categorias =
+    new Map();
+
+  despesas.forEach(
+    despesa => {
+
+      const categoria =
+        despesa.category ||
+        'outros';
+
+      if (
+        !categorias.has(
+          categoria
+        )
+      ) {
+
+        categorias.set(
+          categoria,
+          {
+            categoria,
+            quantidade: 0,
+            total: 0
+          }
+        );
+      }
+
+      const atual =
+        categorias.get(
+          categoria
+        );
+
+      atual.quantidade += 1;
+
+      atual.total +=
+        numeroSeguro(
+          despesa.amount
+        );
+    }
+  );
+
+  const lista =
+    Array.from(
+      categorias.values()
+    )
+      .sort(
+        (a, b) =>
+          b.total -
+          a.total
+      );
+
+  if (
+    lista.length === 0
+  ) {
+
+    tbody.innerHTML =
+      `
+        <tr>
+          <td
+            colspan="3"
+            class="table-empty"
+          >
+            Nenhuma despesa encontrada no período.
+          </td>
+        </tr>
+      `;
+
+    return;
+  }
+
+  tbody.innerHTML =
+    lista
+      .map(
+        item => `
+
+          <tr>
+
+            <td>
+              ${escaparHtml(
+                obterLabelCategoriaDespesa(
+                  item.categoria
+                )
+              )}
+            </td>
+
+            <td>
+              ${formatarNumero(
+                item.quantidade
+              )}
+            </td>
+
+            <td>
+              <strong>
+                ${formatarMoeda(
+                  item.total
+                )}
+              </strong>
+            </td>
+
+          </tr>
+
+        `
+      )
+      .join('');
+}
+
+
+/* =========================================================
+   FINANCEIRO - CARREGAR
+========================================================= */
+
+async function carregarFinanceiroMaster() {
+
+  if (
+    carregandoFinanceiroMaster
+  ) {
+
+    return;
+  }
+
+  const mensagem =
+    byId(
+      'masterFinanceiroMensagem'
+    );
+
+  const botao =
+    byId(
+      'btnAtualizarFinanceiro'
+    );
+
+  const textoAnterior =
+    botao?.innerHTML ||
+    '🔄 Atualizar financeiro';
+
+  try {
+
+    carregandoFinanceiroMaster =
+      true;
+
+    if (botao) {
+
+      botao.disabled =
+        true;
+
+      botao.innerHTML =
+        '⏳ Atualizando...';
+    }
+
+    mostrarMensagemFormulario(
+      mensagem,
+      'Carregando dados financeiros...',
+      'warning'
+    );
+
+    const periodo =
+      obterPeriodoFinanceiroMaster();
+
+    const {
+      pedidos,
+      itens,
+      despesas
+    } =
+      await buscarDadosFinanceirosMaster(
+        periodo.inicio,
+        periodo.fim
+      );
+
+    const resumo =
+      calcularResumoFinanceiroMaster(
+        pedidos,
+        itens,
+        despesas
+      );
+
+    renderizarResumoFinanceiroMaster(
+      resumo,
+      periodo.label
+    );
+
+    renderizarProdutosFinanceiroMaster(
+      itens
+    );
+
+    renderizarDespesasFinanceiroMaster(
+      despesas
+    );
+
+    mostrarMensagemFormulario(
+      mensagem,
+      ''
+    );
+
+  } catch (erro) {
+
+    console.error(
+      'Erro ao carregar Financeiro:',
+      erro
+    );
+
+    mostrarMensagemFormulario(
+      mensagem,
+      erro?.message ||
+      'Não foi possível carregar o financeiro.'
+    );
+
+  } finally {
+
+    carregandoFinanceiroMaster =
+      false;
+
+    if (botao) {
+
+      botao.disabled =
+        false;
+
+      botao.innerHTML =
+        textoAnterior;
+    }
+  }
+}
+
+
+/* =========================================================
+   FINANCEIRO - FILTROS E EVENTOS
+========================================================= */
+
+function configurarFinanceiroMaster() {
+
+  document
+    .querySelectorAll(
+      '.financial-period-btn'
+    )
+    .forEach(
+      botao => {
+
+        botao.addEventListener(
+          'click',
+          async () => {
+
+            document
+              .querySelectorAll(
+                '.financial-period-btn'
+              )
+              .forEach(
+                item => {
+
+                  item.classList.remove(
+                    'active'
+                  );
+                }
+              );
+
+            botao.classList.add(
+              'active'
+            );
+
+            periodoFinanceiroMaster =
+              botao.dataset
+                .financialPeriod ||
+              'today';
+
+            const personalizado =
+              byId(
+                'masterFinanceiroPeriodoPersonalizado'
+              );
+
+            if (
+              periodoFinanceiroMaster ===
+              'custom'
+            ) {
+
+              personalizado
+                ?.classList
+                .remove(
+                  'hidden'
+                );
+
+              const hoje =
+                dataHojeISO();
+
+              if (
+                !dataInicioFinanceiroMaster
+              ) {
+
+                dataInicioFinanceiroMaster =
+                  hoje;
+              }
+
+              if (
+                !dataFimFinanceiroMaster
+              ) {
+
+                dataFimFinanceiroMaster =
+                  hoje;
+              }
+
+              if (
+                byId(
+                  'masterFinanceiroDataInicio'
+                )
+              ) {
+
+                byId(
+                  'masterFinanceiroDataInicio'
+                ).value =
+                  dataInicioFinanceiroMaster;
+              }
+
+              if (
+                byId(
+                  'masterFinanceiroDataFim'
+                )
+              ) {
+
+                byId(
+                  'masterFinanceiroDataFim'
+                ).value =
+                  dataFimFinanceiroMaster;
+              }
+
+              return;
+            }
+
+            personalizado
+              ?.classList
+              .add(
+                'hidden'
+              );
+
+            await carregarFinanceiroMaster();
+          }
+        );
+      }
+    );
+
+
+  const aplicar =
+    byId(
+      'btnAplicarPeriodoFinanceiro'
+    );
+
+  if (aplicar) {
+
+    aplicar.addEventListener(
+      'click',
+      async () => {
+
+        dataInicioFinanceiroMaster =
+          byId(
+            'masterFinanceiroDataInicio'
+          )?.value ||
+          null;
+
+        dataFimFinanceiroMaster =
+          byId(
+            'masterFinanceiroDataFim'
+          )?.value ||
+          null;
+
+        await carregarFinanceiroMaster();
+      }
+    );
+  }
+
+
+  const atualizar =
+    byId(
+      'btnAtualizarFinanceiro'
+    );
+
+  if (atualizar) {
+
+    atualizar.addEventListener(
+      'click',
+      carregarFinanceiroMaster
+    );
+  }
+}
+
 
 
 /* =========================================================
@@ -6626,6 +7894,8 @@ function configurarEventosMaster() {
 
   configurarFiltroPeriodo();
 
+  configurarFinanceiroMaster();
+
   configurarBotoesMaster();
 
   configurarFiltrosProdutosMaster();
@@ -6707,6 +7977,7 @@ async function iniciarMaster() {
   await Promise.all(
     [
       carregarDashboard(),
+      carregarFinanceiroMaster(),
       carregarProdutosMaster(),
       carregarDespesasMaster()
     ]
