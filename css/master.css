@@ -60,47 +60,31 @@ textarea {
 .master-loading-box {
   width: 100%;
   max-width: 360px;
-
   padding: 34px 24px;
-
   text-align: center;
-
   background: #121214;
-
-  border:
-    1px solid rgba(255, 255, 255, 0.08);
-
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 22px;
-
-  box-shadow:
-    0 25px 70px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5);
 }
 
 .master-loading-box img {
   width: 95px;
   height: 95px;
-
   border-radius: 50%;
-
   object-fit: cover;
-
   margin-bottom: 18px;
-
-  border:
-    3px solid #ffc107;
+  border: 3px solid #ffc107;
 }
 
 .master-loading-box strong {
   display: block;
-
   margin-bottom: 8px;
-
   font-size: 18px;
 }
 
 .master-loading-box span {
   color: #8f8f98;
-
   font-size: 13px;
 }
 
@@ -111,7 +95,6 @@ textarea {
 
 .master-app {
   min-height: 100vh;
-
   display: flex;
 
   background:
@@ -133,7 +116,6 @@ textarea {
   min-height: 100vh;
 
   position: fixed;
-
   left: 0;
   top: 0;
   bottom: 0;
@@ -148,8 +130,7 @@ textarea {
       #0d0d0f 100%
     );
 
-  border-right:
-    1px solid rgba(255, 255, 255, 0.07);
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
 
   padding: 22px 16px;
 
@@ -164,13 +145,11 @@ textarea {
 .sidebar-brand {
   display: flex;
   align-items: center;
-
   gap: 12px;
 
   padding: 8px 8px 22px;
 
-  border-bottom:
-    1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .sidebar-brand img {
@@ -178,11 +157,9 @@ textarea {
   height: 54px;
 
   border-radius: 50%;
-
   object-fit: cover;
 
-  border:
-    2px solid #ffc107;
+  border: 2px solid #ffc107;
 }
 
 .sidebar-brand div {
@@ -196,7 +173,6 @@ textarea {
 
   font-size: 10px;
   font-weight: 900;
-
   letter-spacing: 1px;
 
   margin-bottom: 4px;
@@ -210,9 +186,7 @@ textarea {
   font-size: 17px;
 
   white-space: nowrap;
-
   overflow: hidden;
-
   text-overflow: ellipsis;
 }
 
@@ -224,7 +198,6 @@ textarea {
 .master-nav {
   display: flex;
   flex-direction: column;
-
   gap: 7px;
 
   margin-top: 22px;
@@ -235,25 +208,20 @@ textarea {
 
   display: flex;
   align-items: center;
-
   gap: 12px;
 
   padding: 13px 14px;
 
-  border:
-    1px solid transparent;
-
+  border: 1px solid transparent;
   border-radius: 12px;
 
   background: transparent;
-
   color: #aaaab2;
 
   font-size: 14px;
   font-weight: 700;
 
   text-align: left;
-
   cursor: pointer;
 
   transition:
@@ -265,17 +233,13 @@ textarea {
 
 .master-nav-item span {
   width: 22px;
-
   font-size: 18px;
-
   text-align: center;
 }
 
 .master-nav-item:hover {
   color: #ffffff;
-
-  background:
-    rgba(255, 255, 255, 0.035);
+  background: rgba(255, 255, 255, 0.035);
 }
 
 .master-nav-item.active {
@@ -288,11 +252,9 @@ textarea {
       #f2aa00
     );
 
-  border-color:
-    rgba(255, 193, 7, 0.7);
+  border-color: rgba(255, 193, 7, 0.7);
 
-  box-shadow:
-    0 8px 22px rgba(255, 193, 7, 0.12);
+  box-shadow: 0 8px 22px rgba(255, 193, 7, 0.12);
 }
 
 
@@ -305,13 +267,11 @@ textarea {
 
   display: flex;
   flex-direction: column;
-
   gap: 8px;
 
   padding-top: 20px;
 
-  border-top:
-    1px solid rgba(255, 255, 255, 0.07);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .sidebar-link,
@@ -339,34 +299,26 @@ textarea {
 
 .sidebar-link {
   color: #aaaab2;
-
   background: transparent;
 }
 
 .sidebar-link:hover {
   color: #ffffff;
-
-  background:
-    rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .sidebar-logout {
-  border:
-    1px solid rgba(255, 80, 80, 0.2);
+  border: 1px solid rgba(255, 80, 80, 0.2);
 
   color: #ff7272;
-
-  background:
-    rgba(255, 80, 80, 0.06);
+  background: rgba(255, 80, 80, 0.06);
 
   cursor: pointer;
 }
 
 .sidebar-logout:hover {
   color: #ffffff;
-
-  background:
-    rgba(255, 80, 80, 0.15);
+  background: rgba(255, 80, 80, 0.15);
 }
 
 
@@ -375,9 +327,7 @@ textarea {
 ========================================================= */
 
 .master-content {
-  width:
-    calc(100% - 260px);
-
+  width: calc(100% - 260px);
   min-height: 100vh;
 
   margin-left: 260px;
@@ -402,14 +352,11 @@ textarea {
 
   padding: 18px 28px;
 
-  background:
-    rgba(10, 10, 11, 0.92);
+  background: rgba(10, 10, 11, 0.92);
 
-  border-bottom:
-    1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 
   position: sticky;
-
   top: 0;
 
   backdrop-filter: blur(12px);
@@ -422,7 +369,6 @@ textarea {
 
   font-size: 11px;
   font-weight: 900;
-
   letter-spacing: 1px;
 
   margin-bottom: 4px;
@@ -432,14 +378,12 @@ textarea {
 
 .master-topbar h1 {
   font-size: 24px;
-
   line-height: 1.15;
 }
 
 .topbar-right {
   display: flex;
   align-items: center;
-
   gap: 16px;
 }
 
@@ -455,13 +399,11 @@ textarea {
 
   padding-right: 16px;
 
-  border-right:
-    1px solid rgba(255, 255, 255, 0.08);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .master-clock span {
   font-size: 11px;
-
   color: #777780;
 
   margin-bottom: 2px;
@@ -469,7 +411,6 @@ textarea {
 
 .master-clock strong {
   color: #ffffff;
-
   font-size: 15px;
 }
 
@@ -481,7 +422,6 @@ textarea {
 .master-user {
   display: flex;
   align-items: center;
-
   gap: 10px;
 
   min-width: 0;
@@ -499,11 +439,8 @@ textarea {
 
   border-radius: 12px;
 
-  background:
-    rgba(255, 193, 7, 0.1);
-
-  border:
-    1px solid rgba(255, 193, 7, 0.22);
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.22);
 
   font-size: 18px;
 }
@@ -522,9 +459,7 @@ textarea {
   margin-bottom: 3px;
 
   white-space: nowrap;
-
   overflow: hidden;
-
   text-overflow: ellipsis;
 }
 
@@ -534,13 +469,10 @@ textarea {
   max-width: 210px;
 
   color: #85858d;
-
   font-size: 11px;
 
   white-space: nowrap;
-
   overflow: hidden;
-
   text-overflow: ellipsis;
 }
 
@@ -582,7 +514,6 @@ textarea {
 
 .page-heading h2 {
   font-size: 25px;
-
   margin-bottom: 5px;
 }
 
@@ -590,7 +521,6 @@ textarea {
   color: #898991;
 
   font-size: 14px;
-
   line-height: 1.45;
 }
 
@@ -603,7 +533,6 @@ textarea {
   min-height: 42px;
 
   border: 0;
-
   border-radius: 11px;
 
   padding: 0 16px;
@@ -620,15 +549,12 @@ textarea {
 }
 
 .btn-master:hover {
-  transform:
-    translateY(-1px);
+  transform: translateY(-1px);
 }
 
 .btn-master:disabled {
   opacity: 0.55;
-
   cursor: wait;
-
   transform: none;
 }
 
@@ -642,8 +568,7 @@ textarea {
       #f2aa00
     );
 
-  box-shadow:
-    0 9px 22px rgba(255, 193, 7, 0.12);
+  box-shadow: 0 9px 22px rgba(255, 193, 7, 0.12);
 }
 
 
@@ -653,7 +578,6 @@ textarea {
 
 .period-filter {
   display: inline-flex;
-
   gap: 6px;
 
   padding: 5px;
@@ -662,9 +586,7 @@ textarea {
 
   background: #111114;
 
-  border:
-    1px solid rgba(255, 255, 255, 0.07);
-
+  border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 12px;
 }
 
@@ -672,13 +594,11 @@ textarea {
   min-height: 36px;
 
   border: 0;
-
   border-radius: 9px;
 
   padding: 0 14px;
 
   color: #8d8d96;
-
   background: transparent;
 
   font-size: 12px;
@@ -693,7 +613,6 @@ textarea {
 
 .period-btn.active {
   color: #111111;
-
   background: #ffc107;
 }
 
@@ -721,7 +640,6 @@ textarea {
 
   display: flex;
   align-items: center;
-
   gap: 14px;
 
   padding: 20px;
@@ -735,16 +653,13 @@ textarea {
       rgba(15, 15, 17, 0.98)
     );
 
-  border:
-    1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.07);
 
-  box-shadow:
-    0 14px 30px rgba(0, 0, 0, 0.14);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.14);
 }
 
 .master-stat-card.highlight {
-  border-color:
-    rgba(255, 193, 7, 0.24);
+  border-color: rgba(255, 193, 7, 0.24);
 
   background:
     linear-gradient(
@@ -766,11 +681,8 @@ textarea {
 
   border-radius: 13px;
 
-  background:
-    rgba(255, 193, 7, 0.08);
-
-  border:
-    1px solid rgba(255, 193, 7, 0.16);
+  background: rgba(255, 193, 7, 0.08);
+  border: 1px solid rgba(255, 193, 7, 0.16);
 
   font-size: 22px;
 }
@@ -796,7 +708,6 @@ textarea {
   color: #ffffff;
 
   font-size: 24px;
-
   line-height: 1.1;
 
   overflow-wrap: anywhere;
@@ -834,15 +745,13 @@ textarea {
       #101012
     );
 
-  border:
-    1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.07);
 
   border-radius: 17px;
 
   padding: 20px;
 
-  box-shadow:
-    0 15px 32px rgba(0, 0, 0, 0.13);
+  box-shadow: 0 15px 32px rgba(0, 0, 0, 0.13);
 }
 
 .master-panel-full {
@@ -861,15 +770,12 @@ textarea {
 
 .panel-title h3 {
   font-size: 16px;
-
   margin-bottom: 4px;
 }
 
 .panel-title p {
   color: #777780;
-
   font-size: 12px;
-
   line-height: 1.4;
 }
 
@@ -879,7 +785,6 @@ textarea {
   border: 0;
 
   color: #ffc107;
-
   background: transparent;
 
   font-size: 12px;
@@ -900,7 +805,6 @@ textarea {
 .panel-list {
   display: flex;
   flex-direction: column;
-
   gap: 9px;
 }
 
@@ -912,12 +816,9 @@ textarea {
   border-radius: 12px;
 
   color: #74747d;
+  background: rgba(255, 255, 255, 0.025);
 
-  background:
-    rgba(255, 255, 255, 0.025);
-
-  border:
-    1px dashed rgba(255, 255, 255, 0.08);
+  border: 1px dashed rgba(255, 255, 255, 0.08);
 
   font-size: 12px;
 
@@ -940,11 +841,9 @@ textarea {
 
   border-radius: 12px;
 
-  background:
-    rgba(255, 255, 255, 0.025);
+  background: rgba(255, 255, 255, 0.025);
 
-  border:
-    1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .stock-warning-item strong {
@@ -976,11 +875,9 @@ textarea {
 
   color: #ffc107;
 
-  background:
-    rgba(255, 193, 7, 0.08);
+  background: rgba(255, 193, 7, 0.08);
 
-  border:
-    1px solid rgba(255, 193, 7, 0.18);
+  border: 1px solid rgba(255, 193, 7, 0.18);
 
   font-size: 12px;
   font-weight: 900;
@@ -989,11 +886,9 @@ textarea {
 .stock-warning-value.danger {
   color: #ff7373;
 
-  background:
-    rgba(255, 75, 75, 0.08);
+  background: rgba(255, 75, 75, 0.08);
 
-  border-color:
-    rgba(255, 75, 75, 0.18);
+  border-color: rgba(255, 75, 75, 0.18);
 }
 
 
@@ -1017,11 +912,9 @@ textarea {
 
   border-radius: 12px;
 
-  background:
-    rgba(255, 255, 255, 0.025);
+  background: rgba(255, 255, 255, 0.025);
 
-  border:
-    1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .ranking-position {
@@ -1035,7 +928,6 @@ textarea {
   border-radius: 9px;
 
   color: #111111;
-
   background: #ffc107;
 
   font-size: 12px;
@@ -1056,9 +948,7 @@ textarea {
   margin-bottom: 3px;
 
   white-space: nowrap;
-
   overflow: hidden;
-
   text-overflow: ellipsis;
 }
 
@@ -1095,7 +985,6 @@ textarea {
 
 .table-wrap {
   width: 100%;
-
   overflow-x: auto;
 }
 
@@ -1117,8 +1006,7 @@ textarea {
   font-size: 11px;
   font-weight: 800;
 
-  border-bottom:
-    1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 
   white-space: nowrap;
 }
@@ -1130,13 +1018,13 @@ textarea {
 
   font-size: 12px;
 
-  border-bottom:
-    1px solid rgba(255, 255, 255, 0.045);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.045);
+
+  vertical-align: middle;
 }
 
 .master-table tbody tr:hover {
-  background:
-    rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .master-table tbody tr:last-child td {
@@ -1144,14 +1032,11 @@ textarea {
 }
 
 .table-empty {
-  padding:
-    28px !important;
+  padding: 28px !important;
 
-  color:
-    #74747d !important;
+  color: #74747d !important;
 
-  text-align:
-    center !important;
+  text-align: center !important;
 }
 
 
@@ -1180,8 +1065,7 @@ textarea {
       #101012
     );
 
-  border:
-    1px dashed rgba(255, 255, 255, 0.09);
+  border: 1px dashed rgba(255, 255, 255, 0.09);
 
   text-align: center;
 }
@@ -1200,7 +1084,6 @@ textarea {
   color: #85858e;
 
   font-size: 13px;
-
   line-height: 1.6;
 }
 
@@ -1220,8 +1103,7 @@ textarea {
 
   color: #66666f;
 
-  border-top:
-    1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 
   font-size: 11px;
 }
@@ -1237,12 +1119,7 @@ textarea {
 
 .products-summary-grid {
   display: grid;
-
-  grid-template-columns:
-    repeat(
-      4,
-      minmax(0, 1fr)
-    );
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 
   gap: 14px;
 
@@ -1254,7 +1131,6 @@ textarea {
 
   display: flex;
   align-items: center;
-
   gap: 13px;
 
   padding: 17px;
@@ -1268,11 +1144,9 @@ textarea {
       rgba(15, 15, 17, 0.98)
     );
 
-  border:
-    1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.07);
 
-  box-shadow:
-    0 12px 28px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
 }
 
 .products-summary-icon {
@@ -1287,11 +1161,9 @@ textarea {
 
   border-radius: 12px;
 
-  background:
-    rgba(255, 193, 7, 0.08);
+  background: rgba(255, 193, 7, 0.08);
 
-  border:
-    1px solid rgba(255, 193, 7, 0.16);
+  border: 1px solid rgba(255, 193, 7, 0.16);
 
   font-size: 20px;
 }
@@ -1317,7 +1189,6 @@ textarea {
   color: #ffffff;
 
   font-size: 19px;
-
   line-height: 1.15;
 
   overflow-wrap: anywhere;
@@ -1325,7 +1196,7 @@ textarea {
 
 
 /* =========================================================
-   BARRA DE BUSCA / FILTROS
+   PRODUTOS - BUSCA / FILTROS
 ========================================================= */
 
 .products-toolbar {
@@ -1341,12 +1212,10 @@ textarea {
 .products-search {
   width: 100%;
   max-width: 420px;
-
   min-height: 44px;
 
   display: flex;
   align-items: center;
-
   gap: 9px;
 
   padding: 0 13px;
@@ -1355,8 +1224,7 @@ textarea {
 
   background: #111114;
 
-  border:
-    1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 
   transition:
     border-color 0.18s ease,
@@ -1364,11 +1232,9 @@ textarea {
 }
 
 .products-search:focus-within {
-  border-color:
-    rgba(255, 193, 7, 0.7);
+  border-color: rgba(255, 193, 7, 0.7);
 
-  box-shadow:
-    0 0 0 3px rgba(255, 193, 7, 0.07);
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.07);
 }
 
 .products-search > span {
@@ -1383,13 +1249,11 @@ textarea {
   width: 100%;
 
   border: 0;
-
   outline: 0;
 
   padding: 12px 0;
 
   color: #ffffff;
-
   background: transparent;
 
   font-size: 13px;
@@ -1402,7 +1266,6 @@ textarea {
 .products-filters {
   display: flex;
   align-items: center;
-
   gap: 6px;
 
   padding: 5px;
@@ -1411,8 +1274,7 @@ textarea {
 
   background: #111114;
 
-  border:
-    1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .product-filter-btn {
@@ -1421,11 +1283,9 @@ textarea {
   padding: 0 12px;
 
   border: 0;
-
   border-radius: 8px;
 
   color: #85858e;
-
   background: transparent;
 
   font-size: 11px;
@@ -1446,7 +1306,6 @@ textarea {
 
 .product-filter-btn.active {
   color: #111111;
-
   background: #ffc107;
 }
 
@@ -1458,7 +1317,6 @@ textarea {
 .products-list {
   display: flex;
   flex-direction: column;
-
   gap: 10px;
 }
 
@@ -1467,10 +1325,7 @@ textarea {
 
   grid-template-columns:
     minmax(200px, 1.5fr)
-    repeat(
-      4,
-      minmax(90px, 0.7fr)
-    )
+    repeat(4, minmax(90px, 0.7fr))
     auto;
 
   align-items: center;
@@ -1481,11 +1336,9 @@ textarea {
 
   border-radius: 13px;
 
-  background:
-    rgba(255, 255, 255, 0.025);
+  background: rgba(255, 255, 255, 0.025);
 
-  border:
-    1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 
   transition:
     background 0.18s ease,
@@ -1493,11 +1346,9 @@ textarea {
 }
 
 .product-master-item:hover {
-  background:
-    rgba(255, 255, 255, 0.035);
+  background: rgba(255, 255, 255, 0.035);
 
-  border-color:
-    rgba(255, 193, 7, 0.12);
+  border-color: rgba(255, 193, 7, 0.12);
 }
 
 .product-master-main {
@@ -1505,7 +1356,6 @@ textarea {
 
   display: flex;
   align-items: center;
-
   gap: 11px;
 }
 
@@ -1521,11 +1371,9 @@ textarea {
 
   border-radius: 11px;
 
-  background:
-    rgba(255, 193, 7, 0.08);
+  background: rgba(255, 193, 7, 0.08);
 
-  border:
-    1px solid rgba(255, 193, 7, 0.14);
+  border: 1px solid rgba(255, 193, 7, 0.14);
 
   font-size: 19px;
 }
@@ -1544,9 +1392,7 @@ textarea {
   font-size: 13px;
 
   white-space: nowrap;
-
   overflow: hidden;
-
   text-overflow: ellipsis;
 }
 
@@ -1554,7 +1400,6 @@ textarea {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-
   gap: 5px;
 }
 
@@ -1570,11 +1415,9 @@ textarea {
 
   color: #ffc107;
 
-  background:
-    rgba(255, 193, 7, 0.07);
+  background: rgba(255, 193, 7, 0.07);
 
-  border:
-    1px solid rgba(255, 193, 7, 0.15);
+  border: 1px solid rgba(255, 193, 7, 0.15);
 
   font-size: 9px;
   font-weight: 900;
@@ -1585,11 +1428,9 @@ textarea {
 .product-type-badge.ingredient {
   color: #68d990;
 
-  background:
-    rgba(80, 210, 125, 0.07);
+  background: rgba(80, 210, 125, 0.07);
 
-  border-color:
-    rgba(80, 210, 125, 0.15);
+  border-color: rgba(80, 210, 125, 0.15);
 }
 
 .product-master-code {
@@ -1641,7 +1482,6 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-
   gap: 6px;
 
   flex-wrap: wrap;
@@ -1654,13 +1494,11 @@ textarea {
 
   border-radius: 8px;
 
-  border:
-    1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 
   color: #b9b9c0;
 
-  background:
-    rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.03);
 
   font-size: 10px;
   font-weight: 800;
@@ -1673,43 +1511,598 @@ textarea {
 .product-action-btn:hover {
   color: #ffffff;
 
-  border-color:
-    rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.15);
 
-  background:
-    rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .product-action-btn.stock {
   color: #ffc107;
 
-  border-color:
-    rgba(255, 193, 7, 0.17);
+  border-color: rgba(255, 193, 7, 0.17);
 
-  background:
-    rgba(255, 193, 7, 0.06);
+  background: rgba(255, 193, 7, 0.06);
 }
 
 .product-action-btn.stock:hover {
-  background:
-    rgba(255, 193, 7, 0.12);
+  background: rgba(255, 193, 7, 0.12);
 }
 
 .product-action-btn.recipe {
   color: #70b9ff;
 
-  border-color:
-    rgba(85, 170, 255, 0.2);
+  border-color: rgba(85, 170, 255, 0.2);
 
-  background:
-    rgba(85, 170, 255, 0.06);
+  background: rgba(85, 170, 255, 0.06);
 }
 
 .product-action-btn.recipe:hover {
   color: #a9d6ff;
 
+  background: rgba(85, 170, 255, 0.12);
+}
+
+
+/* =========================================================
+   ESTOQUE COMPLETO - RESUMO
+========================================================= */
+
+.stock-summary-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 14px;
+
+  margin-bottom: 20px;
+}
+
+.stock-summary-card {
+  min-height: 94px;
+
+  display: flex;
+  align-items: center;
+  gap: 13px;
+
+  padding: 17px;
+
+  border-radius: 15px;
+
   background:
-    rgba(85, 170, 255, 0.12);
+    linear-gradient(
+      180deg,
+      rgba(22, 22, 25, 0.98),
+      rgba(15, 15, 17, 0.98)
+    );
+
+  border: 1px solid rgba(255, 255, 255, 0.07);
+
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+.stock-summary-icon {
+  width: 44px;
+  height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 auto;
+
+  border-radius: 12px;
+
+  background: rgba(255, 193, 7, 0.08);
+
+  border: 1px solid rgba(255, 193, 7, 0.16);
+
+  font-size: 20px;
+}
+
+.stock-summary-card > div {
+  min-width: 0;
+}
+
+.stock-summary-card > div > span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #85858e;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.stock-summary-card strong {
+  display: block;
+
+  color: #ffffff;
+
+  font-size: 19px;
+  line-height: 1.15;
+
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   ESTOQUE - BUSCA / FILTROS
+========================================================= */
+
+.stock-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 14px;
+
+  margin-bottom: 18px;
+}
+
+.stock-search {
+  width: 100%;
+  max-width: 420px;
+  min-height: 44px;
+
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  padding: 0 13px;
+
+  border-radius: 11px;
+
+  background: #111114;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.stock-search:focus-within {
+  border-color: rgba(255, 193, 7, 0.7);
+
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.07);
+}
+
+.stock-search > span {
+  flex: 0 0 auto;
+
+  font-size: 15px;
+
+  opacity: 0.65;
+}
+
+.stock-search input {
+  width: 100%;
+
+  border: 0;
+  outline: 0;
+
+  padding: 12px 0;
+
+  color: #ffffff;
+  background: transparent;
+
+  font-size: 13px;
+}
+
+.stock-search input::placeholder {
+  color: #66666f;
+}
+
+.stock-filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 5px;
+
+  border-radius: 11px;
+
+  background: #111114;
+
+  border: 1px solid rgba(255, 255, 255, 0.07);
+
+  overflow-x: auto;
+}
+
+.stock-filter-btn {
+  min-height: 34px;
+
+  padding: 0 11px;
+
+  border: 0;
+  border-radius: 8px;
+
+  color: #85858e;
+  background: transparent;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+
+  transition:
+    background 0.16s ease,
+    color 0.16s ease;
+}
+
+.stock-filter-btn:hover {
+  color: #ffffff;
+}
+
+.stock-filter-btn.active {
+  color: #111111;
+  background: #ffc107;
+}
+
+
+/* =========================================================
+   ESTOQUE - TABELA
+========================================================= */
+
+.stock-table {
+  min-width: 1100px;
+}
+
+.stock-item-main {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  min-width: 190px;
+}
+
+.stock-item-icon {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 auto;
+
+  border-radius: 9px;
+
+  background: rgba(255, 193, 7, 0.07);
+
+  border: 1px solid rgba(255, 193, 7, 0.12);
+
+  font-size: 16px;
+}
+
+.stock-item-info {
+  min-width: 0;
+}
+
+.stock-item-info strong {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: #ffffff;
+
+  font-size: 12px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stock-item-info span {
+  color: #707079;
+
+  font-size: 9px;
+}
+
+.stock-type-badge,
+.stock-status-badge,
+.stock-movement-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 24px;
+
+  padding: 0 8px;
+
+  border-radius: 999px;
+
+  font-size: 9px;
+  font-weight: 900;
+
+  white-space: nowrap;
+}
+
+.stock-type-badge {
+  color: #ffc107;
+
+  background: rgba(255, 193, 7, 0.07);
+
+  border: 1px solid rgba(255, 193, 7, 0.14);
+}
+
+.stock-type-badge.ingredient {
+  color: #68d990;
+
+  background: rgba(80, 210, 125, 0.07);
+
+  border-color: rgba(80, 210, 125, 0.15);
+}
+
+.stock-status-badge.ok {
+  color: #68d990;
+
+  background: rgba(80, 210, 125, 0.07);
+
+  border: 1px solid rgba(80, 210, 125, 0.15);
+}
+
+.stock-status-badge.low {
+  color: #ffc107;
+
+  background: rgba(255, 193, 7, 0.07);
+
+  border: 1px solid rgba(255, 193, 7, 0.16);
+}
+
+.stock-status-badge.empty {
+  color: #ff7272;
+
+  background: rgba(255, 90, 90, 0.07);
+
+  border: 1px solid rgba(255, 90, 90, 0.16);
+}
+
+.stock-quantity-value {
+  color: #ffffff;
+
+  font-weight: 900;
+}
+
+.stock-quantity-value.low {
+  color: #ffc107;
+}
+
+.stock-quantity-value.empty {
+  color: #ff7272;
+}
+
+.stock-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 5px;
+
+  min-width: 250px;
+}
+
+.stock-action-btn {
+  min-height: 30px;
+
+  padding: 0 8px;
+
+  border-radius: 7px;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  color: #b9b9c0;
+  background: rgba(255, 255, 255, 0.03);
+
+  font-size: 9px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease;
+}
+
+.stock-action-btn:hover {
+  color: #ffffff;
+
+  background: rgba(255, 255, 255, 0.07);
+
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.stock-action-btn.entry {
+  color: #68d990;
+
+  border-color: rgba(80, 210, 125, 0.16);
+
+  background: rgba(80, 210, 125, 0.05);
+}
+
+.stock-action-btn.exit {
+  color: #70b9ff;
+
+  border-color: rgba(85, 170, 255, 0.16);
+
+  background: rgba(85, 170, 255, 0.05);
+}
+
+.stock-action-btn.loss {
+  color: #ff7272;
+
+  border-color: rgba(255, 90, 90, 0.16);
+
+  background: rgba(255, 90, 90, 0.05);
+}
+
+.stock-action-btn.adjust {
+  color: #ffc107;
+
+  border-color: rgba(255, 193, 7, 0.16);
+
+  background: rgba(255, 193, 7, 0.05);
+}
+
+
+/* =========================================================
+   ESTOQUE - HISTÓRICO
+========================================================= */
+
+.stock-history-panel {
+  margin-top: 18px;
+}
+
+.stock-history-filter select {
+  min-height: 36px;
+
+  padding: 0 10px;
+
+  border-radius: 9px;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  color: #d8d8dc;
+
+  background: #101012;
+
+  outline: 0;
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.stock-history-filter select:focus {
+  border-color: rgba(255, 193, 7, 0.55);
+}
+
+.stock-history-filter select option {
+  color: #ffffff;
+  background: #161618;
+}
+
+.stock-history-table {
+  min-width: 1250px;
+}
+
+.stock-movement-badge.entry {
+  color: #68d990;
+
+  background: rgba(80, 210, 125, 0.07);
+
+  border: 1px solid rgba(80, 210, 125, 0.15);
+}
+
+.stock-movement-badge.sale {
+  color: #70b9ff;
+
+  background: rgba(85, 170, 255, 0.07);
+
+  border: 1px solid rgba(85, 170, 255, 0.15);
+}
+
+.stock-movement-badge.adjust-in {
+  color: #b8f176;
+
+  background: rgba(170, 230, 90, 0.07);
+
+  border: 1px solid rgba(170, 230, 90, 0.15);
+}
+
+.stock-movement-badge.adjust-out {
+  color: #ffbb70;
+
+  background: rgba(255, 170, 85, 0.07);
+
+  border: 1px solid rgba(255, 170, 85, 0.15);
+}
+
+.stock-movement-badge.loss {
+  color: #ff7272;
+
+  background: rgba(255, 90, 90, 0.07);
+
+  border: 1px solid rgba(255, 90, 90, 0.15);
+}
+
+.stock-movement-badge.cancel {
+  color: #d29bff;
+
+  background: rgba(170, 100, 255, 0.07);
+
+  border: 1px solid rgba(170, 100, 255, 0.15);
+}
+
+.stock-note {
+  display: block;
+
+  max-width: 280px;
+
+  color: #8b8b94;
+
+  font-size: 10px;
+  line-height: 1.4;
+
+  white-space: normal;
+}
+
+
+/* =========================================================
+   ESTOQUE - AJUSTE
+========================================================= */
+
+.stock-adjust-preview {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 10px;
+
+  margin-top: 16px;
+  margin-bottom: 18px;
+
+  padding: 13px;
+
+  border-radius: 12px;
+
+  background: rgba(255, 193, 7, 0.045);
+
+  border: 1px solid rgba(255, 193, 7, 0.13);
+}
+
+.stock-adjust-preview > div {
+  min-width: 0;
+}
+
+.stock-adjust-preview span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #74747d;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+}
+
+.stock-adjust-preview strong {
+  display: block;
+
+  color: #ffc107;
+
+  font-size: 14px;
+
+  overflow-wrap: anywhere;
 }
 
 
@@ -1736,22 +2129,17 @@ textarea {
 
   inset: 0;
 
-  background:
-    rgba(0, 0, 0, 0.76);
+  background: rgba(0, 0, 0, 0.76);
 
-  backdrop-filter:
-    blur(6px);
+  backdrop-filter: blur(6px);
 }
 
 .master-modal-dialog {
   position: relative;
 
   width: 100%;
-
   max-width: 570px;
-
-  max-height:
-    calc(100vh - 48px);
+  max-height: calc(100vh - 48px);
 
   overflow-y: auto;
 
@@ -1764,11 +2152,9 @@ textarea {
       #101012
     );
 
-  border:
-    1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.09);
 
-  box-shadow:
-    0 35px 100px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 35px 100px rgba(0, 0, 0, 0.7);
 
   z-index: 2;
 }
@@ -1779,7 +2165,6 @@ textarea {
 
 .master-modal-header {
   position: sticky;
-
   top: 0;
 
   display: flex;
@@ -1788,17 +2173,13 @@ textarea {
 
   gap: 18px;
 
-  padding:
-    22px 24px 18px;
+  padding: 22px 24px 18px;
 
-  background:
-    rgba(24, 24, 27, 0.96);
+  background: rgba(24, 24, 27, 0.96);
 
-  border-bottom:
-    1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 
-  backdrop-filter:
-    blur(12px);
+  backdrop-filter: blur(12px);
 
   z-index: 5;
 }
@@ -1816,7 +2197,6 @@ textarea {
   color: #808089;
 
   font-size: 12px;
-
   line-height: 1.4;
 }
 
@@ -1832,15 +2212,12 @@ textarea {
 
   color: #ffc107;
 
-  background:
-    rgba(255, 193, 7, 0.08);
+  background: rgba(255, 193, 7, 0.08);
 
-  border:
-    1px solid rgba(255, 193, 7, 0.17);
+  border: 1px solid rgba(255, 193, 7, 0.17);
 
   font-size: 9px;
   font-weight: 900;
-
   letter-spacing: 0.7px;
 }
 
@@ -1855,16 +2232,13 @@ textarea {
   flex: 0 0 auto;
 
   border: 0;
-
   border-radius: 9px;
 
   color: #96969e;
 
-  background:
-    rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.04);
 
   font-size: 23px;
-
   line-height: 1;
 
   cursor: pointer;
@@ -1873,8 +2247,7 @@ textarea {
 .master-modal-close:hover {
   color: #ffffff;
 
-  background:
-    rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 
@@ -1883,8 +2256,7 @@ textarea {
 ========================================================= */
 
 .master-form {
-  padding:
-    22px 24px 24px;
+  padding: 22px 24px 24px;
 }
 
 .master-form-section {
@@ -1892,8 +2264,7 @@ textarea {
 
   margin-bottom: 22px;
 
-  border-bottom:
-    1px solid rgba(255, 255, 255, 0.065);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.065);
 }
 
 .master-form-section:last-of-type {
@@ -1903,7 +2274,6 @@ textarea {
 .master-form-section-title {
   display: flex;
   flex-direction: column;
-
   gap: 4px;
 
   margin-bottom: 14px;
@@ -1925,10 +2295,7 @@ textarea {
   display: grid;
 
   grid-template-columns:
-    repeat(
-      2,
-      minmax(0, 1fr)
-    );
+    repeat(2, minmax(0, 1fr));
 
   gap: 14px;
 }
@@ -1938,8 +2305,7 @@ textarea {
 }
 
 .master-field-full {
-  grid-column:
-    1 / -1;
+  grid-column: 1 / -1;
 }
 
 .master-field label {
@@ -1958,8 +2324,7 @@ textarea {
 .master-field textarea {
   width: 100%;
 
-  border:
-    1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.09);
 
   outline: 0;
 
@@ -1994,11 +2359,9 @@ textarea {
 .master-field input:focus,
 .master-field select:focus,
 .master-field textarea:focus {
-  border-color:
-    rgba(255, 193, 7, 0.7);
+  border-color: rgba(255, 193, 7, 0.7);
 
-  box-shadow:
-    0 0 0 3px rgba(255, 193, 7, 0.06);
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.06);
 }
 
 .master-field input::placeholder,
@@ -2008,7 +2371,6 @@ textarea {
 
 .master-field select option {
   color: #ffffff;
-
   background: #161618;
 }
 
@@ -2020,7 +2382,6 @@ textarea {
   color: #66666f;
 
   font-size: 9px;
-
   line-height: 1.4;
 }
 
@@ -2037,8 +2398,7 @@ textarea {
 
   overflow: hidden;
 
-  border:
-    1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.09);
 
   border-radius: 10px;
 
@@ -2050,11 +2410,9 @@ textarea {
 }
 
 .money-input:focus-within {
-  border-color:
-    rgba(255, 193, 7, 0.7);
+  border-color: rgba(255, 193, 7, 0.7);
 
-  box-shadow:
-    0 0 0 3px rgba(255, 193, 7, 0.06);
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.06);
 }
 
 .money-input > span {
@@ -2071,21 +2429,16 @@ textarea {
   font-size: 11px;
   font-weight: 900;
 
-  border-right:
-    1px solid rgba(255, 255, 255, 0.06);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .money-input input {
   min-height: 41px;
 
-  border:
-    0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
 
-  border-radius:
-    0 !important;
-
-  box-shadow:
-    none !important;
+  box-shadow: none !important;
 
   padding-left: 10px;
 }
@@ -2099,10 +2452,7 @@ textarea {
   display: grid;
 
   grid-template-columns:
-    repeat(
-      2,
-      minmax(0, 1fr)
-    );
+    repeat(2, minmax(0, 1fr));
 
   gap: 11px;
 }
@@ -2137,11 +2487,9 @@ textarea {
 
   color: #8a8a93;
 
-  background:
-    rgba(255, 255, 255, 0.025);
+  background: rgba(255, 255, 255, 0.025);
 
-  border:
-    1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.07);
 
   text-align: center;
 
@@ -2152,11 +2500,9 @@ textarea {
 }
 
 .item-type-card:hover {
-  transform:
-    translateY(-1px);
+  transform: translateY(-1px);
 
-  border-color:
-    rgba(255, 193, 7, 0.2);
+  border-color: rgba(255, 193, 7, 0.2);
 }
 
 .item-type-icon {
@@ -2177,19 +2523,14 @@ textarea {
   font-size: 10px;
 }
 
-.item-type-option
-input:checked +
-.item-type-card {
+.item-type-option input:checked + .item-type-card {
   color: #ffc107;
 
-  background:
-    rgba(255, 193, 7, 0.075);
+  background: rgba(255, 193, 7, 0.075);
 
-  border-color:
-    rgba(255, 193, 7, 0.48);
+  border-color: rgba(255, 193, 7, 0.48);
 
-  box-shadow:
-    0 0 0 2px rgba(255, 193, 7, 0.04);
+  box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.04);
 }
 
 
@@ -2201,10 +2542,7 @@ input:checked +
   display: grid;
 
   grid-template-columns:
-    repeat(
-      3,
-      minmax(0, 1fr)
-    );
+    repeat(3, minmax(0, 1fr));
 
   gap: 10px;
 
@@ -2224,11 +2562,9 @@ input:checked +
 
   border-radius: 11px;
 
-  background:
-    rgba(255, 255, 255, 0.025);
+  background: rgba(255, 255, 255, 0.025);
 
-  border:
-    1px solid rgba(255, 255, 255, 0.065);
+  border: 1px solid rgba(255, 255, 255, 0.065);
 
   cursor: pointer;
 }
@@ -2253,7 +2589,6 @@ input:checked +
   color: #6e6e77;
 
   font-size: 9px;
-
   line-height: 1.3;
 }
 
@@ -2270,17 +2605,14 @@ input:checked +
 
 
 /* =========================================================
-   ESTOQUE - ENTRADA
+   ESTOQUE - PREVIEW / SITUAÇÃO ATUAL
 ========================================================= */
 
 .stock-current-box {
   display: grid;
 
   grid-template-columns:
-    repeat(
-      2,
-      minmax(0, 1fr)
-    );
+    repeat(2, minmax(0, 1fr));
 
   gap: 10px;
 
@@ -2292,11 +2624,9 @@ input:checked +
 
   border-radius: 11px;
 
-  background:
-    rgba(255, 255, 255, 0.025);
+  background: rgba(255, 255, 255, 0.025);
 
-  border:
-    1px solid rgba(255, 255, 255, 0.065);
+  border: 1px solid rgba(255, 255, 255, 0.065);
 }
 
 .stock-current-box span,
@@ -2323,10 +2653,7 @@ input:checked +
   display: grid;
 
   grid-template-columns:
-    repeat(
-      3,
-      minmax(0, 1fr)
-    );
+    repeat(3, minmax(0, 1fr));
 
   gap: 9px;
 
@@ -2337,11 +2664,9 @@ input:checked +
 
   border-radius: 12px;
 
-  background:
-    rgba(255, 193, 7, 0.045);
+  background: rgba(255, 193, 7, 0.045);
 
-  border:
-    1px solid rgba(255, 193, 7, 0.13);
+  border: 1px solid rgba(255, 193, 7, 0.13);
 }
 
 .stock-preview > div {
@@ -2367,10 +2692,7 @@ input:checked +
   display: grid;
 
   grid-template-columns:
-    repeat(
-      4,
-      minmax(0, 1fr)
-    );
+    repeat(4, minmax(0, 1fr));
 
   gap: 10px;
 
@@ -2384,11 +2706,9 @@ input:checked +
 
   border-radius: 12px;
 
-  background:
-    rgba(255, 255, 255, 0.025);
+  background: rgba(255, 255, 255, 0.025);
 
-  border:
-    1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .recipe-summary-card span {
@@ -2430,7 +2750,6 @@ input:checked +
 .recipe-info-box {
   display: flex;
   align-items: flex-start;
-
   gap: 11px;
 
   padding: 14px;
@@ -2439,11 +2758,9 @@ input:checked +
 
   border-radius: 12px;
 
-  background:
-    rgba(85, 170, 255, 0.055);
+  background: rgba(85, 170, 255, 0.055);
 
-  border:
-    1px solid rgba(85, 170, 255, 0.16);
+  border: 1px solid rgba(85, 170, 255, 0.16);
 }
 
 .recipe-info-icon {
@@ -2466,7 +2783,6 @@ input:checked +
   color: #8094a8;
 
   font-size: 10px;
-
   line-height: 1.5;
 }
 
@@ -2477,12 +2793,10 @@ input:checked +
 
 .recipe-search {
   width: 100%;
-
   min-height: 42px;
 
   display: flex;
   align-items: center;
-
   gap: 9px;
 
   padding: 0 12px;
@@ -2493,16 +2807,13 @@ input:checked +
 
   background: #101012;
 
-  border:
-    1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .recipe-search:focus-within {
-  border-color:
-    rgba(255, 193, 7, 0.55);
+  border-color: rgba(255, 193, 7, 0.55);
 
-  box-shadow:
-    0 0 0 3px rgba(255, 193, 7, 0.05);
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.05);
 }
 
 .recipe-search span {
@@ -2513,15 +2824,12 @@ input:checked +
 
 .recipe-search input {
   width: 100%;
-
   min-height: 40px;
 
   border: 0;
-
   outline: 0;
 
   color: #ffffff;
-
   background: transparent;
 
   font-size: 12px;
@@ -2539,7 +2847,6 @@ input:checked +
 .recipe-ingredients-list {
   display: flex;
   flex-direction: column;
-
   gap: 8px;
 
   max-height: 360px;
@@ -2565,11 +2872,9 @@ input:checked +
 
   border-radius: 11px;
 
-  background:
-    rgba(255, 255, 255, 0.022);
+  background: rgba(255, 255, 255, 0.022);
 
-  border:
-    1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 
   transition:
     border-color 0.16s ease,
@@ -2577,11 +2882,9 @@ input:checked +
 }
 
 .recipe-ingredient-item.selected {
-  background:
-    rgba(255, 193, 7, 0.045);
+  background: rgba(255, 193, 7, 0.045);
 
-  border-color:
-    rgba(255, 193, 7, 0.18);
+  border-color: rgba(255, 193, 7, 0.18);
 }
 
 .recipe-ingredient-main {
@@ -2589,7 +2892,6 @@ input:checked +
 
   display: flex;
   align-items: center;
-
   gap: 10px;
 }
 
@@ -2618,9 +2920,7 @@ input:checked +
   font-size: 11px;
 
   white-space: nowrap;
-
   overflow: hidden;
-
   text-overflow: ellipsis;
 }
 
@@ -2640,21 +2940,17 @@ input:checked +
 
   background: #0d0d0f;
 
-  border:
-    1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .recipe-quantity-box input {
   width: 100%;
-
   min-width: 0;
-
   height: 38px;
 
   padding: 0 9px;
 
   border: 0;
-
   outline: 0;
 
   color: #ffffff;
@@ -2686,8 +2982,7 @@ input:checked +
 
   text-align: center;
 
-  border-left:
-    1px solid rgba(255, 255, 255, 0.06);
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .recipe-ingredient-cost {
@@ -2738,8 +3033,7 @@ input:checked +
       rgba(255, 193, 7, 0.025)
     );
 
-  border:
-    1px solid rgba(255, 193, 7, 0.17);
+  border: 1px solid rgba(255, 193, 7, 0.17);
 }
 
 .recipe-total-box > div {
@@ -2787,15 +3081,13 @@ input:checked +
 }
 
 .recipe-ingredients-list::-webkit-scrollbar-thumb {
-  background:
-    rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1);
 
   border-radius: 999px;
 }
 
 .recipe-ingredients-list::-webkit-scrollbar-thumb:hover {
-  background:
-    rgba(255, 193, 7, 0.26);
+  background: rgba(255, 193, 7, 0.26);
 }
 
 
@@ -2842,18 +3134,15 @@ input:checked +
 .btn-secondary {
   color: #b7b7be;
 
-  background:
-    rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.05);
 
-  border:
-    1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .btn-secondary:hover {
   color: #ffffff;
 
-  background:
-    rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 
@@ -2870,15 +3159,13 @@ input:checked +
 }
 
 .master-modal-dialog::-webkit-scrollbar-thumb {
-  background:
-    rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.12);
 
   border-radius: 999px;
 }
 
 .master-modal-dialog::-webkit-scrollbar-thumb:hover {
-  background:
-    rgba(255, 193, 7, 0.28);
+  background: rgba(255, 193, 7, 0.28);
 }
 
 
@@ -2888,21 +3175,16 @@ input:checked +
 
 @media (max-width: 1200px) {
 
-  .products-summary-grid {
+  .products-summary-grid,
+  .stock-summary-grid {
     grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
+      repeat(2, minmax(0, 1fr));
   }
 
   .product-master-item {
     grid-template-columns:
       minmax(180px, 1.4fr)
-      repeat(
-        2,
-        minmax(90px, 0.7fr)
-      )
+      repeat(2, minmax(90px, 0.7fr))
       auto;
   }
 
@@ -2913,10 +3195,7 @@ input:checked +
 
   .recipe-summary-grid {
     grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
+      repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -2929,15 +3208,25 @@ input:checked +
 
   .master-stats-grid {
     grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
+      repeat(2, minmax(0, 1fr));
   }
 
   .master-dashboard-grid {
-    grid-template-columns:
-      1fr;
+    grid-template-columns: 1fr;
+  }
+
+  .stock-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .stock-search {
+    max-width: none;
+  }
+
+  .stock-filters {
+    width: fit-content;
+    max-width: 100%;
   }
 }
 
@@ -2955,8 +3244,7 @@ input:checked +
   }
 
   .master-content {
-    width:
-      calc(100% - 86px);
+    width: calc(100% - 86px);
 
     margin-left: 86px;
   }
@@ -3017,7 +3305,6 @@ input:checked +
 
   .products-toolbar {
     align-items: stretch;
-
     flex-direction: column;
   }
 
@@ -3040,8 +3327,7 @@ input:checked +
   }
 
   .recipe-ingredient-cost {
-    grid-column:
-      2;
+    grid-column: 2;
 
     text-align: left;
   }
@@ -3067,7 +3353,6 @@ input:checked +
 
   .master-sidebar {
     width: 100%;
-
     min-height: auto;
 
     left: 0;
@@ -3081,14 +3366,11 @@ input:checked +
 
     border-right: 0;
 
-    border-top:
-      1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 
-    background:
-      rgba(14, 14, 16, 0.97);
+    background: rgba(14, 14, 16, 0.97);
 
-    backdrop-filter:
-      blur(16px);
+    backdrop-filter: blur(16px);
   }
 
   .sidebar-brand,
@@ -3102,10 +3384,7 @@ input:checked +
     display: grid;
 
     grid-template-columns:
-      repeat(
-        6,
-        minmax(0, 1fr)
-      );
+      repeat(6, minmax(0, 1fr));
 
     gap: 4px;
 
@@ -3125,7 +3404,6 @@ input:checked +
     border-radius: 9px;
 
     font-size: 8px;
-
     line-height: 1.1;
 
     text-align: center;
@@ -3201,7 +3479,6 @@ input:checked +
 
   .page-heading {
     align-items: flex-start;
-
     flex-direction: column;
 
     margin-bottom: 18px;
@@ -3224,10 +3501,7 @@ input:checked +
     display: grid;
 
     grid-template-columns:
-      repeat(
-        3,
-        1fr
-      );
+      repeat(3, 1fr);
   }
 
   .period-btn {
@@ -3238,8 +3512,7 @@ input:checked +
   /* CARDS */
 
   .master-stats-grid {
-    grid-template-columns:
-      1fr;
+    grid-template-columns: 1fr;
 
     gap: 11px;
   }
@@ -3267,7 +3540,6 @@ input:checked +
 
   .panel-title {
     align-items: flex-start;
-
     flex-direction: column;
   }
 
@@ -3281,8 +3553,7 @@ input:checked +
   }
 
   .ranking-value {
-    grid-column:
-      2;
+    grid-column: 2;
 
     text-align: left;
   }
@@ -3299,17 +3570,16 @@ input:checked +
 
   /* PRODUTOS */
 
-  .products-summary-grid {
+  .products-summary-grid,
+  .stock-summary-grid {
     grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
+      repeat(2, minmax(0, 1fr));
 
     gap: 9px;
   }
 
-  .products-summary-card {
+  .products-summary-card,
+  .stock-summary-card {
     min-height: 82px;
 
     padding: 12px;
@@ -3317,7 +3587,8 @@ input:checked +
     gap: 9px;
   }
 
-  .products-summary-icon {
+  .products-summary-icon,
+  .stock-summary-icon {
     width: 36px;
     height: 36px;
 
@@ -3326,11 +3597,13 @@ input:checked +
     font-size: 17px;
   }
 
-  .products-summary-card strong {
+  .products-summary-card strong,
+  .stock-summary-card strong {
     font-size: 15px;
   }
 
-  .products-toolbar {
+  .products-toolbar,
+  .stock-toolbar {
     gap: 10px;
   }
 
@@ -3340,10 +3613,7 @@ input:checked +
     display: grid;
 
     grid-template-columns:
-      repeat(
-        3,
-        1fr
-      );
+      repeat(3, 1fr);
   }
 
   .product-filter-btn {
@@ -3355,19 +3625,34 @@ input:checked +
     font-size: 9px;
   }
 
+  .stock-filters {
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .stock-filter-btn {
+    width: 100%;
+
+    padding-left: 5px;
+    padding-right: 5px;
+
+    font-size: 9px;
+  }
+
   .product-master-item {
     display: flex;
-
     flex-direction: column;
-
     align-items: stretch;
 
     gap: 12px;
   }
 
   .product-master-value {
-    display:
-      grid !important;
+    display: grid !important;
 
     grid-template-columns:
       1fr auto;
@@ -3378,8 +3663,7 @@ input:checked +
 
     padding-top: 8px;
 
-    border-top:
-      1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
   }
 
   .product-master-value span {
@@ -3406,26 +3690,21 @@ input:checked +
   .master-modal-dialog,
   .master-modal-large {
     max-width: none;
-
     max-height: 92vh;
 
-    border-radius:
-      20px 20px 0 0;
+    border-radius: 20px 20px 0 0;
   }
 
   .master-modal-header {
-    padding:
-      18px 16px 15px;
+    padding: 18px 16px 15px;
   }
 
   .master-form {
-    padding:
-      18px 16px 20px;
+    padding: 18px 16px 20px;
   }
 
   .master-form-grid {
-    grid-template-columns:
-      1fr;
+    grid-template-columns: 1fr;
   }
 
   .master-field-full {
@@ -3433,13 +3712,12 @@ input:checked +
   }
 
   .item-type-selector {
-    grid-template-columns:
-      1fr;
+    grid-template-columns: 1fr;
   }
 
-  .stock-preview {
-    grid-template-columns:
-      1fr;
+  .stock-preview,
+  .stock-adjust-preview {
+    grid-template-columns: 1fr;
   }
 
   .master-modal-actions {
@@ -3449,8 +3727,7 @@ input:checked +
       1fr 1fr;
   }
 
-  .master-modal-actions
-  .btn-master {
+  .master-modal-actions .btn-master {
     width: 100%;
   }
 
@@ -3459,17 +3736,12 @@ input:checked +
 
   .recipe-summary-grid {
     grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
+      repeat(2, minmax(0, 1fr));
   }
 
   .recipe-ingredient-item {
     display: flex;
-
     flex-direction: column;
-
     align-items: stretch;
 
     gap: 9px;
@@ -3481,7 +3753,6 @@ input:checked +
 
   .recipe-total-box {
     align-items: flex-start;
-
     flex-direction: column;
   }
 
@@ -3512,10 +3783,7 @@ input:checked +
 
   .master-nav {
     grid-template-columns:
-      repeat(
-        3,
-        1fr
-      );
+      repeat(3, 1fr);
   }
 
   body {
@@ -3542,23 +3810,24 @@ input:checked +
     max-width: 180px;
   }
 
-  .products-summary-grid {
-    grid-template-columns:
-      1fr;
+  .products-summary-grid,
+  .stock-summary-grid {
+    grid-template-columns: 1fr;
   }
 
   .stock-current-box {
-    grid-template-columns:
-      1fr;
+    grid-template-columns: 1fr;
   }
 
   .master-modal-actions {
-    grid-template-columns:
-      1fr;
+    grid-template-columns: 1fr;
   }
 
   .recipe-summary-grid {
-    grid-template-columns:
-      1fr;
+    grid-template-columns: 1fr;
+  }
+
+  .stock-filters {
+    grid-template-columns: 1fr;
   }
 }
