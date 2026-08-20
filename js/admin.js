@@ -2279,8 +2279,8 @@ function normalizarTextoVendaExterna(texto) {
 function obterNomeClientePadraoVendaExterna(origem) {
   const valor = String(origem || "IFOOD").toUpperCase();
 
-  if (valor === "IFOOD") return "Cliente iFood";
-  if (valor === "99") return "Cliente 99";
+  if (valor === "IFOOD") return "";
+  if (valor === "99") return "";
 
   return "Cliente";
 }
