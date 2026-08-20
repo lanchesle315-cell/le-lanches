@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Painel Master - Lê Lanches</title>
+
+  <link
+    rel="icon"
+    href="img/le-lanches-logo.png"
+  >
+
+  <link
+    rel="stylesheet"
+    href="css/master.css"
+  >
+
+</head>
+
+
+<body>
+
+  <!-- =====================================================
+       CARREGAMENTO INICIAL
+  ====================================================== -->
+
+  <div
+    id="masterLoading"
+    class="master-loading"
+  >
+
+    <div class="master-loading-box">
+
+      <img
+        src="img/le-lanches-logo.png"
+        alt="Logo Lê Lanches"
+      >
+
+      <strong>
+        Validando acesso Master...
+      </strong>
+
+      <span>
+        Aguarde um momento.
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       ESTRUTURA PRINCIPAL
+  ====================================================== -->
+
+  <div
+    id="masterApp"
+    class="master-app hidden"
+  >
+
+
+    <!-- ===================================================
+         SIDEBAR
+    ==================================================== -->
+
+    <aside class="master-sidebar">
+
+      <div class="sidebar-brand">
+
+        <img
+          src="img/le-lanches-logo.png"
+          alt="Logo Lê Lanches"
+        >
+
+        <div>
+
+          <span>
+            👑 MASTER
+          </span>
+
+          <strong>
+            Lê Lanches
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <nav class="master-nav">
+
+
+        <button
+          class="master-nav-item active"
+          type="button"
+          data-page="dashboard"
+        >
+          <span>🏠</span>
+          Visão Geral
+        </button>
+
+
+        <button
+          class="master-nav-item"
+          type="button"
+          data-page="financeiro"
+        >
+          <span>📊</span>
+          Financeiro
+        </button>
+
+
+        <button
+          class="master-nav-item"
+          type="button"
+          data-page="estoque"
+        >
+          <span>📦</span>
+          Estoque
+        </button>
+
+
+        <button
+          class="master-nav-item"
+          type="button"
+          data-page="produtos"
+        >
+          <span>🍔</span>
+          Produtos
+        </button>
+
+
+        <button
+          class="master-nav-item"
+          type="button"
+          data-page="despesas"
+        >
+          <span>💸</span>
+          Despesas
+        </button>
+
+
+        <button
+          class="master-nav-item"
+          type="button"
+          data-page="relatorios"
+        >
+          <span>📈</span>
+          Relatórios
+        </button>
+
+
+      </nav>
+
+
+      <div class="sidebar-footer">
+
+        <a
+          href="admin.html"
+          class="sidebar-link"
+        >
+          ⚙️ Painel Admin
+        </a>
+
+
+        <a
+          href="index.html"
+          class="sidebar-link"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          🌐 Abrir Cardápio
+        </a>
+
+
+        <button
+          id="btnMasterSair"
+          type="button"
+          class="sidebar-logout"
+        >
+          🚪 Sair
+        </button>
+
+      </div>
+
+    </aside>
+
+
+    <!-- ===================================================
+         CONTEÚDO
+    ==================================================== -->
+
+    <div class="master-content">
+
+
+      <!-- =================================================
+           TOPBAR
+      ================================================== -->
+
+      <header class="master-topbar">
+
+        <div>
+
+          <p class="topbar-label">
+            Painel Master
+          </p>
+
+          <h1 id="masterPageTitle">
+            Visão Geral
+          </h1>
+
+        </div>
+
+
+        <div class="topbar-right">
+
+
+          <div class="master-clock">
+
+            <span>
+              Agora
+            </span>
+
+            <strong id="masterClock">
+              --:--:--
+            </strong>
+
+          </div>
+
+
+          <div class="master-user">
+
+            <div class="master-user-icon">
+              👑
+            </div>
+
+            <div>
+
+              <strong id="masterUserName">
+                Master
+              </strong>
+
+              <span id="masterUserEmail">
+                carregando...
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </header>
+
+
+      <!-- =================================================
+           ÁREA DAS PÁGINAS
+      ================================================== -->
+
+      <main class="master-main">
+
+
+        <!-- =================================================
+             DASHBOARD
+        ================================================== -->
+
+        <section
+          id="page-dashboard"
+          class="master-page active"
+        >
+
+          <div class="page-heading">
+
+            <div>
+
+              <h2>
+                Visão Geral
+              </h2>
+
+              <p>
+                Resumo financeiro e operacional da Lê Lanches.
+              </p>
+
+            </div>
+
+
+            <button
+              id="btnAtualizarMaster"
+              class="btn-master btn-yellow"
+              type="button"
+            >
+              🔄 Atualizar
+            </button>
+
+          </div>
+
+
+          <!-- FILTRO -->
+
+          <div class="period-filter">
+
+            <button
+              type="button"
+              class="period-btn active"
+              data-period="hoje"
+            >
+              Hoje
+            </button>
+
+            <button
+              type="button"
+              class="period-btn"
+              data-period="7"
+            >
+              7 dias
+            </button>
+
+            <button
+              type="button"
+              class="period-btn"
+              data-period="30"
+            >
+              30 dias
+            </button>
+
+          </div>
+
+
+          <!-- CARDS -->
+
+          <div class="master-stats-grid">
+
+
+            <article class="master-stat-card">
+
+              <div class="stat-icon">
+                🧾
+              </div>
+
+              <div>
+
+                <span>
+                  Pedidos concluídos
+                </span>
+
+                <strong id="masterTotalPedidos">
+                  0
+                </strong>
+
+              </div>
+
+            </article>
+
+
+            <article class="master-stat-card">
+
+              <div class="stat-icon">
+                💰
+              </div>
+
+              <div>
+
+                <span>
+                  Faturamento
+                </span>
+
+                <strong id="masterFaturamento">
+                  R$ 0,00
+                </strong>
+
+              </div>
+
+            </article>
+
+
+            <article class="master-stat-card">
+
+              <div class="stat-icon">
+                🧮
+              </div>
+
+              <div>
+
+                <span>
+                  Custo dos produtos
+                </span>
+
+                <strong id="masterCusto">
+                  R$ 0,00
+                </strong>
+
+              </div>
+
+            </article>
+
+
+            <article class="master-stat-card highlight">
+
+              <div class="stat-icon">
+                📈
+              </div>
+
+              <div>
+
+                <span>
+                  Lucro bruto
+                </span>
+
+                <strong id="masterLucro">
+                  R$ 0,00
+                </strong>
+
+              </div>
+
+            </article>
+
+
+            <article class="master-stat-card">
+
+              <div class="stat-icon">
+                📊
+              </div>
+
+              <div>
+
+                <span>
+                  Margem bruta
+                </span>
+
+                <strong id="masterMargem">
+                  0%
+                </strong>
+
+              </div>
+
+            </article>
+
+
+            <article class="master-stat-card">
+
+              <div class="stat-icon">
+                🛒
+              </div>
+
+              <div>
+
+                <span>
+                  Ticket médio
+                </span>
+
+                <strong id="masterTicketMedio">
+                  R$ 0,00
+                </strong>
+
+              </div>
+
+            </article>
+
+          </div>
+
+
+          <!-- PAINEL DUPLO -->
+
+          <div class="master-dashboard-grid">
+
+
+            <!-- ESTOQUE BAIXO -->
+
+            <section class="master-panel">
+
+              <div class="panel-title">
+
+                <div>
+
+                  <h3>
+                    ⚠️ Estoque baixo
+                  </h3>
+
+                  <p>
+                    Produtos próximos do estoque mínimo.
+                  </p>
+
+                </div>
+
+
+                <button
+                  type="button"
+                  class="panel-link"
+                  data-go-page="estoque"
+                >
+                  Ver estoque
+                </button>
+
+              </div>
+
+
+              <div
+                id="masterEstoqueBaixo"
+                class="panel-list"
+              >
+
+                <div class="master-empty">
+                  Nenhum produto com estoque baixo.
+                </div>
+
+              </div>
+
+            </section>
+
+
+            <!-- PRODUTOS MAIS VENDIDOS -->
+
+            <section class="master-panel">
+
+              <div class="panel-title">
+
+                <div>
+
+                  <h3>
+                    🔥 Produtos mais vendidos
+                  </h3>
+
+                  <p>
+                    Ranking do período selecionado.
+                  </p>
+
+                </div>
+
+              </div>
+
+
+              <div
+                id="masterProdutosVendidos"
+                class="panel-list"
+              >
+
+                <div class="master-empty">
+                  Ainda não há vendas no período.
+                </div>
+
+              </div>
+
+            </section>
+
+          </div>
+
+
+          <!-- MOVIMENTAÇÕES -->
+
+          <section class="master-panel master-panel-full">
+
+            <div class="panel-title">
+
+              <div>
+
+                <h3>
+                  📦 Últimas movimentações de estoque
+                </h3>
+
+                <p>
+                  Entradas, vendas, perdas e ajustes recentes.
+                </p>
+
+              </div>
+
+
+              <button
+                type="button"
+                class="panel-link"
+                data-go-page="estoque"
+              >
+                Abrir estoque
+              </button>
+
+            </div>
+
+
+            <div class="table-wrap">
+
+              <table class="master-table">
+
+                <thead>
+
+                  <tr>
+
+                    <th>
+                      Data
+                    </th>
+
+                    <th>
+                      Produto
+                    </th>
+
+                    <th>
+                      Movimento
+                    </th>
+
+                    <th>
+                      Quantidade
+                    </th>
+
+                    <th>
+                      Estoque final
+                    </th>
+
+                  </tr>
+
+                </thead>
+
+
+                <tbody id="masterMovimentacoesRecentes">
+
+                  <tr>
+
+                    <td
+                      colspan="5"
+                      class="table-empty"
+                    >
+                      Nenhuma movimentação registrada.
+                    </td>
+
+                  </tr>
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </section>
+
+        </section>
+
+
+        <!-- =================================================
+             FINANCEIRO
+        ================================================== -->
+
+        <section
+          id="page-financeiro"
+          class="master-page"
+        >
+
+          <div class="page-heading">
+
+            <div>
+
+              <h2>
+                Financeiro
+              </h2>
+
+              <p>
+                Acompanhe faturamento, custos, lucro e margem.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="master-placeholder">
+
+            <span>
+              📊
+            </span>
+
+            <h3>
+              Financeiro
+            </h3>
+
+            <p>
+              Nesta área teremos faturamento, custo dos produtos,
+              lucro bruto, margem e análise por período.
+            </p>
+
+          </div>
+
+        </section>
+
+
+        <!-- =================================================
+             ESTOQUE
+        ================================================== -->
+
+        <section
+          id="page-estoque"
+          class="master-page"
+        >
+
+          <div class="page-heading">
+
+            <div>
+
+              <h2>
+                Estoque
+              </h2>
+
+              <p>
+                Controle entradas, saídas, perdas e ajustes.
+              </p>
+
+            </div>
+
+
+            <button
+              id="btnNovaEntradaEstoque"
+              class="btn-master btn-yellow"
+              type="button"
+            >
+              + Entrada de estoque
+            </button>
+
+          </div>
+
+
+          <div class="master-placeholder">
+
+            <span>
+              📦
+            </span>
+
+            <h3>
+              Controle de Estoque
+            </h3>
+
+            <p>
+              Aqui cadastraremos as entradas de mercadoria,
+              estoque atual e histórico de movimentações.
+            </p>
+
+          </div>
+
+        </section>
+
+
+        <!-- =================================================
+             PRODUTOS
+        ================================================== -->
+
+        <section
+          id="page-produtos"
+          class="master-page"
+        >
+
+          <div class="page-heading">
+
+            <div>
+
+              <h2>
+                Produtos
+              </h2>
+
+              <p>
+                Preço de venda, custo médio e controle de estoque.
+              </p>
+
+            </div>
+
+
+            <button
+              id="btnNovoProduto"
+              class="btn-master btn-yellow"
+              type="button"
+            >
+              + Novo produto
+            </button>
+
+          </div>
+
+
+          <div class="master-placeholder">
+
+            <span>
+              🍔
+            </span>
+
+            <h3>
+              Cadastro de Produtos
+            </h3>
+
+            <p>
+              Nesta área o dono poderá definir custo,
+              preço, estoque mínimo e disponibilidade.
+            </p>
+
+          </div>
+
+        </section>
+
+
+        <!-- =================================================
+             DESPESAS
+        ================================================== -->
+
+        <section
+          id="page-despesas"
+          class="master-page"
+        >
+
+          <div class="page-heading">
+
+            <div>
+
+              <h2>
+                Despesas
+              </h2>
+
+              <p>
+                Registre gastos operacionais da lanchonete.
+              </p>
+
+            </div>
+
+
+            <button
+              id="btnNovaDespesa"
+              class="btn-master btn-yellow"
+              type="button"
+            >
+              + Nova despesa
+            </button>
+
+          </div>
+
+
+          <div class="master-placeholder">
+
+            <span>
+              💸
+            </span>
+
+            <h3>
+              Despesas
+            </h3>
+
+            <p>
+              Futuramente teremos compras, contas, gás,
+              embalagens e outras despesas operacionais.
+            </p>
+
+          </div>
+
+        </section>
+
+
+        <!-- =================================================
+             RELATÓRIOS
+        ================================================== -->
+
+        <section
+          id="page-relatorios"
+          class="master-page"
+        >
+
+          <div class="page-heading">
+
+            <div>
+
+              <h2>
+                Relatórios
+              </h2>
+
+              <p>
+                Indicadores gerenciais e análise do negócio.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="master-placeholder">
+
+            <span>
+              📈
+            </span>
+
+            <h3>
+              Relatórios Gerenciais
+            </h3>
+
+            <p>
+              Produtos mais vendidos, mais lucrativos,
+              períodos de maior movimento e evolução financeira.
+            </p>
+
+          </div>
+
+        </section>
+
+
+      </main>
+
+
+      <!-- =================================================
+           FOOTER
+      ================================================== -->
+
+      <footer class="master-footer">
+
+        <span>
+          Lê Lanches © 2026
+        </span>
+
+        <span>
+          Sistema de Gestão
+          <strong>SMATech</strong>
+        </span>
+
+      </footer>
+
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       SCRIPTS
+  ====================================================== -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+  <script
+    src="js/config.js"
+  ></script>
+
+  <script
+    src="js/master.js"
+  ></script>
+
+</body>
+
+</html>
