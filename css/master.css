@@ -2,497 +2,418 @@
    PAINEL MASTER - LÊ LANCHES
 ========================================================= */
 
-
-/* =========================================================
-   SUPABASE
-========================================================= */
-
-let supabaseClient = null;
-
-if (
-  window.supabase &&
-  window.APP_CONFIG &&
-  window.APP_CONFIG.supabaseUrl &&
-  window.APP_CONFIG.supabaseAnonKey
-) {
-
-  supabaseClient =
-    window.supabase.createClient(
-      window.APP_CONFIG.supabaseUrl,
-      window.APP_CONFIG.supabaseAnonKey
-    );
-
-} else {
-
-  console.error(
-    'Supabase não configurado.'
-  );
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
+html,
+body {
+  min-height: 100%;
+}
 
-/* =========================================================
-   ESTADO GLOBAL
-========================================================= */
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #080808;
+  color: #ffffff;
+  overflow-x: hidden;
+}
 
-let masterPerfil = null;
-let masterUsuario = null;
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
 
-let periodoAtual = 'hoje';
-
-let carregandoMaster = false;
-let salvandoProdutoMaster = false;
-let salvandoFichaMaster = false;
-let salvandoMovimentoMaster = false;
-let salvandoAjusteMaster = false;
-
-let masterProdutos = [];
-let masterMovimentacoes = [];
-
-let filtroProdutoMaster = 'all';
-let buscaProdutoMaster = '';
-
-let filtroEstoqueMaster = 'all';
-let buscaEstoqueMaster = '';
-let filtroMovimentacaoEstoque = 'all';
-
-let masterFichaProduto = null;
-let masterFichaSelecionados = new Map();
-let buscaFichaMaster = '';
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed !important;
+}
 
 
 /* =========================================================
    UTILITÁRIOS
 ========================================================= */
 
-function byId(id) {
-
-  return document.getElementById(id);
-}
-
-
-function escaparHtml(texto) {
-
-  return String(texto ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-
-function normalizarTexto(texto) {
-
-  return String(texto ?? '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .trim()
-    .toLowerCase();
-}
-
-
-function numeroSeguro(valor) {
-
-  const numero =
-    Number(valor);
-
-  return Number.isFinite(numero)
-    ? numero
-    : 0;
-}
-
-
-function formatarMoeda(valor) {
-
-  return numeroSeguro(valor)
-    .toLocaleString(
-      'pt-BR',
-      {
-        style: 'currency',
-        currency: 'BRL'
-      }
-    );
-}
-
-
-function formatarNumero(valor) {
-
-  return numeroSeguro(valor)
-    .toLocaleString('pt-BR');
-}
-
-
-function formatarQuantidade(valor) {
-
-  const numero =
-    numeroSeguro(valor);
-
-  if (
-    Number.isInteger(numero)
-  ) {
-
-    return String(numero);
-  }
-
-  return numero.toLocaleString(
-    'pt-BR',
-    {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 4
-    }
-  );
-}
-
-
-function formatarDataHora(valor) {
-
-  if (!valor) {
-
-    return '-';
-  }
-
-  const data =
-    new Date(valor);
-
-  if (
-    Number.isNaN(
-      data.getTime()
-    )
-  ) {
-
-    return '-';
-  }
-
-  return data.toLocaleString(
-    'pt-BR'
-  );
-}
-
-
-function formatarUnidade(unidade) {
-
-  const unidades = {
-
-    un: 'un',
-    kg: 'kg',
-    g: 'g',
-    l: 'L',
-    ml: 'ml'
-
-  };
-
-  return unidades[unidade] ||
-    unidade ||
-    'un';
-}
-
-
-function gerarCodigoProduto(nome) {
-
-  const base =
-    String(nome || '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toUpperCase()
-      .replace(/[^A-Z0-9]+/g, '_')
-      .replace(/^_+|_+$/g, '')
-      .slice(0, 40);
-
-  const sufixo =
-    Date.now()
-      .toString()
-      .slice(-6);
-
-  return base
-    ? `${base}_${sufixo}`
-    : `ITEM_${sufixo}`;
-}
-
-
-function arredondarCusto(valor) {
-
-  return Math.round(
-    (
-      numeroSeguro(valor) +
-      Number.EPSILON
-    ) *
-    10000
-  ) / 10000;
-}
-
-
-function mostrarMensagemFormulario(
-  elemento,
-  texto,
-  tipo = ''
-) {
-
-  if (!elemento) {
-
-    return;
-  }
-
-  elemento.textContent =
-    texto || '';
-
-  elemento.className =
-    'master-form-message';
-
-  if (tipo) {
-
-    elemento.classList.add(tipo);
-  }
+.hidden {
+  display: none !important;
 }
 
 
 /* =========================================================
-   MOSTRAR / ESCONDER PAINEL
+   LOADING
 ========================================================= */
 
-function mostrarPainelMaster() {
+.master-loading {
+  min-height: 100vh;
 
-  const loading =
-    byId('masterLoading');
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  const app =
-    byId('masterApp');
+  padding: 24px;
 
-  if (loading) {
-
-    loading.style.display =
-      'none';
-  }
-
-  if (app) {
-
-    app.classList.remove(
-      'hidden'
-    );
-
-    app.style.display =
-      '';
-  }
+  background:
+    radial-gradient(
+      circle at top,
+      rgba(255, 193, 7, 0.08),
+      transparent 35%
+    ),
+    #080808;
 }
 
+.master-loading-box {
+  width: 100%;
+  max-width: 360px;
 
-function esconderPainelMaster() {
+  padding: 34px 24px;
 
-  const app =
-    byId('masterApp');
+  text-align: center;
 
-  if (app) {
+  background: #121214;
 
-    app.classList.add(
-      'hidden'
-    );
-  }
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
+
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5);
+}
+
+.master-loading-box img {
+  width: 95px;
+  height: 95px;
+
+  object-fit: cover;
+
+  margin-bottom: 18px;
+
+  border-radius: 50%;
+  border: 3px solid #ffc107;
+}
+
+.master-loading-box strong {
+  display: block;
+
+  margin-bottom: 8px;
+
+  font-size: 18px;
+}
+
+.master-loading-box span {
+  color: #8f8f98;
+
+  font-size: 13px;
 }
 
 
 /* =========================================================
-   LOGIN / SESSÃO
+   APP
 ========================================================= */
 
-async function buscarPerfilMaster(userId) {
+.master-app {
+  min-height: 100vh;
 
-  if (!supabaseClient) {
+  display: flex;
 
-    throw new Error(
-      'Supabase não configurado.'
-    );
-  }
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from('profiles')
-      .select(
-        'id, full_name, role, active'
-      )
-      .eq(
-        'id',
-        userId
-      )
-      .single();
-
-  if (error) {
-
-    console.error(
-      'Erro ao consultar perfil Master:',
-      error
-    );
-
-    throw new Error(
-      'Não foi possível validar a permissão Master.'
-    );
-  }
-
-  return data;
-}
-
-
-function perfilEhMaster(perfil) {
-
-  return (
-    perfil &&
-    perfil.role === 'master' &&
-    perfil.active === true
-  );
-}
-
-
-async function validarAcessoMaster() {
-
-  if (!supabaseClient) {
-
-    window.location.href =
-      'master-login.html';
-
-    return false;
-  }
-
-  try {
-
-    const {
-      data,
-      error
-    } =
-      await supabaseClient.auth
-        .getSession();
-
-    if (error) {
-
-      throw error;
-    }
-
-    const sessao =
-      data?.session;
-
-    if (!sessao?.user) {
-
-      window.location.href =
-        'master-login.html';
-
-      return false;
-    }
-
-    masterUsuario =
-      sessao.user;
-
-    masterPerfil =
-      await buscarPerfilMaster(
-        masterUsuario.id
-      );
-
-    if (
-      !perfilEhMaster(
-        masterPerfil
-      )
-    ) {
-
-      await supabaseClient.auth
-        .signOut();
-
-      alert(
-        'Este usuário não possui acesso ao Painel Master.'
-      );
-
-      window.location.href =
-        'master-login.html';
-
-      return false;
-    }
-
-    atualizarDadosUsuario();
-
-    return true;
-
-  } catch (erro) {
-
-    console.error(
-      'Falha ao validar acesso Master:',
-      erro
-    );
-
-    try {
-
-      await supabaseClient.auth
-        .signOut();
-
-    } catch (_) {}
-
-    window.location.href =
-      'master-login.html';
-
-    return false;
-  }
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(255, 193, 7, 0.035),
+      transparent 30%
+    ),
+    #080808;
 }
 
 
 /* =========================================================
-   DADOS DO USUÁRIO
+   SIDEBAR
 ========================================================= */
 
-function atualizarDadosUsuario() {
+.master-sidebar {
+  width: 260px;
+  min-height: 100vh;
 
-  const nome =
-    byId('masterUserName');
+  position: fixed;
 
-  const email =
-    byId('masterUserEmail');
+  left: 0;
+  top: 0;
+  bottom: 0;
 
-  if (nome) {
+  display: flex;
+  flex-direction: column;
 
-    nome.textContent =
-      masterPerfil?.full_name ||
-      'Master';
-  }
+  padding: 22px 16px;
 
-  if (email) {
+  background:
+    linear-gradient(
+      180deg,
+      #121214 0%,
+      #0d0d0f 100%
+    );
 
-    email.textContent =
-      masterUsuario?.email ||
-      '';
-  }
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+
+  z-index: 50;
 }
 
 
 /* =========================================================
-   LOGOUT
+   BRAND
 ========================================================= */
 
-async function sairMaster() {
+.sidebar-brand {
+  display: flex;
+  align-items: center;
 
-  const confirmar =
-    confirm(
-      'Deseja sair do Painel Master?'
+  gap: 12px;
+
+  padding: 8px 8px 22px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.sidebar-brand img {
+  width: 54px;
+  height: 54px;
+
+  object-fit: cover;
+
+  border-radius: 50%;
+  border: 2px solid #ffc107;
+}
+
+.sidebar-brand div {
+  min-width: 0;
+}
+
+.sidebar-brand span {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #ffc107;
+
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.sidebar-brand strong {
+  display: block;
+
+  color: #ffffff;
+
+  font-size: 17px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* =========================================================
+   MENU
+========================================================= */
+
+.master-nav {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+
+  margin-top: 22px;
+}
+
+.master-nav-item {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 13px 14px;
+
+  border: 1px solid transparent;
+  border-radius: 12px;
+
+  color: #aaaab2;
+  background: transparent;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.master-nav-item span {
+  width: 22px;
+
+  font-size: 18px;
+
+  text-align: center;
+}
+
+.master-nav-item:hover {
+  color: #ffffff;
+
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.master-nav-item.active {
+  color: #111111;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffc107,
+      #f2aa00
     );
 
-  if (!confirmar) {
+  border-color: rgba(255, 193, 7, 0.7);
 
-    return;
-  }
+  box-shadow: 0 8px 22px rgba(255, 193, 7, 0.12);
+}
 
-  try {
 
-    if (supabaseClient) {
+/* =========================================================
+   SIDEBAR FOOTER
+========================================================= */
 
-      await supabaseClient.auth
-        .signOut();
-    }
+.sidebar-footer {
+  margin-top: auto;
 
-  } catch (erro) {
+  display: flex;
+  flex-direction: column;
 
-    console.error(
-      'Erro ao sair:',
-      erro
-    );
-  }
+  gap: 8px;
 
-  window.location.href =
-    'master-login.html';
+  padding-top: 20px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.sidebar-link,
+.sidebar-logout {
+  width: 100%;
+  min-height: 42px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 10px 12px;
+
+  border-radius: 10px;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  text-decoration: none;
+
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.sidebar-link {
+  color: #aaaab2;
+}
+
+.sidebar-link:hover {
+  color: #ffffff;
+
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.sidebar-logout {
+  border: 1px solid rgba(255, 80, 80, 0.2);
+
+  color: #ff7272;
+  background: rgba(255, 80, 80, 0.06);
+
+  cursor: pointer;
+}
+
+.sidebar-logout:hover {
+  color: #ffffff;
+
+  background: rgba(255, 80, 80, 0.15);
+}
+
+
+/* =========================================================
+   CONTEÚDO
+========================================================= */
+
+.master-content {
+  width: calc(100% - 260px);
+  min-height: 100vh;
+
+  margin-left: 260px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* =========================================================
+   TOPBAR
+========================================================= */
+
+.master-topbar {
+  min-height: 84px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 18px 28px;
+
+  position: sticky;
+  top: 0;
+
+  background: rgba(10, 10, 11, 0.92);
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+
+  backdrop-filter: blur(12px);
+
+  z-index: 40;
+}
+
+.topbar-label {
+  margin-bottom: 4px;
+
+  color: #ffc107;
+
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1px;
+
+  text-transform: uppercase;
+}
+
+.master-topbar h1 {
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+
+  gap: 16px;
 }
 
 
@@ -500,5170 +421,142 @@ async function sairMaster() {
    RELÓGIO
 ========================================================= */
 
-function atualizarRelogioMaster() {
+.master-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 
-  const relogio =
-    byId('masterClock');
+  padding-right: 16px;
 
-  if (!relogio) {
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
 
-    return;
-  }
+.master-clock span {
+  margin-bottom: 2px;
 
-  relogio.textContent =
-    new Date()
-      .toLocaleTimeString(
-        'pt-BR'
-      );
+  color: #777780;
+
+  font-size: 11px;
+}
+
+.master-clock strong {
+  color: #ffffff;
+
+  font-size: 15px;
 }
 
 
 /* =========================================================
-   NAVEGAÇÃO
+   USUÁRIO
 ========================================================= */
 
-const TITULOS_PAGINAS = {
+.master-user {
+  display: flex;
+  align-items: center;
 
-  dashboard:
-    'Visão Geral',
+  gap: 10px;
 
-  financeiro:
-    'Financeiro',
-
-  estoque:
-    'Estoque',
-
-  produtos:
-    'Produtos e Insumos',
-
-  despesas:
-    'Despesas',
-
-  relatorios:
-    'Relatórios'
-
-};
-
-
-async function abrirPaginaMaster(pagina) {
-
-  if (!pagina) {
-
-    return;
-  }
-
-  document
-    .querySelectorAll(
-      '.master-page'
-    )
-    .forEach(
-      elemento => {
-
-        elemento.classList.remove(
-          'active'
-        );
-      }
-    );
-
-  document
-    .querySelectorAll(
-      '.master-nav-item'
-    )
-    .forEach(
-      elemento => {
-
-        elemento.classList.remove(
-          'active'
-        );
-      }
-    );
-
-  const paginaElemento =
-    byId(
-      `page-${pagina}`
-    );
-
-  if (paginaElemento) {
-
-    paginaElemento.classList.add(
-      'active'
-    );
-  }
-
-  const botaoMenu =
-    document.querySelector(
-      `.master-nav-item[data-page="${pagina}"]`
-    );
-
-  if (botaoMenu) {
-
-    botaoMenu.classList.add(
-      'active'
-    );
-  }
-
-  const titulo =
-    byId('masterPageTitle');
-
-  if (titulo) {
-
-    titulo.textContent =
-      TITULOS_PAGINAS[pagina] ||
-      'Painel Master';
-  }
-
-  if (
-    pagina === 'produtos'
-  ) {
-
-    await carregarProdutosMaster();
-  }
-
-  if (
-    pagina === 'estoque'
-  ) {
-
-    await carregarEstoqueCompleto();
-  }
+  min-width: 0;
 }
 
+.master-user-icon {
+  width: 40px;
+  height: 40px;
 
-function configurarNavegacao() {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  document
-    .querySelectorAll(
-      '.master-nav-item'
-    )
-    .forEach(
-      botao => {
+  flex: 0 0 auto;
 
-        botao.addEventListener(
-          'click',
-          async () => {
+  border-radius: 12px;
 
-            await abrirPaginaMaster(
-              botao.dataset.page
-            );
-          }
-        );
-      }
-    );
+  background: rgba(255, 193, 7, 0.1);
 
-  document
-    .querySelectorAll(
-      '[data-go-page]'
-    )
-    .forEach(
-      botao => {
+  border: 1px solid rgba(255, 193, 7, 0.22);
 
-        botao.addEventListener(
-          'click',
-          async () => {
+  font-size: 18px;
+}
 
-            await abrirPaginaMaster(
-              botao.dataset.goPage
-            );
-          }
-        );
-      }
-    );
+.master-user div:last-child {
+  min-width: 0;
+}
+
+.master-user strong {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: #ffffff;
+
+  font-size: 13px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.master-user span {
+  display: block;
+
+  max-width: 210px;
+
+  color: #85858d;
+
+  font-size: 11px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 
 /* =========================================================
-   PERÍODO
+   MAIN
 ========================================================= */
 
-function inicioPeriodoSelecionado() {
+.master-main {
+  flex: 1;
 
-  const agora =
-    new Date();
+  width: 100%;
 
-  if (
-    periodoAtual === 'hoje'
-  ) {
-
-    return new Date(
-      agora.getFullYear(),
-      agora.getMonth(),
-      agora.getDate(),
-      0,
-      0,
-      0,
-      0
-    );
-  }
-
-  const dias =
-    Number(periodoAtual);
-
-  if (
-    Number.isFinite(dias) &&
-    dias > 0
-  ) {
-
-    const inicio =
-      new Date();
-
-    inicio.setDate(
-      inicio.getDate() -
-      (dias - 1)
-    );
-
-    inicio.setHours(
-      0,
-      0,
-      0,
-      0
-    );
-
-    return inicio;
-  }
-
-  const fallback =
-    new Date();
-
-  fallback.setHours(
-    0,
-    0,
-    0,
-    0
-  );
-
-  return fallback;
-}
-
-
-function configurarFiltroPeriodo() {
-
-  document
-    .querySelectorAll(
-      '.period-btn'
-    )
-    .forEach(
-      botao => {
-
-        botao.addEventListener(
-          'click',
-          async () => {
-
-            document
-              .querySelectorAll(
-                '.period-btn'
-              )
-              .forEach(
-                item => {
-
-                  item.classList.remove(
-                    'active'
-                  );
-                }
-              );
-
-            botao.classList.add(
-              'active'
-            );
-
-            periodoAtual =
-              botao.dataset.period ||
-              'hoje';
-
-            await carregarDashboard();
-          }
-        );
-      }
-    );
+  padding: 28px;
 }
 
 
 /* =========================================================
-   FINANCEIRO
+   PÁGINAS
 ========================================================= */
 
-async function buscarItensFinanceiros() {
-
-  if (!supabaseClient) {
-
-    return [];
-  }
-
-  const inicio =
-    inicioPeriodoSelecionado();
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from('order_items')
-      .select(
-        `
-        id,
-        order_id,
-        product_id,
-        product_code,
-        product_name,
-        quantity,
-        sale_unit_price,
-        cost_unit_price,
-        sale_total,
-        cost_total,
-        gross_profit,
-        created_at
-        `
-      )
-      .gte(
-        'created_at',
-        inicio.toISOString()
-      )
-      .order(
-        'created_at',
-        {
-          ascending: false
-        }
-      );
-
-  if (error) {
-
-    console.error(
-      'Erro ao carregar dados financeiros:',
-      error
-    );
-
-    return [];
-  }
-
-  return Array.isArray(data)
-    ? data
-    : [];
+.master-page {
+  display: none;
 }
 
-
-function atualizarCardsFinanceiros(itens) {
-
-  const pedidosUnicos =
-    new Set();
-
-  let faturamento = 0;
-  let custo = 0;
-
-  itens.forEach(
-    item => {
-
-      if (
-        item.order_id !== null &&
-        item.order_id !== undefined
-      ) {
-
-        pedidosUnicos.add(
-          item.order_id
-        );
-      }
-
-      faturamento +=
-        numeroSeguro(
-          item.sale_total
-        );
-
-      custo +=
-        numeroSeguro(
-          item.cost_total
-        );
-    }
-  );
-
-  const lucro =
-    faturamento -
-    custo;
-
-  const margem =
-    faturamento > 0
-      ? (
-          lucro /
-          faturamento
-        ) * 100
-      : 0;
-
-  const quantidadePedidos =
-    pedidosUnicos.size;
-
-  const ticketMedio =
-    quantidadePedidos > 0
-      ? faturamento /
-        quantidadePedidos
-      : 0;
-
-  if (byId('masterTotalPedidos')) {
-
-    byId(
-      'masterTotalPedidos'
-    ).textContent =
-      quantidadePedidos;
-  }
-
-  if (byId('masterFaturamento')) {
-
-    byId(
-      'masterFaturamento'
-    ).textContent =
-      formatarMoeda(
-        faturamento
-      );
-  }
-
-  if (byId('masterCusto')) {
-
-    byId(
-      'masterCusto'
-    ).textContent =
-      formatarMoeda(
-        custo
-      );
-  }
-
-  if (byId('masterLucro')) {
-
-    byId(
-      'masterLucro'
-    ).textContent =
-      formatarMoeda(
-        lucro
-      );
-  }
-
-  if (byId('masterMargem')) {
-
-    byId(
-      'masterMargem'
-    ).textContent =
-      margem.toLocaleString(
-        'pt-BR',
-        {
-          minimumFractionDigits: 1,
-          maximumFractionDigits: 1
-        }
-      ) + '%';
-  }
-
-  if (byId('masterTicketMedio')) {
-
-    byId(
-      'masterTicketMedio'
-    ).textContent =
-      formatarMoeda(
-        ticketMedio
-      );
-  }
+.master-page.active {
+  display: block;
 }
 
+.page-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-/* =========================================================
-   PRODUTOS MAIS VENDIDOS
-========================================================= */
+  gap: 18px;
 
-function renderizarProdutosMaisVendidos(itens) {
-
-  const container =
-    byId(
-      'masterProdutosVendidos'
-    );
-
-  if (!container) {
-
-    return;
-  }
-
-  const agrupados = {};
-
-  itens.forEach(
-    item => {
-
-      const chave =
-        item.product_code ||
-        item.product_name ||
-        'produto';
-
-      if (!agrupados[chave]) {
-
-        agrupados[chave] = {
-
-          nome:
-            item.product_name ||
-            'Produto',
-
-          quantidade:
-            0,
-
-          faturamento:
-            0,
-
-          lucro:
-            0
-        };
-      }
-
-      agrupados[chave].quantidade +=
-        numeroSeguro(
-          item.quantity
-        );
-
-      agrupados[chave].faturamento +=
-        numeroSeguro(
-          item.sale_total
-        );
-
-      agrupados[chave].lucro +=
-        numeroSeguro(
-          item.gross_profit
-        );
-    }
-  );
-
-  const ranking =
-    Object.values(
-      agrupados
-    )
-      .sort(
-        (a, b) =>
-          b.quantidade -
-          a.quantidade
-      )
-      .slice(
-        0,
-        5
-      );
-
-  if (
-    ranking.length === 0
-  ) {
-
-    container.innerHTML =
-      `
-        <div class="master-empty">
-          Ainda não há vendas no período.
-        </div>
-      `;
-
-    return;
-  }
-
-  container.innerHTML =
-    ranking
-      .map(
-        (
-          item,
-          index
-        ) => `
-
-          <div class="ranking-item">
-
-            <div class="ranking-position">
-              ${index + 1}
-            </div>
-
-            <div class="ranking-info">
-
-              <strong>
-                ${escaparHtml(item.nome)}
-              </strong>
-
-              <span>
-                ${formatarQuantidade(item.quantidade)}
-                unidade(s)
-              </span>
-
-            </div>
-
-            <div class="ranking-value">
-
-              <strong>
-                ${formatarMoeda(item.faturamento)}
-              </strong>
-
-              <span>
-                Lucro:
-                ${formatarMoeda(item.lucro)}
-              </span>
-
-            </div>
-
-          </div>
-
-        `
-      )
-      .join('');
+  margin-bottom: 22px;
 }
 
+.page-heading h2 {
+  margin-bottom: 5px;
 
-/* =========================================================
-   BUSCAR PRODUTOS
-========================================================= */
-
-async function buscarProdutos(
-  somenteAtivos = true
-) {
-
-  if (!supabaseClient) {
-
-    return [];
-  }
-
-  let consulta =
-    supabaseClient
-      .from('products')
-      .select(
-        `
-        id,
-        product_code,
-        name,
-        category,
-        sale_price,
-        average_cost,
-        stock_quantity,
-        minimum_stock,
-        stock_control,
-        available,
-        active,
-        item_type,
-        unit,
-        supplier,
-        notes,
-        created_at,
-        updated_at
-        `
-      );
-
-  if (somenteAtivos) {
-
-    consulta =
-      consulta.eq(
-        'active',
-        true
-      );
-  }
-
-  const {
-    data,
-    error
-  } =
-    await consulta.order(
-      'name',
-      {
-        ascending: true
-      }
-    );
-
-  if (error) {
-
-    console.error(
-      'Erro ao carregar produtos:',
-      error
-    );
-
-    throw error;
-  }
-
-  return Array.isArray(data)
-    ? data
-    : [];
+  font-size: 25px;
 }
 
-
-/* =========================================================
-   ESTOQUE BAIXO - DASHBOARD
-========================================================= */
-
-function renderizarEstoqueBaixo(produtos) {
-
-  const container =
-    byId('masterEstoqueBaixo');
-
-  if (!container) {
-
-    return;
-  }
-
-  const estoqueBaixo =
-    produtos
-      .filter(
-        produto => {
-
-          if (
-            produto.stock_control !== true
-          ) {
-
-            return false;
-          }
-
-          const estoque =
-            numeroSeguro(
-              produto.stock_quantity
-            );
-
-          const minimo =
-            numeroSeguro(
-              produto.minimum_stock
-            );
-
-          return estoque <= minimo;
-        }
-      )
-      .sort(
-        (a, b) =>
-          numeroSeguro(
-            a.stock_quantity
-          ) -
-          numeroSeguro(
-            b.stock_quantity
-          )
-      )
-      .slice(
-        0,
-        6
-      );
-
-  if (
-    estoqueBaixo.length === 0
-  ) {
-
-    container.innerHTML =
-      `
-        <div class="master-empty">
-          Nenhum produto com estoque baixo.
-        </div>
-      `;
-
-    return;
-  }
-
-  container.innerHTML =
-    estoqueBaixo
-      .map(
-        produto => {
-
-          const estoque =
-            numeroSeguro(
-              produto.stock_quantity
-            );
-
-          const minimo =
-            numeroSeguro(
-              produto.minimum_stock
-            );
-
-          const esgotado =
-            estoque <= 0;
-
-          return `
-
-            <div class="stock-warning-item">
-
-              <div>
-
-                <strong>
-                  ${escaparHtml(produto.name)}
-                </strong>
-
-                <span>
-                  Mínimo:
-                  ${formatarQuantidade(minimo)}
-                  ${escaparHtml(
-                    formatarUnidade(
-                      produto.unit
-                    )
-                  )}
-                </span>
-
-              </div>
-
-              <div
-                class="
-                  stock-warning-value
-                  ${
-                    esgotado
-                      ? 'danger'
-                      : ''
-                  }
-                "
-              >
-
-                ${
-                  esgotado
-                    ? 'ESGOTADO'
-                    :
-                    `${formatarQuantidade(estoque)}
-                     ${escaparHtml(
-                       formatarUnidade(
-                         produto.unit
-                       )
-                     )}`
-                }
-
-              </div>
-
-            </div>
-
-          `;
-        }
-      )
-      .join('');
-}
-
-
-/* =========================================================
-   MOVIMENTAÇÕES
-========================================================= */
-
-async function buscarMovimentacoes(
-  limite = 200
-) {
-
-  if (!supabaseClient) {
-
-    return [];
-  }
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from('stock_movements')
-      .select(
-        `
-        id,
-        product_id,
-        movement_type,
-        quantity,
-        unit_cost,
-        total_cost,
-        stock_before,
-        stock_after,
-        average_cost_before,
-        average_cost_after,
-        order_id,
-        notes,
-        created_at,
-        products (
-          name,
-          product_code,
-          unit,
-          item_type
-        )
-        `
-      )
-      .order(
-        'created_at',
-        {
-          ascending: false
-        }
-      )
-      .limit(
-        limite
-      );
-
-  if (error) {
-
-    console.error(
-      'Erro ao buscar movimentações:',
-      error
-    );
-
-    return [];
-  }
-
-  return Array.isArray(data)
-    ? data
-    : [];
-}
-
-
-async function buscarMovimentacoesRecentes() {
-
-  const dados =
-    await buscarMovimentacoes(
-      10
-    );
-
-  return dados;
-}
-
-
-function obterLabelMovimento(tipo) {
-
-  const labels = {
-
-    entrada:
-      'Entrada',
-
-    venda:
-      'Venda',
-
-    ajuste_entrada:
-      'Ajuste +',
-
-    ajuste_saida:
-      'Ajuste -',
-
-    perda:
-      'Perda',
-
-    cancelamento:
-      'Cancelamento'
-
-  };
-
-  return labels[tipo] ||
-    tipo ||
-    '-';
-}
-
-
-function obterClasseMovimento(tipo) {
-
-  const classes = {
-
-    entrada:
-      'entry',
-
-    venda:
-      'sale',
-
-    ajuste_entrada:
-      'adjust-in',
-
-    ajuste_saida:
-      'adjust-out',
-
-    perda:
-      'loss',
-
-    cancelamento:
-      'cancel'
-
-  };
-
-  return classes[tipo] ||
-    '';
-}
-
-
-function renderizarMovimentacoes(
-  movimentacoes
-) {
-
-  const tbody =
-    byId(
-      'masterMovimentacoesRecentes'
-    );
-
-  if (!tbody) {
-
-    return;
-  }
-
-  if (
-    movimentacoes.length === 0
-  ) {
-
-    tbody.innerHTML =
-      `
-        <tr>
-          <td
-            colspan="5"
-            class="table-empty"
-          >
-            Nenhuma movimentação registrada.
-          </td>
-        </tr>
-      `;
-
-    return;
-  }
-
-  tbody.innerHTML =
-    movimentacoes
-      .map(
-        movimento => `
-
-          <tr>
-
-            <td>
-              ${formatarDataHora(
-                movimento.created_at
-              )}
-            </td>
-
-            <td>
-              ${escaparHtml(
-                movimento.products?.name ||
-                'Item'
-              )}
-            </td>
-
-            <td>
-              ${escaparHtml(
-                obterLabelMovimento(
-                  movimento.movement_type
-                )
-              )}
-            </td>
-
-            <td>
-              ${formatarQuantidade(
-                movimento.quantity
-              )}
-              ${escaparHtml(
-                formatarUnidade(
-                  movimento.products?.unit
-                )
-              )}
-            </td>
-
-            <td>
-              ${formatarQuantidade(
-                movimento.stock_after
-              )}
-              ${escaparHtml(
-                formatarUnidade(
-                  movimento.products?.unit
-                )
-              )}
-            </td>
-
-          </tr>
-
-        `
-      )
-      .join('');
-}
-
-
-/* =========================================================
-   DASHBOARD
-========================================================= */
-
-async function carregarDashboard() {
-
-  if (carregandoMaster) {
-
-    return;
-  }
-
-  carregandoMaster =
-    true;
-
-  const btnAtualizar =
-    byId('btnAtualizarMaster');
-
-  const textoAnterior =
-    btnAtualizar
-      ? btnAtualizar.innerHTML
-      : '';
-
-  try {
-
-    if (btnAtualizar) {
-
-      btnAtualizar.disabled =
-        true;
-
-      btnAtualizar.innerHTML =
-        '⏳ Atualizando...';
-    }
-
-    const [
-      itensFinanceiros,
-      produtos,
-      movimentacoes
-    ] =
-      await Promise.all(
-        [
-          buscarItensFinanceiros(),
-          buscarProdutos(true),
-          buscarMovimentacoesRecentes()
-        ]
-      );
-
-    atualizarCardsFinanceiros(
-      itensFinanceiros
-    );
-
-    renderizarProdutosMaisVendidos(
-      itensFinanceiros
-    );
-
-    renderizarEstoqueBaixo(
-      produtos
-    );
-
-    renderizarMovimentacoes(
-      movimentacoes
-    );
-
-  } catch (erro) {
-
-    console.error(
-      'Erro ao carregar dashboard Master:',
-      erro
-    );
-
-  } finally {
-
-    carregandoMaster =
-      false;
-
-    if (btnAtualizar) {
-
-      btnAtualizar.disabled =
-        false;
-
-      btnAtualizar.innerHTML =
-        textoAnterior ||
-        '🔄 Atualizar';
-    }
-  }
-}
-
-
-/* =========================================================
-   PRODUTOS / INSUMOS - RESUMO
-========================================================= */
-
-function atualizarResumoProdutosMaster() {
-
-  const ativos =
-    masterProdutos.filter(
-      produto =>
-        produto.active === true
-    );
-
-  const produtos =
-    ativos.filter(
-      produto =>
-        produto.item_type ===
-        'product'
-    );
-
-  const insumos =
-    ativos.filter(
-      produto =>
-        produto.item_type ===
-        'ingredient'
-    );
-
-  const estoqueBaixo =
-    ativos.filter(
-      produto => {
-
-        if (
-          produto.stock_control !== true
-        ) {
-
-          return false;
-        }
-
-        return (
-          numeroSeguro(
-            produto.stock_quantity
-          ) <=
-          numeroSeguro(
-            produto.minimum_stock
-          )
-        );
-      }
-    );
-
-  const valorEstoque =
-    ativos.reduce(
-      (
-        total,
-        produto
-      ) => {
-
-        if (
-          produto.stock_control !== true
-        ) {
-
-          return total;
-        }
-
-        return (
-          total +
-          (
-            numeroSeguro(
-              produto.stock_quantity
-            ) *
-            numeroSeguro(
-              produto.average_cost
-            )
-          )
-        );
-      },
-      0
-    );
-
-  if (
-    byId(
-      'masterQuantidadeProdutos'
-    )
-  ) {
-
-    byId(
-      'masterQuantidadeProdutos'
-    ).textContent =
-      formatarNumero(
-        produtos.length
-      );
-  }
-
-  if (
-    byId(
-      'masterQuantidadeInsumos'
-    )
-  ) {
-
-    byId(
-      'masterQuantidadeInsumos'
-    ).textContent =
-      formatarNumero(
-        insumos.length
-      );
-  }
-
-  if (
-    byId(
-      'masterQuantidadeEstoqueBaixo'
-    )
-  ) {
-
-    byId(
-      'masterQuantidadeEstoqueBaixo'
-    ).textContent =
-      formatarNumero(
-        estoqueBaixo.length
-      );
-  }
-
-  if (
-    byId(
-      'masterValorEstoque'
-    )
-  ) {
-
-    byId(
-      'masterValorEstoque'
-    ).textContent =
-      formatarMoeda(
-        valorEstoque
-      );
-  }
-}
-
-
-/* =========================================================
-   FILTRO DE PRODUTOS
-========================================================= */
-
-function obterProdutosFiltrados() {
-
-  const busca =
-    normalizarTexto(
-      buscaProdutoMaster
-    );
-
-  return masterProdutos
-    .filter(
-      produto => {
-
-        if (
-          filtroProdutoMaster !==
-            'all' &&
-          produto.item_type !==
-            filtroProdutoMaster
-        ) {
-
-          return false;
-        }
-
-        if (!busca) {
-
-          return true;
-        }
-
-        const texto =
-          normalizarTexto(
-            [
-              produto.name,
-              produto.product_code,
-              produto.category,
-              produto.supplier
-            ].join(' ')
-          );
-
-        return texto.includes(
-          busca
-        );
-      }
-    )
-    .sort(
-      (a, b) =>
-        String(a.name || '')
-          .localeCompare(
-            String(b.name || ''),
-            'pt-BR'
-          )
-    );
-}
-
-
-/* =========================================================
-   PRODUTOS - RENDER
-========================================================= */
-
-function renderizarProdutosMaster() {
-
-  const container =
-    byId('masterListaProdutos');
-
-  if (!container) {
-
-    return;
-  }
-
-  atualizarResumoProdutosMaster();
-
-  const produtos =
-    obterProdutosFiltrados();
-
-  if (
-    produtos.length === 0
-  ) {
-
-    container.innerHTML =
-      `
-        <div class="master-empty">
-          Nenhum produto ou insumo encontrado.
-        </div>
-      `;
-
-    return;
-  }
-
-  container.innerHTML =
-    produtos
-      .map(
-        produto => {
-
-          const tipoInsumo =
-            produto.item_type ===
-            'ingredient';
-
-          const estoque =
-            numeroSeguro(
-              produto.stock_quantity
-            );
-
-          const minimo =
-            numeroSeguro(
-              produto.minimum_stock
-            );
-
-          const custo =
-            numeroSeguro(
-              produto.average_cost
-            );
-
-          const venda =
-            numeroSeguro(
-              produto.sale_price
-            );
-
-          const lucro =
-            venda - custo;
-
-          const margem =
-            venda > 0
-              ? (
-                  lucro /
-                  venda
-                ) * 100
-              : 0;
-
-          const estoqueBaixo =
-            produto.stock_control ===
-              true &&
-            estoque <= minimo;
-
-          const esgotado =
-            produto.stock_control ===
-              true &&
-            estoque <= 0;
-
-          const unidade =
-            formatarUnidade(
-              produto.unit
-            );
-
-          let classeEstoque = '';
-
-          if (esgotado) {
-
-            classeEstoque =
-              'danger';
-
-          } else if (
-            estoqueBaixo
-          ) {
-
-            classeEstoque =
-              'warning';
-          }
-
-          return `
-
-            <article
-              class="product-master-item"
-              data-product-id="${produto.id}"
-            >
-
-              <div class="product-master-main">
-
-                <div class="product-master-icon">
-                  ${
-                    tipoInsumo
-                      ? '🥩'
-                      : '🍔'
-                  }
-                </div>
-
-                <div class="product-master-info">
-
-                  <strong>
-                    ${escaparHtml(
-                      produto.name
-                    )}
-                  </strong>
-
-                  <div class="product-master-meta">
-
-                    <span
-                      class="
-                        product-type-badge
-                        ${
-                          tipoInsumo
-                            ? 'ingredient'
-                            : ''
-                        }
-                      "
-                    >
-                      ${
-                        tipoInsumo
-                          ? 'Insumo'
-                          : 'Produto'
-                      }
-                    </span>
-
-                    ${
-                      produto.category
-                        ? `
-                          <span class="product-master-code">
-                            ${escaparHtml(
-                              produto.category
-                            )}
-                          </span>
-                        `
-                        : ''
-                    }
-
-                    ${
-                      produto.product_code
-                        ? `
-                          <span class="product-master-code">
-                            #${escaparHtml(
-                              produto.product_code
-                            )}
-                          </span>
-                        `
-                        : ''
-                    }
-
-                  </div>
-
-                </div>
-
-              </div>
-
-
-              <div class="product-master-value">
-
-                <span>
-                  ${
-                    tipoInsumo
-                      ? 'Custo médio'
-                      : 'Venda'
-                  }
-                </span>
-
-                <strong>
-                  ${
-                    tipoInsumo
-                      ? formatarMoeda(
-                          custo
-                        )
-                      : formatarMoeda(
-                          venda
-                        )
-                  }
-                </strong>
-
-              </div>
-
-
-              <div class="product-master-value">
-
-                <span>
-                  Estoque
-                </span>
-
-                <strong class="${classeEstoque}">
-                  ${
-                    produto.stock_control
-                      ? `
-                        ${formatarQuantidade(
-                          estoque
-                        )}
-                        ${escaparHtml(
-                          unidade
-                        )}
-                      `
-                      : 'Sem controle'
-                  }
-                </strong>
-
-              </div>
-
-
-              <div class="product-master-value">
-
-                <span>
-                  ${
-                    tipoInsumo
-                      ? 'Valor estoque'
-                      : 'Custo'
-                  }
-                </span>
-
-                <strong>
-                  ${
-                    tipoInsumo
-                      ? formatarMoeda(
-                          estoque *
-                          custo
-                        )
-                      : formatarMoeda(
-                          custo
-                        )
-                  }
-                </strong>
-
-              </div>
-
-
-              <div class="product-master-value">
-
-                <span>
-                  ${
-                    tipoInsumo
-                      ? 'Mínimo'
-                      : 'Margem'
-                  }
-                </span>
-
-                <strong
-                  class="${
-                    !tipoInsumo &&
-                    margem > 0
-                      ? 'positive'
-                      : ''
-                  }"
-                >
-                  ${
-                    tipoInsumo
-                      ? `
-                        ${formatarQuantidade(
-                          minimo
-                        )}
-                        ${escaparHtml(
-                          unidade
-                        )}
-                      `
-                      : `
-                        ${margem.toLocaleString(
-                          'pt-BR',
-                          {
-                            minimumFractionDigits: 1,
-                            maximumFractionDigits: 1
-                          }
-                        )}%
-                      `
-                  }
-                </strong>
-
-              </div>
-
-
-              <div class="product-master-actions">
-
-                ${
-                  !tipoInsumo
-                    ? `
-                      <button
-                        type="button"
-                        class="product-action-btn recipe"
-                        data-master-recipe="${produto.id}"
-                      >
-                        🧾 Ficha
-                      </button>
-                    `
-                    : ''
-                }
-
-                <button
-                  type="button"
-                  class="product-action-btn"
-                  data-master-edit-product="${produto.id}"
-                >
-                  Editar
-                </button>
-
-                ${
-                  produto.stock_control
-                    ? `
-                      <button
-                        type="button"
-                        class="product-action-btn stock"
-                        data-master-stock-entry="${produto.id}"
-                      >
-                        + Entrada
-                      </button>
-                    `
-                    : ''
-                }
-
-              </div>
-
-            </article>
-
-          `;
-        }
-      )
-      .join('');
-}
-
-
-/* =========================================================
-   CARREGAR PRODUTOS
-========================================================= */
-
-async function carregarProdutosMaster() {
-
-  if (!supabaseClient) {
-
-    return;
-  }
-
-  const container =
-    byId('masterListaProdutos');
-
-  if (container) {
-
-    container.innerHTML =
-      `
-        <div class="master-empty">
-          Carregando produtos...
-        </div>
-      `;
-  }
-
-  try {
-
-    masterProdutos =
-      await buscarProdutos(false);
-
-    renderizarProdutosMaster();
-
-  } catch (erro) {
-
-    console.error(
-      'Erro ao carregar Produtos/Insumos:',
-      erro
-    );
-
-    if (container) {
-
-      container.innerHTML =
-        `
-          <div class="master-empty">
-            Não foi possível carregar os produtos.
-          </div>
-        `;
-    }
-  }
-}
-
-
-/* =========================================================
-   BUSCAR PRODUTO LOCAL
-========================================================= */
-
-function buscarProdutoLocalPorId(id) {
-
-  return masterProdutos.find(
-    produto =>
-      String(produto.id) ===
-      String(id)
-  ) || null;
-}
-
-
-/* =========================================================
-   MODAIS
-========================================================= */
-
-function abrirModalMaster(elemento) {
-
-  if (!elemento) {
-
-    return;
-  }
-
-  elemento.classList.remove(
-    'hidden'
-  );
-
-  elemento.setAttribute(
-    'aria-hidden',
-    'false'
-  );
-
-  document.body.style.overflow =
-    'hidden';
-}
-
-
-function fecharModalMaster(elemento) {
-
-  if (!elemento) {
-
-    return;
-  }
-
-  elemento.classList.add(
-    'hidden'
-  );
-
-  elemento.setAttribute(
-    'aria-hidden',
-    'true'
-  );
-
-  const algumModalAberto =
-    document.querySelector(
-      '.master-modal:not(.hidden)'
-    );
-
-  if (!algumModalAberto) {
-
-    document.body.style.overflow =
-      '';
-  }
-}
-
-
-function fecharModalPorNome(nome) {
-
-  const mapa = {
-
-    produto:
-      'modalMasterProduto',
-
-    ficha:
-      'modalMasterFicha',
-
-    entrada:
-      'modalMasterEntrada',
-
-    'movimento-estoque':
-      'modalMasterMovimentoEstoque',
-
-    'ajuste-estoque':
-      'modalMasterAjusteEstoque'
-
-  };
-
-  const id =
-    mapa[nome];
-
-  if (!id) {
-
-    return;
-  }
-
-  fecharModalMaster(
-    byId(id)
-  );
-}
-
-
-/* =========================================================
-   TIPO DO ITEM
-========================================================= */
-
-function obterTipoItemSelecionado() {
-
-  const selecionado =
-    document.querySelector(
-      'input[name="masterItemType"]:checked'
-    );
-
-  return selecionado?.value ===
-    'ingredient'
-    ? 'ingredient'
-    : 'product';
-}
-
-
-function atualizarFormularioPorTipo() {
-
-  const tipo =
-    obterTipoItemSelecionado();
-
-  const campoPreco =
-    byId(
-      'masterCampoPrecoVenda'
-    );
-
-  const preco =
-    byId(
-      'masterProdutoPrecoVenda'
-    );
-
-  if (
-    tipo === 'ingredient'
-  ) {
-
-    if (campoPreco) {
-
-      campoPreco.style.display =
-        'none';
-    }
-
-    if (preco) {
-
-      preco.value =
-        '0';
-    }
-
-  } else {
-
-    if (campoPreco) {
-
-      campoPreco.style.display =
-        '';
-    }
-  }
-}
-
-
-/* =========================================================
-   NOVO ITEM
-========================================================= */
-
-function limparFormularioProdutoMaster() {
-
-  const form =
-    byId(
-      'formMasterProduto'
-    );
-
-  if (form) {
-
-    form.reset();
-  }
-
-  if (byId('masterProdutoId')) {
-
-    byId(
-      'masterProdutoId'
-    ).value =
-      '';
-  }
-
-  const radioProduto =
-    document.querySelector(
-      'input[name="masterItemType"][value="product"]'
-    );
-
-  if (radioProduto) {
-
-    radioProduto.checked =
-      true;
-  }
-
-  if (byId('masterProdutoUnidade')) {
-
-    byId(
-      'masterProdutoUnidade'
-    ).value =
-      'un';
-  }
-
-  if (byId('masterProdutoEstoque')) {
-
-    byId(
-      'masterProdutoEstoque'
-    ).value =
-      '0';
-  }
-
-  if (byId('masterProdutoEstoqueMinimo')) {
-
-    byId(
-      'masterProdutoEstoqueMinimo'
-    ).value =
-      '0';
-  }
-
-  if (
-    byId(
-      'masterProdutoControlaEstoque'
-    )
-  ) {
-
-    byId(
-      'masterProdutoControlaEstoque'
-    ).checked =
-      true;
-  }
-
-  if (byId('masterProdutoDisponivel')) {
-
-    byId(
-      'masterProdutoDisponivel'
-    ).checked =
-      true;
-  }
-
-  if (byId('masterProdutoAtivo')) {
-
-    byId(
-      'masterProdutoAtivo'
-    ).checked =
-      true;
-  }
-
-  mostrarMensagemFormulario(
-    byId(
-      'masterProdutoMensagem'
-    ),
-    ''
-  );
-
-  atualizarFormularioPorTipo();
-}
-
-
-function abrirNovoProdutoMaster() {
-
-  limparFormularioProdutoMaster();
-
-  const titulo =
-    byId(
-      'tituloModalMasterProduto'
-    );
-
-  if (titulo) {
-
-    titulo.textContent =
-      'Novo item';
-  }
-
-  const botao =
-    byId(
-      'btnSalvarMasterProduto'
-    );
-
-  if (botao) {
-
-    botao.textContent =
-      'Salvar item';
-  }
-
-  abrirModalMaster(
-    byId(
-      'modalMasterProduto'
-    )
-  );
-}
-
-
-/* =========================================================
-   EDITAR ITEM
-========================================================= */
-
-function abrirEditarProdutoMaster(id) {
-
-  const produto =
-    buscarProdutoLocalPorId(id);
-
-  if (!produto) {
-
-    alert(
-      'Produto não encontrado.'
-    );
-
-    return;
-  }
-
-  limparFormularioProdutoMaster();
-
-  byId(
-    'masterProdutoId'
-  ).value =
-    produto.id;
-
-  const radio =
-    document.querySelector(
-      `input[name="masterItemType"][value="${
-        produto.item_type ===
-          'ingredient'
-          ? 'ingredient'
-          : 'product'
-      }"]`
-    );
-
-  if (radio) {
-
-    radio.checked =
-      true;
-  }
-
-  byId(
-    'masterProdutoNome'
-  ).value =
-    produto.name || '';
-
-  byId(
-    'masterProdutoCodigo'
-  ).value =
-    produto.product_code || '';
-
-  byId(
-    'masterProdutoCategoria'
-  ).value =
-    produto.category || '';
-
-  byId(
-    'masterProdutoUnidade'
-  ).value =
-    produto.unit || 'un';
-
-  byId(
-    'masterProdutoFornecedor'
-  ).value =
-    produto.supplier || '';
-
-  byId(
-    'masterProdutoPrecoVenda'
-  ).value =
-    numeroSeguro(
-      produto.sale_price
-    );
-
-  byId(
-    'masterProdutoCusto'
-  ).value =
-    numeroSeguro(
-      produto.average_cost
-    );
-
-  byId(
-    'masterProdutoEstoque'
-  ).value =
-    numeroSeguro(
-      produto.stock_quantity
-    );
-
-  byId(
-    'masterProdutoEstoqueMinimo'
-  ).value =
-    numeroSeguro(
-      produto.minimum_stock
-    );
-
-  byId(
-    'masterProdutoControlaEstoque'
-  ).checked =
-    produto.stock_control === true;
-
-  byId(
-    'masterProdutoDisponivel'
-  ).checked =
-    produto.available === true;
-
-  byId(
-    'masterProdutoAtivo'
-  ).checked =
-    produto.active === true;
-
-  byId(
-    'masterProdutoObservacoes'
-  ).value =
-    produto.notes || '';
-
-  byId(
-    'tituloModalMasterProduto'
-  ).textContent =
-    `Editar ${produto.name}`;
-
-  byId(
-    'btnSalvarMasterProduto'
-  ).textContent =
-    'Salvar alterações';
-
-  atualizarFormularioPorTipo();
-
-  abrirModalMaster(
-    byId(
-      'modalMasterProduto'
-    )
-  );
-}
-
-
-/* =========================================================
-   SALVAR ITEM
-========================================================= */
-
-async function salvarProdutoMaster(evento) {
-
-  evento.preventDefault();
-
-  if (
-    salvandoProdutoMaster
-  ) {
-
-    return;
-  }
-
-  const mensagem =
-    byId(
-      'masterProdutoMensagem'
-    );
-
-  mostrarMensagemFormulario(
-    mensagem,
-    ''
-  );
-
-  const id =
-    String(
-      byId(
-        'masterProdutoId'
-      )?.value || ''
-    ).trim();
-
-  const editando =
-    Boolean(id);
-
-  const produtoAnterior =
-    editando
-      ? buscarProdutoLocalPorId(id)
-      : null;
-
-  const tipo =
-    obterTipoItemSelecionado();
-
-  const nome =
-    String(
-      byId(
-        'masterProdutoNome'
-      )?.value || ''
-    ).trim();
-
-  let codigo =
-    String(
-      byId(
-        'masterProdutoCodigo'
-      )?.value || ''
-    )
-      .trim()
-      .toUpperCase();
-
-  const categoria =
-    String(
-      byId(
-        'masterProdutoCategoria'
-      )?.value || ''
-    ).trim();
-
-  const unidade =
-    String(
-      byId(
-        'masterProdutoUnidade'
-      )?.value || 'un'
-    );
-
-  const fornecedor =
-    String(
-      byId(
-        'masterProdutoFornecedor'
-      )?.value || ''
-    ).trim();
-
-  const precoVenda =
-    tipo === 'product'
-      ? numeroSeguro(
-          byId(
-            'masterProdutoPrecoVenda'
-          )?.value
-        )
-      : 0;
-
-  const custo =
-    numeroSeguro(
-      byId(
-        'masterProdutoCusto'
-      )?.value
-    );
-
-  const estoque =
-    numeroSeguro(
-      byId(
-        'masterProdutoEstoque'
-      )?.value
-    );
-
-  const estoqueMinimo =
-    numeroSeguro(
-      byId(
-        'masterProdutoEstoqueMinimo'
-      )?.value
-    );
-
-  const controlaEstoque =
-    byId(
-      'masterProdutoControlaEstoque'
-    )?.checked === true;
-
-  const disponivel =
-    byId(
-      'masterProdutoDisponivel'
-    )?.checked === true;
-
-  const ativo =
-    byId(
-      'masterProdutoAtivo'
-    )?.checked === true;
-
-  const observacoes =
-    String(
-      byId(
-        'masterProdutoObservacoes'
-      )?.value || ''
-    ).trim();
-
-  if (!nome) {
-
-    mostrarMensagemFormulario(
-      mensagem,
-      'Informe o nome do item.'
-    );
-
-    return;
-  }
-
-  if (
-    precoVenda < 0 ||
-    custo < 0 ||
-    estoque < 0 ||
-    estoqueMinimo < 0
-  ) {
-
-    mostrarMensagemFormulario(
-      mensagem,
-      'Valores negativos não são permitidos.'
-    );
-
-    return;
-  }
-
-  if (!codigo) {
-
-    codigo =
-      gerarCodigoProduto(
-        nome
-      );
-  }
-
-  /*
-   * Ao editar, o estoque não será alterado diretamente.
-   * Alterações de quantidade devem ser feitas pela tela Estoque.
-   */
-
-  const payload = {
-
-    product_code:
-      codigo,
-
-    name:
-      nome,
-
-    category:
-      categoria || null,
-
-    sale_price:
-      precoVenda,
-
-    average_cost:
-      arredondarCusto(
-        custo
-      ),
-
-    minimum_stock:
-      estoqueMinimo,
-
-    stock_control:
-      controlaEstoque,
-
-    available:
-      disponivel,
-
-    active:
-      ativo,
-
-    item_type:
-      tipo,
-
-    unit:
-      unidade,
-
-    supplier:
-      fornecedor || null,
-
-    notes:
-      observacoes || null,
-
-    updated_at:
-      new Date().toISOString()
-  };
-
-  if (!editando) {
-
-    payload.stock_quantity =
-      estoque;
-  }
-
-  const botao =
-    byId(
-      'btnSalvarMasterProduto'
-    );
-
-  const textoBotao =
-    botao?.textContent || '';
-
-  try {
-
-    salvandoProdutoMaster =
-      true;
-
-    if (botao) {
-
-      botao.disabled =
-        true;
-
-      botao.textContent =
-        'Salvando...';
-    }
-
-    let resultado = null;
-
-    if (editando) {
-
-      const {
-        data,
-        error
-      } =
-        await supabaseClient
-          .from('products')
-          .update(payload)
-          .eq(
-            'id',
-            id
-          )
-          .select()
-          .single();
-
-      if (error) {
-
-        throw error;
-      }
-
-      resultado =
-        data;
-
-      /*
-       * Caso o usuário tenha alterado estoque no formulário,
-       * transformamos a diferença em ajuste transacional.
-       */
-
-      if (
-        produtoAnterior &&
-        produtoAnterior.stock_control === true &&
-        controlaEstoque === true
-      ) {
-
-        const estoqueAnterior =
-          numeroSeguro(
-            produtoAnterior.stock_quantity
-          );
-
-        const diferenca =
-          estoque -
-          estoqueAnterior;
-
-        if (
-          Math.abs(diferenca) >
-          0.0000001
-        ) {
-
-          await movimentarEstoqueRPC(
-            resultado.id,
-            diferenca > 0
-              ? 'ajuste_entrada'
-              : 'ajuste_saida',
-            Math.abs(
-              diferenca
-            ),
-            null,
-            'Ajuste realizado pelo cadastro do item.'
-          );
-        }
-      }
-
-    } else {
-
-      /*
-       * Criamos zerado primeiro quando haverá estoque inicial,
-       * e depois fazemos a entrada pela função transacional.
-       */
-
-      const estoqueInicial =
-        numeroSeguro(
-          payload.stock_quantity
-        );
-
-      if (
-        controlaEstoque &&
-        estoqueInicial > 0
-      ) {
-
-        payload.stock_quantity =
-          0;
-      }
-
-      const {
-        data,
-        error
-      } =
-        await supabaseClient
-          .from('products')
-          .insert(
-            payload
-          )
-          .select()
-          .single();
-
-      if (error) {
-
-        throw error;
-      }
-
-      resultado =
-        data;
-
-      if (
-        controlaEstoque &&
-        estoqueInicial > 0
-      ) {
-
-        await movimentarEstoqueRPC(
-          resultado.id,
-          'entrada',
-          estoqueInicial,
-          custo,
-          'Estoque inicial do cadastro.'
-        );
-      }
-    }
-
-    mostrarMensagemFormulario(
-      mensagem,
-      editando
-        ? 'Item atualizado com sucesso.'
-        : 'Item cadastrado com sucesso.',
-      'success'
-    );
-
-    await atualizarTudoMaster();
-
-    setTimeout(
-      () => {
-
-        fecharModalMaster(
-          byId(
-            'modalMasterProduto'
-          )
-        );
-
-      },
-      400
-    );
-
-  } catch (erro) {
-
-    console.error(
-      'Erro ao salvar item:',
-      erro
-    );
-
-    let texto =
-      erro?.message ||
-      'Não foi possível salvar o item.';
-
-    if (
-      erro?.code === '23505'
-    ) {
-
-      texto =
-        'Já existe um item utilizando esse código.';
-    }
-
-    mostrarMensagemFormulario(
-      mensagem,
-      texto
-    );
-
-  } finally {
-
-    salvandoProdutoMaster =
-      false;
-
-    if (botao) {
-
-      botao.disabled =
-        false;
-
-      botao.textContent =
-        textoBotao ||
-        'Salvar item';
-    }
-  }
-}
-
-
-/* =========================================================
-   FICHA TÉCNICA
-========================================================= */
-
-async function buscarFichaTecnicaProduto(
-  produtoId
-) {
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from('product_ingredients')
-      .select(
-        `
-        id,
-        product_id,
-        ingredient_id,
-        quantity
-        `
-      )
-      .eq(
-        'product_id',
-        produtoId
-      );
-
-  if (error) {
-
-    throw error;
-  }
-
-  return Array.isArray(data)
-    ? data
-    : [];
-}
-
-
-function obterInsumosFichaMaster() {
-
-  const busca =
-    normalizarTexto(
-      buscaFichaMaster
-    );
-
-  return masterProdutos
-    .filter(
-      item => {
-
-        if (
-          item.item_type !==
-          'ingredient' ||
-          item.active !== true
-        ) {
-
-          return false;
-        }
-
-        if (!busca) {
-
-          return true;
-        }
-
-        return normalizarTexto(
-          [
-            item.name,
-            item.product_code,
-            item.category
-          ].join(' ')
-        ).includes(
-          busca
-        );
-      }
-    )
-    .sort(
-      (a, b) =>
-        String(a.name || '')
-          .localeCompare(
-            String(b.name || ''),
-            'pt-BR'
-          )
-    );
-}
-
-
-function calcularCustoFichaMaster() {
-
-  let total = 0;
-
-  masterFichaSelecionados.forEach(
-    (
-      quantidade,
-      ingredientId
-    ) => {
-
-      const insumo =
-        buscarProdutoLocalPorId(
-          ingredientId
-        );
-
-      total +=
-        numeroSeguro(
-          quantidade
-        ) *
-        numeroSeguro(
-          insumo?.average_cost
-        );
-    }
-  );
-
-  return arredondarCusto(
-    total
-  );
-}
-
-
-function atualizarResumoFichaMaster() {
-
-  if (!masterFichaProduto) {
-
-    return;
-  }
-
-  const preco =
-    numeroSeguro(
-      masterFichaProduto.sale_price
-    );
-
-  const custo =
-    calcularCustoFichaMaster();
-
-  const lucro =
-    preco -
-    custo;
-
-  const margem =
-    preco > 0
-      ? (
-          lucro /
-          preco
-        ) * 100
-      : 0;
-
-  byId(
-    'masterFichaPrecoVenda'
-  ).textContent =
-    formatarMoeda(
-      preco
-    );
-
-  byId(
-    'masterFichaCustoTotal'
-  ).textContent =
-    formatarMoeda(
-      custo
-    );
-
-  byId(
-    'masterFichaLucro'
-  ).textContent =
-    formatarMoeda(
-      lucro
-    );
-
-  byId(
-    'masterFichaMargem'
-  ).textContent =
-    margem.toLocaleString(
-      'pt-BR',
-      {
-        minimumFractionDigits: 1,
-        maximumFractionDigits: 1
-      }
-    ) + '%';
-
-  byId(
-    'masterFichaCustoRodape'
-  ).textContent =
-    formatarMoeda(
-      custo
-    );
-}
-
-
-function renderizarFichaMaster() {
-
-  const container =
-    byId(
-      'masterFichaListaInsumos'
-    );
-
-  if (!container) {
-
-    return;
-  }
-
-  const insumos =
-    obterInsumosFichaMaster();
-
-  if (
-    insumos.length === 0
-  ) {
-
-    container.innerHTML =
-      `
-        <div class="master-empty">
-          Nenhum insumo cadastrado.
-        </div>
-      `;
-
-    atualizarResumoFichaMaster();
-
-    return;
-  }
-
-  container.innerHTML =
-    insumos.map(
-      insumo => {
-
-        const chave =
-          String(
-            insumo.id
-          );
-
-        const selecionado =
-          masterFichaSelecionados.has(
-            chave
-          );
-
-        const quantidade =
-          selecionado
-            ? numeroSeguro(
-                masterFichaSelecionados.get(
-                  chave
-                )
-              )
-            : 0;
-
-        const custo =
-          quantidade *
-          numeroSeguro(
-            insumo.average_cost
-          );
-
-        return `
-
-          <div
-            class="
-              recipe-ingredient-item
-              ${
-                selecionado
-                  ? 'selected'
-                  : ''
-              }
-            "
-          >
-
-            <div class="recipe-ingredient-main">
-
-              <input
-                type="checkbox"
-                class="recipe-check"
-                data-recipe-check="${insumo.id}"
-                ${
-                  selecionado
-                    ? 'checked'
-                    : ''
-                }
-              >
-
-              <div class="recipe-ingredient-info">
-
-                <strong>
-                  ${escaparHtml(
-                    insumo.name
-                  )}
-                </strong>
-
-                <span>
-                  ${formatarMoeda(
-                    insumo.average_cost
-                  )}
-                  /
-                  ${escaparHtml(
-                    formatarUnidade(
-                      insumo.unit
-                    )
-                  )}
-                </span>
-
-              </div>
-
-            </div>
-
-
-            <div class="recipe-quantity-box">
-
-              <input
-                type="number"
-                min="0.0001"
-                step="0.0001"
-                value="${
-                  selecionado
-                    ? quantidade
-                    : ''
-                }"
-                data-recipe-quantity="${insumo.id}"
-                ${
-                  selecionado
-                    ? ''
-                    : 'disabled'
-                }
-              >
-
-              <span class="recipe-quantity-unit">
-                ${escaparHtml(
-                  formatarUnidade(
-                    insumo.unit
-                  )
-                )}
-              </span>
-
-            </div>
-
-
-            <div class="recipe-ingredient-cost">
-
-              <span>
-                Custo
-              </span>
-
-              <strong
-                data-recipe-cost="${insumo.id}"
-              >
-                ${formatarMoeda(
-                  custo
-                )}
-              </strong>
-
-            </div>
-
-          </div>
-
-        `;
-      }
-    ).join('');
-
-  atualizarResumoFichaMaster();
-}
-
-
-async function abrirFichaTecnicaMaster(
-  produtoId
-) {
-
-  const produto =
-    buscarProdutoLocalPorId(
-      produtoId
-    );
-
-  if (
-    !produto ||
-    produto.item_type !==
-      'product'
-  ) {
-
-    alert(
-      'Produto inválido para ficha técnica.'
-    );
-
-    return;
-  }
-
-  masterFichaProduto =
-    produto;
-
-  masterFichaSelecionados =
-    new Map();
-
-  buscaFichaMaster =
-    '';
-
-  byId(
-    'masterFichaProdutoId'
-  ).value =
-    produto.id;
-
-  byId(
-    'masterFichaProdutoNome'
-  ).textContent =
-    produto.name;
-
-  byId(
-    'masterFichaBuscaInsumo'
-  ).value =
-    '';
-
-  mostrarMensagemFormulario(
-    byId(
-      'masterFichaMensagem'
-    ),
-    ''
-  );
-
-  abrirModalMaster(
-    byId(
-      'modalMasterFicha'
-    )
-  );
-
-  try {
-
-    const ficha =
-      await buscarFichaTecnicaProduto(
-        produto.id
-      );
-
-    ficha.forEach(
-      item => {
-
-        if (
-          numeroSeguro(
-            item.quantity
-          ) > 0
-        ) {
-
-          masterFichaSelecionados.set(
-            String(
-              item.ingredient_id
-            ),
-            numeroSeguro(
-              item.quantity
-            )
-          );
-        }
-      }
-    );
-
-    renderizarFichaMaster();
-
-  } catch (erro) {
-
-    console.error(
-      erro
-    );
-
-    mostrarMensagemFormulario(
-      byId(
-        'masterFichaMensagem'
-      ),
-      'Não foi possível carregar a ficha técnica.'
-    );
-  }
-}
-
-
-async function salvarFichaTecnicaMaster(
-  evento
-) {
-
-  evento.preventDefault();
-
-  if (
-    salvandoFichaMaster
-  ) {
-
-    return;
-  }
-
-  const mensagem =
-    byId(
-      'masterFichaMensagem'
-    );
-
-  const itens = [];
-
-  for (
-    const [
-      ingredientId,
-      quantidade
-    ]
-    of masterFichaSelecionados.entries()
-  ) {
-
-    const qtd =
-      numeroSeguro(
-        quantidade
-      );
-
-    if (
-      qtd <= 0
-    ) {
-
-      mostrarMensagemFormulario(
-        mensagem,
-        'Informe uma quantidade maior que zero para todos os insumos.'
-      );
-
-      return;
-    }
-
-    itens.push(
-      {
-
-        ingredient_id:
-          Number(
-            ingredientId
-          ),
-
-        quantity:
-          qtd
-      }
-    );
-  }
-
-  const botao =
-    byId(
-      'btnSalvarMasterFicha'
-    );
-
-  try {
-
-    salvandoFichaMaster =
-      true;
-
-    botao.disabled =
-      true;
-
-    botao.textContent =
-      'Salvando...';
-
-    const {
-      data,
-      error
-    } =
-      await supabaseClient
-        .rpc(
-          'save_product_recipe',
-          {
-
-            p_product_id:
-              Number(
-                masterFichaProduto.id
-              ),
-
-            p_items:
-              itens
-          }
-        );
-
-    if (error) {
-
-      throw error;
-    }
-
-    mostrarMensagemFormulario(
-      mensagem,
-      `Ficha salva. Custo: ${formatarMoeda(
-        data
-      )}`,
-      'success'
-    );
-
-    await atualizarTudoMaster();
-
-    setTimeout(
-      () => {
-
-        fecharModalMaster(
-          byId(
-            'modalMasterFicha'
-          )
-        );
-
-      },
-      600
-    );
-
-  } catch (erro) {
-
-    console.error(
-      erro
-    );
-
-    mostrarMensagemFormulario(
-      mensagem,
-      erro?.message ||
-      'Erro ao salvar ficha técnica.'
-    );
-
-  } finally {
-
-    salvandoFichaMaster =
-      false;
-
-    botao.disabled =
-      false;
-
-    botao.textContent =
-      'Salvar ficha técnica';
-  }
-}
-
-
-/* =========================================================
-   RPC CENTRAL DE ESTOQUE
-========================================================= */
-
-async function movimentarEstoqueRPC(
-  produtoId,
-  tipo,
-  quantidade,
-  custoUnitario = null,
-  observacao = null,
-  orderId = null
-) {
-
-  const parametros = {
-
-    p_product_id:
-      Number(
-        produtoId
-      ),
-
-    p_movement_type:
-      String(
-        tipo
-      ),
-
-    p_quantity:
-      numeroSeguro(
-        quantidade
-      ),
-
-    p_unit_cost:
-      custoUnitario === null ||
-      custoUnitario === undefined
-        ? null
-        : numeroSeguro(
-            custoUnitario
-          ),
-
-    p_notes:
-      observacao ||
-      null,
-
-    p_order_id:
-      orderId === null ||
-      orderId === undefined
-        ? null
-        : Number(
-            orderId
-          )
-
-  };
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .rpc(
-        'move_stock',
-        parametros
-      );
-
-  if (error) {
-
-    throw error;
-  }
-
-  return data;
-}
-
-
-/* =========================================================
-   ESTOQUE - RESUMO
-========================================================= */
-
-function obterItensComEstoque() {
-
-  return masterProdutos
-    .filter(
-      item =>
-        item.active === true &&
-        item.stock_control === true
-    );
-}
-
-
-function atualizarResumoEstoque() {
-
-  const itens =
-    obterItensComEstoque();
-
-  const baixos =
-    itens.filter(
-      item =>
-        numeroSeguro(
-          item.stock_quantity
-        ) > 0 &&
-        numeroSeguro(
-          item.stock_quantity
-        ) <=
-        numeroSeguro(
-          item.minimum_stock
-        )
-    );
-
-  const esgotados =
-    itens.filter(
-      item =>
-        numeroSeguro(
-          item.stock_quantity
-        ) <= 0
-    );
-
-  const valorTotal =
-    itens.reduce(
-      (
-        total,
-        item
-      ) =>
-        total +
-        (
-          numeroSeguro(
-            item.stock_quantity
-          ) *
-          numeroSeguro(
-            item.average_cost
-          )
-        ),
-      0
-    );
-
-  byId(
-    'masterEstoqueItensControlados'
-  ).textContent =
-    formatarNumero(
-      itens.length
-    );
-
-  byId(
-    'masterEstoqueQuantidadeBaixo'
-  ).textContent =
-    formatarNumero(
-      baixos.length
-    );
-
-  byId(
-    'masterEstoqueQuantidadeEsgotado'
-  ).textContent =
-    formatarNumero(
-      esgotados.length
-    );
-
-  byId(
-    'masterEstoqueValorTotal'
-  ).textContent =
-    formatarMoeda(
-      valorTotal
-    );
-}
-
-
-/* =========================================================
-   ESTOQUE - FILTRO
-========================================================= */
-
-function obterEstoqueFiltrado() {
-
-  const busca =
-    normalizarTexto(
-      buscaEstoqueMaster
-    );
-
-  return obterItensComEstoque()
-    .filter(
-      item => {
-
-        const estoque =
-          numeroSeguro(
-            item.stock_quantity
-          );
-
-        const minimo =
-          numeroSeguro(
-            item.minimum_stock
-          );
-
-        if (
-          filtroEstoqueMaster ===
-            'product' &&
-          item.item_type !==
-            'product'
-        ) {
-
-          return false;
-        }
-
-        if (
-          filtroEstoqueMaster ===
-            'ingredient' &&
-          item.item_type !==
-            'ingredient'
-        ) {
-
-          return false;
-        }
-
-        if (
-          filtroEstoqueMaster ===
-            'low' &&
-          !(
-            estoque > 0 &&
-            estoque <= minimo
-          )
-        ) {
-
-          return false;
-        }
-
-        if (
-          filtroEstoqueMaster ===
-            'empty' &&
-          estoque > 0
-        ) {
-
-          return false;
-        }
-
-        if (!busca) {
-
-          return true;
-        }
-
-        return normalizarTexto(
-          [
-            item.name,
-            item.product_code,
-            item.category,
-            item.supplier
-          ].join(' ')
-        ).includes(
-          busca
-        );
-      }
-    )
-    .sort(
-      (a, b) =>
-        String(
-          a.name || ''
-        ).localeCompare(
-          String(
-            b.name || ''
-          ),
-          'pt-BR'
-        )
-    );
-}
-
-
-/* =========================================================
-   ESTOQUE - RENDER
-========================================================= */
-
-function renderizarEstoqueAtual() {
-
-  const tbody =
-    byId(
-      'masterListaEstoque'
-    );
-
-  if (!tbody) {
-
-    return;
-  }
-
-  atualizarResumoEstoque();
-
-  const itens =
-    obterEstoqueFiltrado();
-
-  if (
-    itens.length === 0
-  ) {
-
-    tbody.innerHTML =
-      `
-        <tr>
-          <td
-            colspan="8"
-            class="table-empty"
-          >
-            Nenhum item encontrado.
-          </td>
-        </tr>
-      `;
-
-    return;
-  }
-
-  tbody.innerHTML =
-    itens.map(
-      item => {
-
-        const estoque =
-          numeroSeguro(
-            item.stock_quantity
-          );
-
-        const minimo =
-          numeroSeguro(
-            item.minimum_stock
-          );
-
-        const custo =
-          numeroSeguro(
-            item.average_cost
-          );
-
-        const valor =
-          estoque *
-          custo;
-
-        const esgotado =
-          estoque <= 0;
-
-        const baixo =
-          !esgotado &&
-          estoque <= minimo;
-
-        let statusTexto =
-          'Normal';
-
-        let statusClasse =
-          'ok';
-
-        let quantidadeClasse =
-          '';
-
-        if (esgotado) {
-
-          statusTexto =
-            'Esgotado';
-
-          statusClasse =
-            'empty';
-
-          quantidadeClasse =
-            'empty';
-
-        } else if (baixo) {
-
-          statusTexto =
-            'Baixo';
-
-          statusClasse =
-            'low';
-
-          quantidadeClasse =
-            'low';
-        }
-
-        const tipoInsumo =
-          item.item_type ===
-          'ingredient';
-
-        return `
-
-          <tr>
-
-            <td>
-
-              <div class="stock-item-main">
-
-                <div class="stock-item-icon">
-                  ${
-                    tipoInsumo
-                      ? '🥩'
-                      : '🍔'
-                  }
-                </div>
-
-                <div class="stock-item-info">
-
-                  <strong>
-                    ${escaparHtml(
-                      item.name
-                    )}
-                  </strong>
-
-                  <span>
-                    ${
-                      item.product_code
-                        ? '#' +
-                          escaparHtml(
-                            item.product_code
-                          )
-                        : '-'
-                    }
-                  </span>
-
-                </div>
-
-              </div>
-
-            </td>
-
-
-            <td>
-
-              <span
-                class="
-                  stock-type-badge
-                  ${
-                    tipoInsumo
-                      ? 'ingredient'
-                      : ''
-                  }
-                "
-              >
-                ${
-                  tipoInsumo
-                    ? 'Insumo'
-                    : 'Produto'
-                }
-              </span>
-
-            </td>
-
-
-            <td>
-
-              <strong
-                class="
-                  stock-quantity-value
-                  ${quantidadeClasse}
-                "
-              >
-                ${formatarQuantidade(
-                  estoque
-                )}
-                ${escaparHtml(
-                  formatarUnidade(
-                    item.unit
-                  )
-                )}
-              </strong>
-
-            </td>
-
-
-            <td>
-              ${formatarQuantidade(
-                minimo
-              )}
-              ${escaparHtml(
-                formatarUnidade(
-                  item.unit
-                )
-              )}
-            </td>
-
-
-            <td>
-              ${formatarMoeda(
-                custo
-              )}
-            </td>
-
-
-            <td>
-              ${formatarMoeda(
-                valor
-              )}
-            </td>
-
-
-            <td>
-
-              <span
-                class="
-                  stock-status-badge
-                  ${statusClasse}
-                "
-              >
-                ${statusTexto}
-              </span>
-
-            </td>
-
-
-            <td>
-
-              <div class="stock-actions">
-
-                <button
-                  type="button"
-                  class="stock-action-btn entry"
-                  data-stock-entry="${item.id}"
-                >
-                  + Entrada
-                </button>
-
-                <button
-                  type="button"
-                  class="stock-action-btn exit"
-                  data-stock-exit="${item.id}"
-                  ${
-                    estoque <= 0
-                      ? 'disabled'
-                      : ''
-                  }
-                >
-                  Saída
-                </button>
-
-                <button
-                  type="button"
-                  class="stock-action-btn loss"
-                  data-stock-loss="${item.id}"
-                  ${
-                    estoque <= 0
-                      ? 'disabled'
-                      : ''
-                  }
-                >
-                  Perda
-                </button>
-
-                <button
-                  type="button"
-                  class="stock-action-btn adjust"
-                  data-stock-adjust="${item.id}"
-                >
-                  Ajustar
-                </button>
-
-              </div>
-
-            </td>
-
-          </tr>
-
-        `;
-      }
-    ).join('');
-}
-
-
-/* =========================================================
-   ESTOQUE - HISTÓRICO
-========================================================= */
-
-function renderizarHistoricoEstoque() {
-
-  const tbody =
-    byId(
-      'masterHistoricoEstoque'
-    );
-
-  if (!tbody) {
-
-    return;
-  }
-
-  let movimentos =
-    masterMovimentacoes;
-
-  if (
-    filtroMovimentacaoEstoque !==
-    'all'
-  ) {
-
-    movimentos =
-      movimentos.filter(
-        movimento =>
-          movimento.movement_type ===
-          filtroMovimentacaoEstoque
-      );
-  }
-
-  if (
-    movimentos.length === 0
-  ) {
-
-    tbody.innerHTML =
-      `
-        <tr>
-          <td
-            colspan="9"
-            class="table-empty"
-          >
-            Nenhuma movimentação registrada.
-          </td>
-        </tr>
-      `;
-
-    return;
-  }
-
-  tbody.innerHTML =
-    movimentos.map(
-      movimento => {
-
-        const unidade =
-          formatarUnidade(
-            movimento.products?.unit
-          );
-
-        return `
-
-          <tr>
-
-            <td>
-              ${formatarDataHora(
-                movimento.created_at
-              )}
-            </td>
-
-            <td>
-              ${escaparHtml(
-                movimento.products?.name ||
-                'Item'
-              )}
-            </td>
-
-            <td>
-
-              <span
-                class="
-                  stock-movement-badge
-                  ${obterClasseMovimento(
-                    movimento.movement_type
-                  )}
-                "
-              >
-                ${escaparHtml(
-                  obterLabelMovimento(
-                    movimento.movement_type
-                  )
-                )}
-              </span>
-
-            </td>
-
-            <td>
-              ${formatarQuantidade(
-                movimento.quantity
-              )}
-              ${escaparHtml(
-                unidade
-              )}
-            </td>
-
-            <td>
-              ${formatarQuantidade(
-                movimento.stock_before
-              )}
-              ${escaparHtml(
-                unidade
-              )}
-            </td>
-
-            <td>
-              ${formatarQuantidade(
-                movimento.stock_after
-              )}
-              ${escaparHtml(
-                unidade
-              )}
-            </td>
-
-            <td>
-              ${formatarMoeda(
-                movimento.unit_cost
-              )}
-            </td>
-
-            <td>
-              ${formatarMoeda(
-                movimento.total_cost
-              )}
-            </td>
-
-            <td>
-
-              <span class="stock-note">
-                ${escaparHtml(
-                  movimento.notes ||
-                  '-'
-                )}
-              </span>
-
-            </td>
-
-          </tr>
-
-        `;
-      }
-    ).join('');
-}
-
-
-/* =========================================================
-   ESTOQUE - CARREGAMENTO COMPLETO
-========================================================= */
-
-async function carregarEstoqueCompleto() {
-
-  try {
-
-    const [
-      produtos,
-      movimentacoes
-    ] =
-      await Promise.all(
-        [
-          buscarProdutos(false),
-          buscarMovimentacoes(300)
-        ]
-      );
-
-    masterProdutos =
-      produtos;
-
-    masterMovimentacoes =
-      movimentacoes;
-
-    renderizarEstoqueAtual();
-
-    renderizarHistoricoEstoque();
-
-  } catch (erro) {
-
-    console.error(
-      'Erro ao carregar estoque:',
-      erro
-    );
-  }
-}
-
-
-/* =========================================================
-   ESTOQUE - ABRIR MOVIMENTAÇÃO
-========================================================= */
-
-function abrirMovimentoEstoque(
-  produtoId,
-  tipo
-) {
-
-  const produto =
-    buscarProdutoLocalPorId(
-      produtoId
-    );
-
-  if (!produto) {
-
-    alert(
-      'Item não encontrado.'
-    );
-
-    return;
-  }
-
-  const form =
-    byId(
-      'formMasterMovimentoEstoque'
-    );
-
-  form?.reset();
-
-  byId(
-    'masterMovimentoProdutoId'
-  ).value =
-    produto.id;
-
-  byId(
-    'masterMovimentoTipo'
-  ).value =
-    tipo;
-
-  byId(
-    'masterMovimentoProdutoNome'
-  ).textContent =
-    `${produto.name} • ${formatarUnidade(
-      produto.unit
-    )}`;
-
-  byId(
-    'masterMovimentoEstoqueAtual'
-  ).textContent =
-    `${formatarQuantidade(
-      produto.stock_quantity
-    )} ${formatarUnidade(
-      produto.unit
-    )}`;
-
-  byId(
-    'masterMovimentoCustoAtual'
-  ).textContent =
-    formatarMoeda(
-      produto.average_cost
-    );
-
-  const titulo =
-    byId(
-      'tituloModalMasterMovimentoEstoque'
-    );
-
-  const badge =
-    byId(
-      'masterMovimentoBadge'
-    );
-
-  const campoCusto =
-    byId(
-      'masterMovimentoCampoCusto'
-    );
-
-  const custo =
-    byId(
-      'masterMovimentoCustoUnitario'
-    );
-
-  if (
-    tipo === 'entrada'
-  ) {
-
-    titulo.textContent =
-      'Entrada de estoque';
-
-    badge.textContent =
-      '📦 ENTRADA';
-
-    campoCusto.style.display =
-      '';
-
-    custo.required =
-      true;
-
-    custo.value =
-      numeroSeguro(
-        produto.average_cost
-      ) || '';
-
-  } else if (
-    tipo === 'ajuste_saida'
-  ) {
-
-    titulo.textContent =
-      'Saída manual';
-
-    badge.textContent =
-      '📤 SAÍDA';
-
-    campoCusto.style.display =
-      'none';
-
-    custo.required =
-      false;
-
-    custo.value =
-      '';
-
-  } else if (
-    tipo === 'perda'
-  ) {
-
-    titulo.textContent =
-      'Registrar perda';
-
-    badge.textContent =
-      '⚠️ PERDA';
-
-    campoCusto.style.display =
-      'none';
-
-    custo.required =
-      false;
-
-    custo.value =
-      '';
-  }
-
-  mostrarMensagemFormulario(
-    byId(
-      'masterMovimentoMensagem'
-    ),
-    ''
-  );
-
-  atualizarPreviewMovimento();
-
-  abrirModalMaster(
-    byId(
-      'modalMasterMovimentoEstoque'
-    )
-  );
-
-  setTimeout(
-    () => {
-
-      byId(
-        'masterMovimentoQuantidade'
-      )?.focus();
-
-    },
-    100
-  );
-}
-
-
-/* =========================================================
-   ESTOQUE - PREVIEW MOVIMENTAÇÃO
-========================================================= */
-
-function atualizarPreviewMovimento() {
-
-  const produto =
-    buscarProdutoLocalPorId(
-      byId(
-        'masterMovimentoProdutoId'
-      )?.value
-    );
-
-  if (!produto) {
-
-    return;
-  }
-
-  const tipo =
-    byId(
-      'masterMovimentoTipo'
-    )?.value;
-
-  const quantidade =
-    numeroSeguro(
-      byId(
-        'masterMovimentoQuantidade'
-      )?.value
-    );
-
-  const estoqueAntes =
-    numeroSeguro(
-      produto.stock_quantity
-    );
-
-  let estoqueDepois =
-    estoqueAntes;
-
-  if (
-    tipo === 'entrada'
-  ) {
-
-    estoqueDepois +=
-      quantidade;
-
-  } else {
-
-    estoqueDepois -=
-      quantidade;
-  }
-
-  const custoUnitario =
-    tipo === 'entrada'
-      ? numeroSeguro(
-          byId(
-            'masterMovimentoCustoUnitario'
-          )?.value
-        )
-      : numeroSeguro(
-          produto.average_cost
-        );
-
-  const valor =
-    quantidade *
-    custoUnitario;
-
-  byId(
-    'masterMovimentoPreviewAntes'
-  ).textContent =
-    `${formatarQuantidade(
-      estoqueAntes
-    )} ${formatarUnidade(
-      produto.unit
-    )}`;
-
-  byId(
-    'masterMovimentoPreviewDepois'
-  ).textContent =
-    `${formatarQuantidade(
-      estoqueDepois
-    )} ${formatarUnidade(
-      produto.unit
-    )}`;
-
-  byId(
-    'masterMovimentoPreviewValor'
-  ).textContent =
-    formatarMoeda(
-      valor
-    );
-}
-
-
-/* =========================================================
-   ESTOQUE - SALVAR MOVIMENTAÇÃO
-========================================================= */
-
-async function salvarMovimentoEstoque(
-  evento
-) {
-
-  evento.preventDefault();
-
-  if (
-    salvandoMovimentoMaster
-  ) {
-
-    return;
-  }
-
-  const mensagem =
-    byId(
-      'masterMovimentoMensagem'
-    );
-
-  const produtoId =
-    byId(
-      'masterMovimentoProdutoId'
-    )?.value;
-
-  const tipo =
-    byId(
-      'masterMovimentoTipo'
-    )?.value;
-
-  const quantidade =
-    numeroSeguro(
-      byId(
-        'masterMovimentoQuantidade'
-      )?.value
-    );
-
-  const observacao =
-    String(
-      byId(
-        'masterMovimentoObservacao'
-      )?.value || ''
-    ).trim();
-
-  let custo =
-    null;
-
-  if (
-    tipo === 'entrada'
-  ) {
-
-    custo =
-      numeroSeguro(
-        byId(
-          'masterMovimentoCustoUnitario'
-        )?.value
-      );
-  }
-
-  if (
-    quantidade <= 0
-  ) {
-
-    mostrarMensagemFormulario(
-      mensagem,
-      'Informe uma quantidade maior que zero.'
-    );
-
-    return;
-  }
-
-  if (
-    tipo === 'entrada' &&
-    (
-      custo === null ||
-      custo < 0
-    )
-  ) {
-
-    mostrarMensagemFormulario(
-      mensagem,
-      'Informe um custo unitário válido.'
-    );
-
-    return;
-  }
-
-  const botao =
-    byId(
-      'btnSalvarMasterMovimento'
-    );
-
-  try {
-
-    salvandoMovimentoMaster =
-      true;
-
-    botao.disabled =
-      true;
-
-    botao.textContent =
-      'Registrando...';
-
-    const resultado =
-      await movimentarEstoqueRPC(
-        produtoId,
-        tipo,
-        quantidade,
-        custo,
-        observacao ||
-        (
-          tipo === 'entrada'
-            ? 'Entrada manual pelo Painel Master.'
-            :
-          tipo === 'perda'
-            ? 'Perda registrada pelo Painel Master.'
-            : 'Saída manual pelo Painel Master.'
-        )
-      );
-
-    mostrarMensagemFormulario(
-      mensagem,
-      `Movimentação registrada. Novo estoque: ${formatarQuantidade(
-        resultado?.stock_after
-      )}`,
-      'success'
-    );
-
-    await atualizarTudoMaster();
-
-    setTimeout(
-      () => {
-
-        fecharModalMaster(
-          byId(
-            'modalMasterMovimentoEstoque'
-          )
-        );
-
-      },
-      500
-    );
-
-  } catch (erro) {
-
-    console.error(
-      'Erro ao movimentar estoque:',
-      erro
-    );
-
-    mostrarMensagemFormulario(
-      mensagem,
-      erro?.message ||
-      'Não foi possível movimentar o estoque.'
-    );
-
-  } finally {
-
-    salvandoMovimentoMaster =
-      false;
-
-    botao.disabled =
-      false;
-
-    botao.textContent =
-      'Confirmar movimentação';
-  }
-}
-
-
-/* =========================================================
-   ESTOQUE - AJUSTE DE INVENTÁRIO
-========================================================= */
-
-function abrirAjusteEstoque(
-  produtoId
-) {
-
-  const produto =
-    buscarProdutoLocalPorId(
-      produtoId
-    );
-
-  if (!produto) {
-
-    alert(
-      'Item não encontrado.'
-    );
-
-    return;
-  }
-
-  const form =
-    byId(
-      'formMasterAjusteEstoque'
-    );
-
-  form?.reset();
-
-  byId(
-    'masterAjusteProdutoId'
-  ).value =
-    produto.id;
-
-  byId(
-    'masterAjusteProdutoNome'
-  ).textContent =
-    `${produto.name} • ${formatarUnidade(
-      produto.unit
-    )}`;
-
-  byId(
-    'masterAjusteEstoqueAtual'
-  ).textContent =
-    `${formatarQuantidade(
-      produto.stock_quantity
-    )} ${formatarUnidade(
-      produto.unit
-    )}`;
-
-  byId(
-    'masterAjusteCustoAtual'
-  ).textContent =
-    formatarMoeda(
-      produto.average_cost
-    );
-
-  byId(
-    'masterAjusteNovoEstoque'
-  ).value =
-    numeroSeguro(
-      produto.stock_quantity
-    );
-
-  mostrarMensagemFormulario(
-    byId(
-      'masterAjusteMensagem'
-    ),
-    ''
-  );
-
-  atualizarPreviewAjuste();
-
-  abrirModalMaster(
-    byId(
-      'modalMasterAjusteEstoque'
-    )
-  );
-}
-
-
-function atualizarPreviewAjuste() {
-
-  const produto =
-    buscarProdutoLocalPorId(
-      byId(
-        'masterAjusteProdutoId'
-      )?.value
-    );
-
-  if (!produto) {
-
-    return;
-  }
-
-  const atual =
-    numeroSeguro(
-      produto.stock_quantity
-    );
-
-  const novo =
-    numeroSeguro(
-      byId(
-        'masterAjusteNovoEstoque'
-      )?.value
-    );
-
-  const diferenca =
-    novo -
-    atual;
-
-  byId(
-    'masterAjusteDiferenca'
-  ).textContent =
-    (
-      diferenca > 0
-        ? '+'
-        : ''
-    ) +
-    formatarQuantidade(
-      diferenca
-    ) +
-    ' ' +
-    formatarUnidade(
-      produto.unit
-    );
-
-  if (
-    diferenca > 0
-  ) {
-
-    byId(
-      'masterAjusteTipoPreview'
-    ).textContent =
-      'Ajuste de entrada';
-
-  } else if (
-    diferenca < 0
-  ) {
-
-    byId(
-      'masterAjusteTipoPreview'
-    ).textContent =
-      'Ajuste de saída';
-
-  } else {
-
-    byId(
-      'masterAjusteTipoPreview'
-    ).textContent =
-      'Sem alteração';
-  }
-}
-
-
-async function salvarAjusteEstoque(
-  evento
-) {
-
-  evento.preventDefault();
-
-  if (
-    salvandoAjusteMaster
-  ) {
-
-    return;
-  }
-
-  const produtoId =
-    byId(
-      'masterAjusteProdutoId'
-    )?.value;
-
-  const produto =
-    buscarProdutoLocalPorId(
-      produtoId
-    );
-
-  const mensagem =
-    byId(
-      'masterAjusteMensagem'
-    );
-
-  if (!produto) {
-
-    mostrarMensagemFormulario(
-      mensagem,
-      'Produto inválido.'
-    );
-
-    return;
-  }
-
-  const estoqueAtual =
-    numeroSeguro(
-      produto.stock_quantity
-    );
-
-  const estoqueNovo =
-    numeroSeguro(
-      byId(
-        'masterAjusteNovoEstoque'
-      )?.value
-    );
-
-  const diferenca =
-    estoqueNovo -
-    estoqueAtual;
-
-  const observacao =
-    String(
-      byId(
-        'masterAjusteObservacao'
-      )?.value || ''
-    ).trim();
-
-  if (
-    estoqueNovo < 0
-  ) {
-
-    mostrarMensagemFormulario(
-      mensagem,
-      'O estoque não pode ser negativo.'
-    );
-
-    return;
-  }
-
-  if (
-    Math.abs(diferenca) <
-    0.0000001
-  ) {
-
-    mostrarMensagemFormulario(
-      mensagem,
-      'O estoque informado é igual ao estoque atual.'
-    );
-
-    return;
-  }
-
-  const tipo =
-    diferenca > 0
-      ? 'ajuste_entrada'
-      : 'ajuste_saida';
-
-  const quantidade =
-    Math.abs(
-      diferenca
-    );
-
-  const botao =
-    byId(
-      'btnSalvarMasterAjuste'
-    );
-
-  try {
-
-    salvandoAjusteMaster =
-      true;
-
-    botao.disabled =
-      true;
-
-    botao.textContent =
-      'Salvando...';
-
-    await movimentarEstoqueRPC(
-      produto.id,
-      tipo,
-      quantidade,
-      null,
-      observacao ||
-      'Ajuste realizado por inventário físico.'
-    );
-
-    mostrarMensagemFormulario(
-      mensagem,
-      'Estoque ajustado com sucesso.',
-      'success'
-    );
-
-    await atualizarTudoMaster();
-
-    setTimeout(
-      () => {
-
-        fecharModalMaster(
-          byId(
-            'modalMasterAjusteEstoque'
-          )
-        );
-
-      },
-      500
-    );
-
-  } catch (erro) {
-
-    console.error(
-      erro
-    );
-
-    mostrarMensagemFormulario(
-      mensagem,
-      erro?.message ||
-      'Não foi possível ajustar o estoque.'
-    );
-
-  } finally {
-
-    salvandoAjusteMaster =
-      false;
-
-    botao.disabled =
-      false;
-
-    botao.textContent =
-      'Salvar ajuste';
-  }
-}
-
-
-/* =========================================================
-   ATUALIZAÇÃO GERAL
-========================================================= */
-
-async function atualizarTudoMaster() {
-
-  const [
-    produtos,
-    movimentacoes
-  ] =
-    await Promise.all(
-      [
-        buscarProdutos(false),
-        buscarMovimentacoes(300)
-      ]
-    );
-
-  masterProdutos =
-    produtos;
-
-  masterMovimentacoes =
-    movimentacoes;
-
-  renderizarProdutosMaster();
-
-  renderizarEstoqueAtual();
-
-  renderizarHistoricoEstoque();
-
-  await carregarDashboard();
-}
-
-
-/* =========================================================
-   FILTROS PRODUTOS
-========================================================= */
-
-function configurarFiltrosProdutosMaster() {
-
-  const busca =
-    byId(
-      'masterBuscaProduto'
-    );
-
-  if (busca) {
-
-    busca.addEventListener(
-      'input',
-      () => {
-
-        buscaProdutoMaster =
-          busca.value || '';
-
-        renderizarProdutosMaster();
-      }
-    );
-  }
-
-  document
-    .querySelectorAll(
-      '.product-filter-btn'
-    )
-    .forEach(
-      botao => {
-
-        botao.addEventListener(
-          'click',
-          () => {
-
-            document
-              .querySelectorAll(
-                '.product-filter-btn'
-              )
-              .forEach(
-                item =>
-                  item.classList.remove(
-                    'active'
-                  )
-              );
-
-            botao.classList.add(
-              'active'
-            );
-
-            filtroProdutoMaster =
-              botao.dataset
-                .productFilter ||
-              'all';
-
-            renderizarProdutosMaster();
-          }
-        );
-      }
-    );
-}
-
-
-/* =========================================================
-   FILTROS ESTOQUE
-========================================================= */
-
-function configurarFiltrosEstoqueMaster() {
-
-  const busca =
-    byId(
-      'masterBuscaEstoque'
-    );
-
-  if (busca) {
-
-    busca.addEventListener(
-      'input',
-      () => {
-
-        buscaEstoqueMaster =
-          busca.value || '';
-
-        renderizarEstoqueAtual();
-      }
-    );
-  }
-
-  document
-    .querySelectorAll(
-      '.stock-filter-btn'
-    )
-    .forEach(
-      botao => {
-
-        botao.addEventListener(
-          'click',
-          () => {
-
-            document
-              .querySelectorAll(
-                '.stock-filter-btn'
-              )
-              .forEach(
-                item =>
-                  item.classList.remove(
-                    'active'
-                  )
-              );
-
-            botao.classList.add(
-              'active'
-            );
-
-            filtroEstoqueMaster =
-              botao.dataset
-                .stockFilter ||
-              'all';
-
-            renderizarEstoqueAtual();
-          }
-        );
-      }
-    );
-
-  const filtroMovimento =
-    byId(
-      'masterFiltroMovimentacaoEstoque'
-    );
-
-  if (filtroMovimento) {
-
-    filtroMovimento.addEventListener(
-      'change',
-      () => {
-
-        filtroMovimentacaoEstoque =
-          filtroMovimento.value ||
-          'all';
-
-        renderizarHistoricoEstoque();
-      }
-    );
-  }
-}
-
-
-/* =========================================================
-   EVENTOS LISTA PRODUTOS
-========================================================= */
-
-function configurarEventosListaProdutos() {
-
-  const lista =
-    byId(
-      'masterListaProdutos'
-    );
-
-  if (!lista) {
-
-    return;
-  }
-
-  lista.addEventListener(
-    'click',
-    evento => {
-
-      const ficha =
-        evento.target.closest(
-          '[data-master-recipe]'
-        );
-
-      if (ficha) {
-
-        abrirFichaTecnicaMaster(
-          ficha.dataset
-            .masterRecipe
-        );
-
-        return;
-      }
-
-      const editar =
-        evento.target.closest(
-          '[data-master-edit-product]'
-        );
-
-      if (editar) {
-
-        abrirEditarProdutoMaster(
-          editar.dataset
-            .masterEditProduct
-        );
-
-        return;
-      }
-
-      const entrada =
-        evento.target.closest(
-          '[data-master-stock-entry]'
-        );
-
-      if (entrada) {
-
-        abrirMovimentoEstoque(
-          entrada.dataset
-            .masterStockEntry,
-          'entrada'
-        );
-      }
-    }
-  );
-}
-
-
-/* =========================================================
-   EVENTOS TABELA ESTOQUE
-========================================================= */
-
-function configurarEventosEstoque() {
-
-  const tabela =
-    byId(
-      'masterListaEstoque'
-    );
-
-  if (!tabela) {
-
-    return;
-  }
-
-  tabela.addEventListener(
-    'click',
-    evento => {
-
-      const entrada =
-        evento.target.closest(
-          '[data-stock-entry]'
-        );
-
-      if (entrada) {
-
-        abrirMovimentoEstoque(
-          entrada.dataset
-            .stockEntry,
-          'entrada'
-        );
-
-        return;
-      }
-
-      const saida =
-        evento.target.closest(
-          '[data-stock-exit]'
-        );
-
-      if (saida) {
-
-        abrirMovimentoEstoque(
-          saida.dataset
-            .stockExit,
-          'ajuste_saida'
-        );
-
-        return;
-      }
-
-      const perda =
-        evento.target.closest(
-          '[data-stock-loss]'
-        );
-
-      if (perda) {
-
-        abrirMovimentoEstoque(
-          perda.dataset
-            .stockLoss,
-          'perda'
-        );
-
-        return;
-      }
-
-      const ajuste =
-        evento.target.closest(
-          '[data-stock-adjust]'
-        );
-
-      if (ajuste) {
-
-        abrirAjusteEstoque(
-          ajuste.dataset
-            .stockAdjust
-        );
-      }
-    }
-  );
-}
-
-
-/* =========================================================
-   EVENTOS FICHA
-========================================================= */
-
-function configurarEventosFichaMaster() {
-
-  const lista =
-    byId(
-      'masterFichaListaInsumos'
-    );
-
-  if (lista) {
-
-    lista.addEventListener(
-      'change',
-      evento => {
-
-        const check =
-          evento.target.closest(
-            '[data-recipe-check]'
-          );
-
-        if (!check) {
-
-          return;
-        }
-
-        const id =
-          String(
-            check.dataset
-              .recipeCheck
-          );
-
-        if (
-          check.checked
-        ) {
-
-          masterFichaSelecionados.set(
-            id,
-            1
-          );
-
-        } else {
-
-          masterFichaSelecionados.delete(
-            id
-          );
-        }
-
-        renderizarFichaMaster();
-      }
-    );
-
-    lista.addEventListener(
-      'input',
-      evento => {
-
-        const input =
-          evento.target.closest(
-            '[data-recipe-quantity]'
-          );
-
-        if (!input) {
-
-          return;
-        }
-
-        masterFichaSelecionados.set(
-          String(
-            input.dataset
-              .recipeQuantity
-          ),
-          numeroSeguro(
-            input.value
-          )
-        );
-
-        atualizarResumoFichaMaster();
-      }
-    );
-  }
-
-  const busca =
-    byId(
-      'masterFichaBuscaInsumo'
-    );
-
-  if (busca) {
-
-    busca.addEventListener(
-      'input',
-      () => {
-
-        buscaFichaMaster =
-          busca.value || '';
-
-        renderizarFichaMaster();
-      }
-    );
-  }
-}
-
-
-/* =========================================================
-   MODAIS
-========================================================= */
-
-function configurarModaisMaster() {
-
-  document
-    .querySelectorAll(
-      '[data-close-master-modal]'
-    )
-    .forEach(
-      botao => {
-
-        botao.addEventListener(
-          'click',
-          () => {
-
-            fecharModalPorNome(
-              botao.dataset
-                .closeMasterModal
-            );
-          }
-        );
-      }
-    );
-
-  document.addEventListener(
-    'keydown',
-    evento => {
-
-      if (
-        evento.key !==
-        'Escape'
-      ) {
-
-        return;
-      }
-
-      const modal =
-        document.querySelector(
-          '.master-modal:not(.hidden)'
-        );
-
-      if (modal) {
-
-        fecharModalMaster(
-          modal
-        );
-      }
-    }
-  );
+.page-heading p {
+  color: #898991;
+
+  font-size: 14px;
+  line-height: 1.45;
 }
 
 
@@ -5671,82 +564,1906 @@ function configurarModaisMaster() {
    BOTÕES
 ========================================================= */
 
-function configurarBotoesMaster() {
+.btn-master {
+  min-height: 42px;
 
-  const produto =
-    byId(
-      'btnNovoProduto'
+  padding: 0 16px;
+
+  border: 0;
+  border-radius: 11px;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    filter 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.btn-master:hover {
+  transform: translateY(-1px);
+}
+
+.btn-master:disabled {
+  opacity: 0.55;
+
+  cursor: wait;
+
+  transform: none;
+}
+
+.btn-yellow {
+  color: #111111;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffc107,
+      #f2aa00
     );
 
-  if (produto) {
+  box-shadow: 0 9px 22px rgba(255, 193, 7, 0.12);
+}
 
-    produto.addEventListener(
-      'click',
-      abrirNovoProdutoMaster
+.btn-secondary {
+  color: #b7b7be;
+
+  background: rgba(255, 255, 255, 0.05);
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.btn-secondary:hover {
+  color: #ffffff;
+
+  background: rgba(255, 255, 255, 0.08);
+}
+
+
+/* =========================================================
+   FILTRO DE PERÍODO
+========================================================= */
+
+.period-filter {
+  display: inline-flex;
+
+  gap: 6px;
+
+  padding: 5px;
+
+  margin-bottom: 22px;
+
+  background: #111114;
+
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+}
+
+.period-btn {
+  min-height: 36px;
+
+  padding: 0 14px;
+
+  border: 0;
+  border-radius: 9px;
+
+  color: #8d8d96;
+  background: transparent;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+.period-btn:hover {
+  color: #ffffff;
+}
+
+.period-btn.active {
+  color: #111111;
+
+  background: #ffc107;
+}
+
+
+/* =========================================================
+   CARDS DASHBOARD
+========================================================= */
+
+.master-stats-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 16px;
+
+  margin-bottom: 22px;
+}
+
+.master-stat-card {
+  min-height: 120px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 14px;
+
+  padding: 20px;
+
+  border-radius: 17px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(22, 22, 25, 0.98),
+      rgba(15, 15, 17, 0.98)
     );
-  }
 
-  const entrada =
-    byId(
-      'btnNovaEntradaEstoque'
+  border: 1px solid rgba(255, 255, 255, 0.07);
+
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.14);
+}
+
+.master-stat-card.highlight {
+  border-color: rgba(255, 193, 7, 0.24);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 193, 7, 0.07),
+      rgba(18, 18, 20, 0.98)
+    );
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 auto;
+
+  border-radius: 13px;
+
+  background: rgba(255, 193, 7, 0.08);
+
+  border: 1px solid rgba(255, 193, 7, 0.16);
+
+  font-size: 22px;
+}
+
+.master-stat-card div:last-child {
+  min-width: 0;
+}
+
+.master-stat-card span {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: #85858e;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.master-stat-card strong {
+  display: block;
+
+  color: #ffffff;
+
+  font-size: 24px;
+  line-height: 1.1;
+
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   GRID DASHBOARD
+========================================================= */
+
+.master-dashboard-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 18px;
+
+  margin-bottom: 18px;
+}
+
+
+/* =========================================================
+   PAINÉIS
+========================================================= */
+
+.master-panel {
+  padding: 20px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #141416,
+      #101012
     );
 
-  if (entrada) {
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 17px;
 
-    entrada.addEventListener(
-      'click',
-      () => {
+  box-shadow: 0 15px 32px rgba(0, 0, 0, 0.13);
+}
 
-        const itens =
-          obterItensComEstoque();
+.master-panel-full {
+  width: 100%;
+}
 
-        if (
-          itens.length === 0
-        ) {
+.panel-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-          alert(
-            'Cadastre primeiro um item com controle de estoque.'
-          );
+  gap: 14px;
 
-          abrirPaginaMaster(
-            'produtos'
-          );
+  margin-bottom: 18px;
+}
 
-          return;
-        }
+.panel-title h3 {
+  margin-bottom: 4px;
 
-        /*
-         * O item é escolhido diretamente na tabela.
-         */
+  font-size: 16px;
+}
 
-        alert(
-          'Escolha o item na lista abaixo e clique em "+ Entrada".'
-        );
+.panel-title p {
+  color: #777780;
 
-        byId(
-          'masterBuscaEstoque'
-        )?.focus();
-      }
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.panel-link {
+  flex: 0 0 auto;
+
+  border: 0;
+
+  color: #ffc107;
+  background: transparent;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+.panel-link:hover {
+  color: #ffd55a;
+}
+
+
+/* =========================================================
+   LISTAS / EMPTY
+========================================================= */
+
+.panel-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 9px;
+}
+
+.master-empty {
+  width: 100%;
+
+  padding: 22px 16px;
+
+  border-radius: 12px;
+
+  color: #74747d;
+  background: rgba(255, 255, 255, 0.025);
+
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+
+  font-size: 12px;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   ESTOQUE BAIXO
+========================================================= */
+
+.stock-warning-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  padding: 13px 14px;
+
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.025);
+
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.stock-warning-item strong {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #ffffff;
+
+  font-size: 13px;
+}
+
+.stock-warning-item span {
+  color: #777780;
+
+  font-size: 11px;
+}
+
+.stock-warning-value {
+  flex: 0 0 auto;
+
+  min-width: 54px;
+
+  padding: 7px 9px;
+
+  border-radius: 9px;
+
+  color: #ffc107;
+
+  background: rgba(255, 193, 7, 0.08);
+
+  border: 1px solid rgba(255, 193, 7, 0.18);
+
+  font-size: 12px;
+  font-weight: 900;
+
+  text-align: center;
+}
+
+.stock-warning-value.danger {
+  color: #ff7373;
+
+  background: rgba(255, 75, 75, 0.08);
+
+  border-color: rgba(255, 75, 75, 0.18);
+}
+
+
+/* =========================================================
+   RANKING
+========================================================= */
+
+.ranking-item {
+  display: grid;
+
+  grid-template-columns:
+    34px
+    minmax(0, 1fr)
+    auto;
+
+  align-items: center;
+
+  gap: 11px;
+
+  padding: 12px 13px;
+
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.025);
+
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ranking-position {
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9px;
+
+  color: #111111;
+  background: #ffc107;
+
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.ranking-info {
+  min-width: 0;
+}
+
+.ranking-info strong {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: #ffffff;
+
+  font-size: 13px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ranking-info span {
+  color: #777780;
+
+  font-size: 11px;
+}
+
+.ranking-value {
+  text-align: right;
+}
+
+.ranking-value strong {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: #ffffff;
+
+  font-size: 12px;
+}
+
+.ranking-value span {
+  color: #65d98b;
+
+  font-size: 10px;
+}
+
+
+/* =========================================================
+   TABELAS
+========================================================= */
+
+.table-wrap {
+  width: 100%;
+
+  overflow-x: auto;
+}
+
+.master-table {
+  width: 100%;
+  min-width: 700px;
+
+  border-collapse: collapse;
+}
+
+.master-table th {
+  padding: 12px 11px;
+
+  color: #777780;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+
+  font-size: 11px;
+  font-weight: 800;
+
+  text-align: left;
+
+  white-space: nowrap;
+}
+
+.master-table td {
+  padding: 13px 11px;
+
+  color: #d8d8dc;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.045);
+
+  font-size: 12px;
+
+  vertical-align: middle;
+}
+
+.master-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.master-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table-empty {
+  padding: 28px !important;
+
+  color: #74747d !important;
+
+  text-align: center !important;
+}
+
+
+/* =========================================================
+   PLACEHOLDER
+========================================================= */
+
+.master-placeholder {
+  min-height: 340px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  padding: 35px;
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #141416,
+      #101012
     );
-  }
 
-  const despesa =
-    byId(
-      'btnNovaDespesa'
+  border: 1px dashed rgba(255, 255, 255, 0.09);
+
+  text-align: center;
+}
+
+.master-placeholder > span {
+  font-size: 48px;
+}
+
+.master-placeholder h3 {
+  font-size: 21px;
+}
+
+.master-placeholder p {
+  max-width: 560px;
+
+  color: #85858e;
+
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+
+/* =========================================================
+   PRODUTOS - CARDS
+========================================================= */
+
+.products-summary-grid,
+.stock-summary-grid,
+.expenses-summary-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 14px;
+
+  margin-bottom: 20px;
+}
+
+.products-summary-card,
+.stock-summary-card,
+.expenses-summary-card {
+  min-height: 94px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 13px;
+
+  padding: 17px;
+
+  border-radius: 15px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(22, 22, 25, 0.98),
+      rgba(15, 15, 17, 0.98)
     );
 
-  if (despesa) {
+  border: 1px solid rgba(255, 255, 255, 0.07);
 
-    despesa.addEventListener(
-      'click',
-      () => {
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
 
-        alert(
-          'O cadastro de despesas será criado na próxima etapa.'
-        );
-      }
+.products-summary-icon,
+.stock-summary-icon,
+.expenses-summary-icon {
+  width: 44px;
+  height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 auto;
+
+  border-radius: 12px;
+
+  background: rgba(255, 193, 7, 0.08);
+
+  border: 1px solid rgba(255, 193, 7, 0.16);
+
+  font-size: 20px;
+}
+
+.products-summary-card > div,
+.stock-summary-card > div,
+.expenses-summary-card > div {
+  min-width: 0;
+}
+
+.products-summary-card > div > span,
+.stock-summary-card > div > span,
+.expenses-summary-card > div > span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #85858e;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.products-summary-card strong,
+.stock-summary-card strong,
+.expenses-summary-card strong {
+  display: block;
+
+  color: #ffffff;
+
+  font-size: 19px;
+  line-height: 1.15;
+
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   PRODUTOS - TOOLBAR
+========================================================= */
+
+.products-toolbar,
+.stock-toolbar,
+.expenses-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 14px;
+
+  margin-bottom: 18px;
+}
+
+.products-search,
+.stock-search,
+.expenses-search {
+  width: 100%;
+  max-width: 420px;
+  min-height: 44px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  padding: 0 13px;
+
+  border-radius: 11px;
+
+  background: #111114;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.products-search:focus-within,
+.stock-search:focus-within,
+.expenses-search:focus-within {
+  border-color: rgba(255, 193, 7, 0.7);
+
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.07);
+}
+
+.products-search > span,
+.stock-search > span,
+.expenses-search > span {
+  flex: 0 0 auto;
+
+  font-size: 15px;
+
+  opacity: 0.65;
+}
+
+.products-search input,
+.stock-search input,
+.expenses-search input {
+  width: 100%;
+
+  padding: 12px 0;
+
+  border: 0;
+  outline: 0;
+
+  color: #ffffff;
+  background: transparent;
+
+  font-size: 13px;
+}
+
+.products-search input::placeholder,
+.stock-search input::placeholder,
+.expenses-search input::placeholder {
+  color: #66666f;
+}
+
+
+/* =========================================================
+   PRODUTOS - FILTROS
+========================================================= */
+
+.products-filters,
+.stock-filters {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  padding: 5px;
+
+  border-radius: 11px;
+
+  background: #111114;
+
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.stock-filters {
+  overflow-x: auto;
+}
+
+.product-filter-btn,
+.stock-filter-btn {
+  min-height: 34px;
+
+  padding: 0 11px;
+
+  border: 0;
+  border-radius: 8px;
+
+  color: #85858e;
+  background: transparent;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+
+  transition:
+    background 0.16s ease,
+    color 0.16s ease;
+}
+
+.product-filter-btn:hover,
+.stock-filter-btn:hover {
+  color: #ffffff;
+}
+
+.product-filter-btn.active,
+.stock-filter-btn.active {
+  color: #111111;
+
+  background: #ffc107;
+}
+
+
+/* =========================================================
+   PRODUTOS - LISTA
+========================================================= */
+
+.products-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+.product-master-item {
+  display: grid;
+
+  grid-template-columns:
+    minmax(200px, 1.5fr)
+    repeat(4, minmax(90px, 0.7fr))
+    auto;
+
+  align-items: center;
+
+  gap: 14px;
+
+  padding: 15px;
+
+  border-radius: 13px;
+
+  background: rgba(255, 255, 255, 0.025);
+
+  border: 1px solid rgba(255, 255, 255, 0.06);
+
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.product-master-item:hover {
+  background: rgba(255, 255, 255, 0.035);
+
+  border-color: rgba(255, 193, 7, 0.12);
+}
+
+.product-master-main {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+}
+
+.product-master-icon {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 auto;
+
+  border-radius: 11px;
+
+  background: rgba(255, 193, 7, 0.08);
+
+  border: 1px solid rgba(255, 193, 7, 0.14);
+
+  font-size: 19px;
+}
+
+.product-master-info {
+  min-width: 0;
+}
+
+.product-master-info strong {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #ffffff;
+
+  font-size: 13px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-master-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 5px;
+}
+
+.product-type-badge {
+  min-height: 20px;
+
+  display: inline-flex;
+  align-items: center;
+
+  padding: 0 7px;
+
+  border-radius: 999px;
+
+  color: #ffc107;
+
+  background: rgba(255, 193, 7, 0.07);
+
+  border: 1px solid rgba(255, 193, 7, 0.15);
+
+  font-size: 9px;
+  font-weight: 900;
+
+  text-transform: uppercase;
+}
+
+.product-type-badge.ingredient {
+  color: #68d990;
+
+  background: rgba(80, 210, 125, 0.07);
+
+  border-color: rgba(80, 210, 125, 0.15);
+}
+
+.product-master-code {
+  color: #707079;
+
+  font-size: 10px;
+}
+
+.product-master-value {
+  min-width: 0;
+}
+
+.product-master-value span {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #707079;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+}
+
+.product-master-value strong {
+  display: block;
+
+  color: #dedee2;
+
+  font-size: 12px;
+
+  overflow-wrap: anywhere;
+}
+
+.product-master-value strong.positive {
+  color: #68d990;
+}
+
+.product-master-value strong.warning {
+  color: #ffc107;
+}
+
+.product-master-value strong.danger {
+  color: #ff7272;
+}
+
+.product-master-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+
+  gap: 6px;
+}
+
+.product-action-btn {
+  min-height: 33px;
+
+  padding: 0 10px;
+
+  border-radius: 8px;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  color: #b9b9c0;
+  background: rgba(255, 255, 255, 0.03);
+
+  font-size: 10px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+}
+
+.product-action-btn:hover {
+  color: #ffffff;
+
+  background: rgba(255, 255, 255, 0.06);
+
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.product-action-btn.stock {
+  color: #ffc107;
+
+  background: rgba(255, 193, 7, 0.06);
+
+  border-color: rgba(255, 193, 7, 0.17);
+}
+
+.product-action-btn.recipe {
+  color: #70b9ff;
+
+  background: rgba(85, 170, 255, 0.06);
+
+  border-color: rgba(85, 170, 255, 0.2);
+}
+
+
+/* =========================================================
+   ESTOQUE - TABELA
+========================================================= */
+
+.stock-table {
+  min-width: 1100px;
+}
+
+.stock-item-main {
+  min-width: 190px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+}
+
+.stock-item-icon {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 auto;
+
+  border-radius: 9px;
+
+  background: rgba(255, 193, 7, 0.07);
+
+  border: 1px solid rgba(255, 193, 7, 0.12);
+
+  font-size: 16px;
+}
+
+.stock-item-info {
+  min-width: 0;
+}
+
+.stock-item-info strong {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: #ffffff;
+
+  font-size: 12px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stock-item-info span {
+  color: #707079;
+
+  font-size: 9px;
+}
+
+.stock-type-badge,
+.stock-status-badge,
+.stock-movement-badge {
+  min-height: 24px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 8px;
+
+  border-radius: 999px;
+
+  font-size: 9px;
+  font-weight: 900;
+
+  white-space: nowrap;
+}
+
+.stock-type-badge {
+  color: #ffc107;
+
+  background: rgba(255, 193, 7, 0.07);
+
+  border: 1px solid rgba(255, 193, 7, 0.14);
+}
+
+.stock-type-badge.ingredient {
+  color: #68d990;
+
+  background: rgba(80, 210, 125, 0.07);
+
+  border-color: rgba(80, 210, 125, 0.15);
+}
+
+.stock-status-badge.ok {
+  color: #68d990;
+
+  background: rgba(80, 210, 125, 0.07);
+
+  border: 1px solid rgba(80, 210, 125, 0.15);
+}
+
+.stock-status-badge.low {
+  color: #ffc107;
+
+  background: rgba(255, 193, 7, 0.07);
+
+  border: 1px solid rgba(255, 193, 7, 0.16);
+}
+
+.stock-status-badge.empty {
+  color: #ff7272;
+
+  background: rgba(255, 90, 90, 0.07);
+
+  border: 1px solid rgba(255, 90, 90, 0.16);
+}
+
+.stock-quantity-value {
+  color: #ffffff;
+
+  font-weight: 900;
+}
+
+.stock-quantity-value.low {
+  color: #ffc107;
+}
+
+.stock-quantity-value.empty {
+  color: #ff7272;
+}
+
+.stock-actions {
+  min-width: 250px;
+
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 5px;
+}
+
+.stock-action-btn {
+  min-height: 30px;
+
+  padding: 0 8px;
+
+  border-radius: 7px;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  color: #b9b9c0;
+  background: rgba(255, 255, 255, 0.03);
+
+  font-size: 9px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+}
+
+.stock-action-btn.entry {
+  color: #68d990;
+
+  background: rgba(80, 210, 125, 0.05);
+
+  border-color: rgba(80, 210, 125, 0.16);
+}
+
+.stock-action-btn.exit {
+  color: #70b9ff;
+
+  background: rgba(85, 170, 255, 0.05);
+
+  border-color: rgba(85, 170, 255, 0.16);
+}
+
+.stock-action-btn.loss {
+  color: #ff7272;
+
+  background: rgba(255, 90, 90, 0.05);
+
+  border-color: rgba(255, 90, 90, 0.16);
+}
+
+.stock-action-btn.adjust {
+  color: #ffc107;
+
+  background: rgba(255, 193, 7, 0.05);
+
+  border-color: rgba(255, 193, 7, 0.16);
+}
+
+
+/* =========================================================
+   HISTÓRICO ESTOQUE
+========================================================= */
+
+.stock-history-panel {
+  margin-top: 18px;
+}
+
+.stock-history-filter select {
+  min-height: 36px;
+
+  padding: 0 10px;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9px;
+
+  outline: 0;
+
+  color: #d8d8dc;
+  background: #101012;
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.stock-history-filter select option {
+  color: #ffffff;
+  background: #161618;
+}
+
+.stock-history-table {
+  min-width: 1250px;
+}
+
+.stock-movement-badge.entry {
+  color: #68d990;
+
+  background: rgba(80, 210, 125, 0.07);
+
+  border: 1px solid rgba(80, 210, 125, 0.15);
+}
+
+.stock-movement-badge.sale {
+  color: #70b9ff;
+
+  background: rgba(85, 170, 255, 0.07);
+
+  border: 1px solid rgba(85, 170, 255, 0.15);
+}
+
+.stock-movement-badge.adjust-in {
+  color: #b8f176;
+
+  background: rgba(170, 230, 90, 0.07);
+
+  border: 1px solid rgba(170, 230, 90, 0.15);
+}
+
+.stock-movement-badge.adjust-out {
+  color: #ffbb70;
+
+  background: rgba(255, 170, 85, 0.07);
+
+  border: 1px solid rgba(255, 170, 85, 0.15);
+}
+
+.stock-movement-badge.loss {
+  color: #ff7272;
+
+  background: rgba(255, 90, 90, 0.07);
+
+  border: 1px solid rgba(255, 90, 90, 0.15);
+}
+
+.stock-movement-badge.cancel {
+  color: #d29bff;
+
+  background: rgba(170, 100, 255, 0.07);
+
+  border: 1px solid rgba(170, 100, 255, 0.15);
+}
+
+.stock-note {
+  display: block;
+
+  max-width: 280px;
+
+  color: #8b8b94;
+
+  font-size: 10px;
+  line-height: 1.4;
+
+  white-space: normal;
+}
+
+
+/* =========================================================
+   ESTOQUE - PREVIEWS
+========================================================= */
+
+.stock-current-box {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 10px;
+
+  margin-bottom: 18px;
+}
+
+.stock-current-box > div {
+  padding: 14px;
+
+  border-radius: 11px;
+
+  background: rgba(255, 255, 255, 0.025);
+
+  border: 1px solid rgba(255, 255, 255, 0.065);
+}
+
+.stock-current-box span,
+.stock-preview span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #74747d;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+}
+
+.stock-current-box strong {
+  color: #ffffff;
+
+  font-size: 16px;
+}
+
+.stock-preview {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 9px;
+
+  margin-top: 16px;
+  margin-bottom: 18px;
+
+  padding: 13px;
+
+  border-radius: 12px;
+
+  background: rgba(255, 193, 7, 0.045);
+
+  border: 1px solid rgba(255, 193, 7, 0.13);
+}
+
+.stock-preview strong {
+  display: block;
+
+  color: #ffc107;
+
+  font-size: 14px;
+}
+
+.stock-adjust-preview {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 10px;
+
+  margin-top: 16px;
+  margin-bottom: 18px;
+
+  padding: 13px;
+
+  border-radius: 12px;
+
+  background: rgba(255, 193, 7, 0.045);
+
+  border: 1px solid rgba(255, 193, 7, 0.13);
+}
+
+.stock-adjust-preview span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #74747d;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+}
+
+.stock-adjust-preview strong {
+  color: #ffc107;
+
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   DESPESAS - CARDS
+========================================================= */
+
+.expenses-summary-card:first-child {
+  border-color: rgba(255, 90, 90, 0.14);
+}
+
+.expenses-summary-card:first-child .expenses-summary-icon {
+  background: rgba(255, 90, 90, 0.07);
+
+  border-color: rgba(255, 90, 90, 0.15);
+}
+
+.expenses-summary-card:first-child strong {
+  color: #ff8585;
+}
+
+.expenses-summary-card:nth-child(3) .expenses-summary-icon {
+  background: rgba(112, 185, 255, 0.07);
+
+  border-color: rgba(112, 185, 255, 0.15);
+}
+
+
+/* =========================================================
+   DESPESAS - FILTROS
+========================================================= */
+
+.expenses-filters {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+.expenses-filters select {
+  min-height: 44px;
+
+  padding: 0 12px;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 11px;
+
+  outline: 0;
+
+  color: #d8d8dc;
+  background: #111114;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.expenses-filters select:focus {
+  border-color: rgba(255, 193, 7, 0.65);
+
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.06);
+}
+
+.expenses-filters select option {
+  color: #ffffff;
+
+  background: #161618;
+}
+
+
+/* =========================================================
+   DESPESAS - TABELA
+========================================================= */
+
+.expenses-table {
+  min-width: 1050px;
+}
+
+.expense-description {
+  min-width: 180px;
+}
+
+.expense-description strong {
+  display: block;
+
+  color: #ffffff;
+
+  font-size: 12px;
+}
+
+.expense-category-badge {
+  min-height: 24px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 9px;
+
+  border-radius: 999px;
+
+  color: #ffc107;
+
+  background: rgba(255, 193, 7, 0.07);
+
+  border: 1px solid rgba(255, 193, 7, 0.15);
+
+  font-size: 9px;
+  font-weight: 900;
+
+  white-space: nowrap;
+}
+
+.expense-payment-badge {
+  min-height: 23px;
+
+  display: inline-flex;
+  align-items: center;
+
+  padding: 0 8px;
+
+  border-radius: 8px;
+
+  color: #aeb0b8;
+
+  background: rgba(255, 255, 255, 0.04);
+
+  border: 1px solid rgba(255, 255, 255, 0.07);
+
+  font-size: 9px;
+  font-weight: 800;
+
+  white-space: nowrap;
+}
+
+.expense-value {
+  color: #ff8585;
+
+  font-size: 12px;
+  font-weight: 900;
+
+  white-space: nowrap;
+}
+
+.expense-note {
+  display: block;
+
+  max-width: 250px;
+
+  color: #85858e;
+
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.expense-status-badge {
+  min-height: 24px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 8px;
+
+  border-radius: 999px;
+
+  font-size: 9px;
+  font-weight: 900;
+
+  white-space: nowrap;
+}
+
+.expense-status-badge.active {
+  color: #68d990;
+
+  background: rgba(80, 210, 125, 0.07);
+
+  border: 1px solid rgba(80, 210, 125, 0.15);
+}
+
+.expense-status-badge.inactive {
+  color: #8c8c95;
+
+  background: rgba(255, 255, 255, 0.04);
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.expense-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+}
+
+.expense-action-btn {
+  min-height: 31px;
+
+  padding: 0 9px;
+
+  border-radius: 8px;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  color: #babac2;
+  background: rgba(255, 255, 255, 0.03);
+
+  font-size: 9px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+
+  transition:
+    color 0.16s ease,
+    background 0.16s ease,
+    border-color 0.16s ease;
+}
+
+.expense-action-btn:hover {
+  color: #ffffff;
+
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.expense-action-btn.edit {
+  color: #70b9ff;
+
+  background: rgba(85, 170, 255, 0.05);
+
+  border-color: rgba(85, 170, 255, 0.16);
+}
+
+.expense-action-btn.delete {
+  color: #ff7272;
+
+  background: rgba(255, 90, 90, 0.05);
+
+  border-color: rgba(255, 90, 90, 0.16);
+}
+
+.expense-action-btn.toggle {
+  color: #ffc107;
+
+  background: rgba(255, 193, 7, 0.05);
+
+  border-color: rgba(255, 193, 7, 0.16);
+}
+
+
+/* =========================================================
+   DESPESAS - SWITCH ATIVA
+========================================================= */
+
+.expense-active-row {
+  min-height: 68px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  margin-top: 15px;
+
+  padding: 13px 14px;
+
+  border-radius: 11px;
+
+  background: rgba(255, 255, 255, 0.025);
+
+  border: 1px solid rgba(255, 255, 255, 0.065);
+
+  cursor: pointer;
+}
+
+.expense-active-row > div {
+  min-width: 0;
+}
+
+.expense-active-row strong {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #ffffff;
+
+  font-size: 11px;
+}
+
+.expense-active-row span {
+  display: block;
+
+  color: #6f6f78;
+
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.expense-active-row input {
+  width: 18px;
+  height: 18px;
+
+  flex: 0 0 auto;
+
+  accent-color: #ffc107;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   MODAIS
+========================================================= */
+
+.master-modal {
+  position: fixed;
+
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  z-index: 500;
+}
+
+.master-modal-backdrop {
+  position: absolute;
+
+  inset: 0;
+
+  background: rgba(0, 0, 0, 0.76);
+
+  backdrop-filter: blur(6px);
+}
+
+.master-modal-dialog {
+  position: relative;
+
+  width: 100%;
+  max-width: 570px;
+  max-height: calc(100vh - 48px);
+
+  overflow-y: auto;
+
+  border-radius: 20px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #18181b,
+      #101012
     );
-  }
+
+  border: 1px solid rgba(255, 255, 255, 0.09);
+
+  box-shadow: 0 35px 100px rgba(0, 0, 0, 0.7);
+
+  z-index: 2;
+}
+
+.master-modal-large {
+  max-width: 760px;
+}
+
+.master-modal-header {
+  position: sticky;
+  top: 0;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 18px;
+
+  padding: 22px 24px 18px;
+
+  background: rgba(24, 24, 27, 0.96);
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+
+  backdrop-filter: blur(12px);
+
+  z-index: 5;
+}
+
+.master-modal-header h3 {
+  margin-top: 7px;
+  margin-bottom: 5px;
+
+  color: #ffffff;
+
+  font-size: 21px;
+}
+
+.master-modal-header p {
+  color: #808089;
+
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.master-modal-badge {
+  min-height: 24px;
+
+  display: inline-flex;
+  align-items: center;
+
+  padding: 0 9px;
+
+  border-radius: 999px;
+
+  color: #ffc107;
+
+  background: rgba(255, 193, 7, 0.08);
+
+  border: 1px solid rgba(255, 193, 7, 0.17);
+
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.7px;
+}
+
+.master-modal-close {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 auto;
+
+  border: 0;
+  border-radius: 9px;
+
+  color: #96969e;
+  background: rgba(255, 255, 255, 0.04);
+
+  font-size: 23px;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.master-modal-close:hover {
+  color: #ffffff;
+
+  background: rgba(255, 255, 255, 0.08);
 }
 
 
@@ -5754,230 +2471,1336 @@ function configurarBotoesMaster() {
    FORMULÁRIOS
 ========================================================= */
 
-function configurarFormulariosMaster() {
+.master-form {
+  padding: 22px 24px 24px;
+}
 
-  byId(
-    'formMasterProduto'
-  )?.addEventListener(
-    'submit',
-    salvarProdutoMaster
-  );
+.master-form-section {
+  padding-bottom: 22px;
 
-  byId(
-    'formMasterFicha'
-  )?.addEventListener(
-    'submit',
-    salvarFichaTecnicaMaster
-  );
+  margin-bottom: 22px;
 
-  byId(
-    'formMasterMovimentoEstoque'
-  )?.addEventListener(
-    'submit',
-    salvarMovimentoEstoque
-  );
+  border-bottom: 1px solid rgba(255, 255, 255, 0.065);
+}
 
-  byId(
-    'formMasterAjusteEstoque'
-  )?.addEventListener(
-    'submit',
-    salvarAjusteEstoque
-  );
+.master-form-section:last-of-type {
+  margin-bottom: 0;
+}
 
-  document
-    .querySelectorAll(
-      'input[name="masterItemType"]'
-    )
-    .forEach(
-      radio => {
+.master-form-section-title {
+  display: flex;
+  flex-direction: column;
 
-        radio.addEventListener(
-          'change',
-          atualizarFormularioPorTipo
-        );
-      }
+  gap: 4px;
+
+  margin-bottom: 14px;
+}
+
+.master-form-section-title strong {
+  color: #ffffff;
+
+  font-size: 13px;
+}
+
+.master-form-section-title span {
+  color: #72727b;
+
+  font-size: 11px;
+}
+
+.master-form-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 14px;
+}
+
+.master-field {
+  min-width: 0;
+}
+
+.master-field-full {
+  grid-column: 1 / -1;
+}
+
+.master-field label {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: #cfcfd4;
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.master-field input,
+.master-field select,
+.master-field textarea {
+  width: 100%;
+
+  padding: 11px 12px;
+
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 10px;
+
+  outline: 0;
+
+  color: #ffffff;
+  background: #101012;
+
+  font-size: 12px;
+
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.master-field input,
+.master-field select {
+  min-height: 43px;
+}
+
+.master-field textarea {
+  min-height: 88px;
+
+  resize: vertical;
+
+  line-height: 1.5;
+}
+
+.master-field input:focus,
+.master-field select:focus,
+.master-field textarea:focus {
+  border-color: rgba(255, 193, 7, 0.7);
+
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.06);
+}
+
+.master-field input::placeholder,
+.master-field textarea::placeholder {
+  color: #575760;
+}
+
+.master-field select option {
+  color: #ffffff;
+
+  background: #161618;
+}
+
+.master-field > small {
+  display: block;
+
+  margin-top: 6px;
+
+  color: #66666f;
+
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+
+/* =========================================================
+   MONEY INPUT
+========================================================= */
+
+.money-input {
+  min-height: 43px;
+
+  display: flex;
+  align-items: center;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 10px;
+
+  background: #101012;
+
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.money-input:focus-within {
+  border-color: rgba(255, 193, 7, 0.7);
+
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.06);
+}
+
+.money-input > span {
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+
+  padding-left: 12px;
+  padding-right: 9px;
+
+  color: #ffc107;
+
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.money-input input {
+  min-height: 41px;
+
+  padding-left: 10px;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+
+  box-shadow: none !important;
+}
+
+
+/* =========================================================
+   SELETOR PRODUTO / INSUMO
+========================================================= */
+
+.item-type-selector {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 11px;
+}
+
+.item-type-option {
+  display: block;
+
+  cursor: pointer;
+}
+
+.item-type-option input {
+  position: absolute;
+
+  opacity: 0;
+
+  pointer-events: none;
+}
+
+.item-type-card {
+  min-height: 100px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  padding: 14px;
+
+  border-radius: 12px;
+
+  color: #8a8a93;
+  background: rgba(255, 255, 255, 0.025);
+
+  border: 1px solid rgba(255, 255, 255, 0.07);
+
+  text-align: center;
+
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+
+.item-type-card:hover {
+  transform: translateY(-1px);
+
+  border-color: rgba(255, 193, 7, 0.2);
+}
+
+.item-type-icon {
+  margin-bottom: 3px;
+
+  font-size: 23px;
+}
+
+.item-type-card strong {
+  color: #ffffff;
+
+  font-size: 12px;
+}
+
+.item-type-card small {
+  color: #777780;
+
+  font-size: 10px;
+}
+
+.item-type-option input:checked + .item-type-card {
+  color: #ffc107;
+
+  background: rgba(255, 193, 7, 0.075);
+
+  border-color: rgba(255, 193, 7, 0.48);
+
+  box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.04);
+}
+
+
+/* =========================================================
+   SWITCHES
+========================================================= */
+
+.master-switch-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 10px;
+
+  margin-top: 14px;
+}
+
+.master-switch-row {
+  min-height: 74px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  padding: 12px;
+
+  border-radius: 11px;
+
+  background: rgba(255, 255, 255, 0.025);
+
+  border: 1px solid rgba(255, 255, 255, 0.065);
+
+  cursor: pointer;
+}
+
+.master-switch-row strong {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #ffffff;
+
+  font-size: 10px;
+}
+
+.master-switch-row span {
+  display: block;
+
+  color: #6e6e77;
+
+  font-size: 9px;
+  line-height: 1.3;
+}
+
+.master-switch-row input {
+  width: 17px;
+  height: 17px;
+
+  flex: 0 0 auto;
+
+  accent-color: #ffc107;
+}
+
+
+/* =========================================================
+   FICHA TÉCNICA
+========================================================= */
+
+.recipe-summary-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 10px;
+
+  margin-bottom: 18px;
+}
+
+.recipe-summary-card {
+  padding: 14px;
+
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.025);
+
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.recipe-summary-card span {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #74747d;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+}
+
+.recipe-summary-card strong {
+  color: #ffffff;
+
+  font-size: 15px;
+}
+
+.recipe-summary-card:nth-child(2) strong {
+  color: #ffc107;
+}
+
+.recipe-summary-card:nth-child(3) strong {
+  color: #68d990;
+}
+
+.recipe-info-box {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 11px;
+
+  padding: 14px;
+
+  margin-bottom: 20px;
+
+  border-radius: 12px;
+
+  background: rgba(85, 170, 255, 0.055);
+
+  border: 1px solid rgba(85, 170, 255, 0.16);
+}
+
+.recipe-info-icon {
+  font-size: 18px;
+}
+
+.recipe-info-box strong {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #b9dcff;
+
+  font-size: 11px;
+}
+
+.recipe-info-box p {
+  color: #8094a8;
+
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.recipe-search {
+  width: 100%;
+  min-height: 42px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  padding: 0 12px;
+
+  margin-bottom: 12px;
+
+  border-radius: 10px;
+
+  background: #101012;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.recipe-search input {
+  width: 100%;
+  min-height: 40px;
+
+  border: 0;
+  outline: 0;
+
+  color: #ffffff;
+  background: transparent;
+
+  font-size: 12px;
+}
+
+.recipe-ingredients-list {
+  max-height: 360px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+
+  overflow-y: auto;
+}
+
+.recipe-ingredient-item {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1.3fr)
+    minmax(120px, 0.55fr)
+    minmax(90px, 0.45fr);
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 12px;
+
+  border-radius: 11px;
+
+  background: rgba(255, 255, 255, 0.022);
+
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.recipe-ingredient-item.selected {
+  background: rgba(255, 193, 7, 0.045);
+
+  border-color: rgba(255, 193, 7, 0.18);
+}
+
+.recipe-ingredient-main {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.recipe-check {
+  width: 18px;
+  height: 18px;
+
+  accent-color: #ffc107;
+}
+
+.recipe-ingredient-info strong {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #ffffff;
+
+  font-size: 11px;
+}
+
+.recipe-ingredient-info span {
+  color: #71717a;
+
+  font-size: 9px;
+}
+
+.recipe-quantity-box {
+  display: flex;
+  align-items: center;
+
+  overflow: hidden;
+
+  border-radius: 9px;
+
+  background: #0d0d0f;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.recipe-quantity-box input {
+  width: 100%;
+  height: 38px;
+
+  padding: 0 9px;
+
+  border: 0;
+  outline: 0;
+
+  color: #ffffff;
+  background: transparent;
+
+  text-align: right;
+
+  font-size: 11px;
+}
+
+.recipe-quantity-unit {
+  min-width: 38px;
+
+  padding: 0 8px;
+
+  color: #ffc107;
+
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+
+  font-size: 9px;
+  font-weight: 900;
+
+  text-align: center;
+}
+
+.recipe-ingredient-cost {
+  text-align: right;
+}
+
+.recipe-ingredient-cost span {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #6e6e77;
+
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.recipe-ingredient-cost strong {
+  color: #ffffff;
+
+  font-size: 11px;
+}
+
+.recipe-total-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  padding: 15px;
+
+  margin-top: 18px;
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 193, 7, 0.075),
+      rgba(255, 193, 7, 0.025)
     );
 
-  byId(
-    'masterMovimentoQuantidade'
-  )?.addEventListener(
-    'input',
-    atualizarPreviewMovimento
-  );
+  border: 1px solid rgba(255, 193, 7, 0.17);
+}
 
-  byId(
-    'masterMovimentoCustoUnitario'
-  )?.addEventListener(
-    'input',
-    atualizarPreviewMovimento
-  );
+.recipe-total-box span {
+  display: block;
 
-  byId(
-    'masterAjusteNovoEstoque'
-  )?.addEventListener(
-    'input',
-    atualizarPreviewAjuste
-  );
+  margin-bottom: 3px;
+
+  color: #ffffff;
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.recipe-total-box small {
+  color: #7f7f88;
+
+  font-size: 9px;
+}
+
+.recipe-total-box > strong {
+  color: #ffc107;
+
+  font-size: 20px;
 }
 
 
 /* =========================================================
-   EVENTOS GERAIS
+   MENSAGENS
 ========================================================= */
 
-function configurarEventosMaster() {
+.master-form-message {
+  min-height: 20px;
 
-  byId(
-    'btnMasterSair'
-  )?.addEventListener(
-    'click',
-    sairMaster
-  );
+  margin-top: 14px;
 
-  byId(
-    'btnAtualizarMaster'
-  )?.addEventListener(
-    'click',
-    async () => {
+  color: #ff7272;
 
-      await atualizarTudoMaster();
-    }
-  );
+  font-size: 11px;
+  font-weight: 700;
 
-  configurarNavegacao();
+  text-align: center;
+}
 
-  configurarFiltroPeriodo();
+.master-form-message.success {
+  color: #68d990;
+}
 
-  configurarBotoesMaster();
-
-  configurarFiltrosProdutosMaster();
-
-  configurarFiltrosEstoqueMaster();
-
-  configurarEventosListaProdutos();
-
-  configurarEventosEstoque();
-
-  configurarEventosFichaMaster();
-
-  configurarModaisMaster();
-
-  configurarFormulariosMaster();
+.master-form-message.warning {
+  color: #ffc107;
 }
 
 
 /* =========================================================
-   MONITORAR SESSÃO
+   AÇÕES MODAL
 ========================================================= */
 
-function monitorarSessaoMaster() {
+.master-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 
-  if (!supabaseClient) {
+  gap: 9px;
 
-    return;
+  margin-top: 6px;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.master-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 18px;
+
+  padding: 18px 28px;
+
+  color: #66666f;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+
+  font-size: 11px;
+}
+
+.master-footer strong {
+  color: #9f9fa7;
+}
+
+
+/* =========================================================
+   SCROLLBARS
+========================================================= */
+
+.master-modal-dialog::-webkit-scrollbar,
+.recipe-ingredients-list::-webkit-scrollbar,
+.table-wrap::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+.master-modal-dialog::-webkit-scrollbar-track,
+.recipe-ingredients-list::-webkit-scrollbar-track,
+.table-wrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.master-modal-dialog::-webkit-scrollbar-thumb,
+.recipe-ingredients-list::-webkit-scrollbar-thumb,
+.table-wrap::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.11);
+
+  border-radius: 999px;
+}
+
+.master-modal-dialog::-webkit-scrollbar-thumb:hover,
+.recipe-ingredients-list::-webkit-scrollbar-thumb:hover,
+.table-wrap::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 193, 7, 0.28);
+}
+
+
+/* =========================================================
+   RESPONSIVO - 1200
+========================================================= */
+
+@media (max-width: 1200px) {
+
+  .products-summary-grid,
+  .stock-summary-grid,
+  .expenses-summary-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
   }
 
-  supabaseClient.auth
-    .onAuthStateChange(
-      (
-        event,
-        session
-      ) => {
+  .product-master-item {
+    grid-template-columns:
+      minmax(180px, 1.4fr)
+      repeat(2, minmax(90px, 0.7fr))
+      auto;
+  }
 
-        console.log(
-          'Master Auth:',
-          event
-        );
+  .product-master-value:nth-of-type(3),
+  .product-master-value:nth-of-type(4) {
+    display: none;
+  }
 
-        if (
-          event === 'SIGNED_OUT' ||
-          !session
-        ) {
-
-          window.location.href =
-            'master-login.html';
-        }
-      }
-    );
+  .recipe-summary-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
 }
 
 
 /* =========================================================
-   INICIALIZAÇÃO
+   RESPONSIVO - 1100
 ========================================================= */
 
-async function iniciarMaster() {
+@media (max-width: 1100px) {
 
-  esconderPainelMaster();
-
-  atualizarRelogioMaster();
-
-  const acessoLiberado =
-    await validarAcessoMaster();
-
-  if (!acessoLiberado) {
-
-    return;
+  .master-stats-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
   }
 
-  configurarEventosMaster();
+  .master-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
 
-  monitorarSessaoMaster();
+  .stock-toolbar,
+  .expenses-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-  mostrarPainelMaster();
+  .stock-search,
+  .expenses-search {
+    max-width: none;
+  }
 
-  const [
-    produtos,
-    movimentacoes
-  ] =
-    await Promise.all(
-      [
-        buscarProdutos(false),
-        buscarMovimentacoes(300)
-      ]
-    );
+  .expenses-filters {
+    width: 100%;
+  }
 
-  masterProdutos =
-    produtos;
-
-  masterMovimentacoes =
-    movimentacoes;
-
-  renderizarProdutosMaster();
-
-  renderizarEstoqueAtual();
-
-  renderizarHistoricoEstoque();
-
-  await carregarDashboard();
-
-  setInterval(
-    atualizarRelogioMaster,
-    1000
-  );
+  .expenses-filters select {
+    flex: 1;
+  }
 }
 
 
 /* =========================================================
-   DOM READY
+   RESPONSIVO - 900
 ========================================================= */
 
-document.addEventListener(
-  'DOMContentLoaded',
-  () => {
+@media (max-width: 900px) {
 
-    iniciarMaster()
-      .catch(
-        erro => {
+  .master-sidebar {
+    width: 86px;
 
-          console.error(
-            'Erro ao iniciar Painel Master:',
-            erro
-          );
-
-          window.location.href =
-            'master-login.html';
-        }
-      );
+    padding: 18px 10px;
   }
-);
+
+  .master-content {
+    width: calc(100% - 86px);
+
+    margin-left: 86px;
+  }
+
+  .sidebar-brand {
+    justify-content: center;
+  }
+
+  .sidebar-brand img {
+    width: 50px;
+    height: 50px;
+  }
+
+  .sidebar-brand div {
+    display: none;
+  }
+
+  .master-nav-item {
+    justify-content: center;
+
+    min-height: 48px;
+
+    padding-left: 8px;
+    padding-right: 8px;
+
+    font-size: 0;
+  }
+
+  .master-nav-item span {
+    width: auto;
+
+    font-size: 19px;
+  }
+
+  .sidebar-link,
+  .sidebar-logout {
+    justify-content: center;
+
+    font-size: 0;
+  }
+
+  .master-main {
+    padding: 24px 20px;
+  }
+
+  .master-topbar {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .products-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .products-search {
+    max-width: none;
+  }
+
+  .master-switch-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .recipe-ingredient-item {
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(110px, 0.5fr);
+  }
+
+  .recipe-ingredient-cost {
+    grid-column: 2;
+
+    text-align: left;
+  }
+}
+
+
+/* =========================================================
+   RESPONSIVO - MOBILE
+========================================================= */
+
+@media (max-width: 680px) {
+
+  body {
+    padding-bottom: 70px;
+  }
+
+  .master-app {
+    display: block;
+  }
+
+  .master-sidebar {
+    width: 100%;
+    min-height: auto;
+
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+
+    display: block;
+
+    padding: 7px 8px;
+
+    background: rgba(14, 14, 16, 0.97);
+
+    border-right: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+    backdrop-filter: blur(16px);
+  }
+
+  .sidebar-brand,
+  .sidebar-footer {
+    display: none;
+  }
+
+  .master-nav {
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns:
+      repeat(6, minmax(0, 1fr));
+
+    gap: 4px;
+
+    margin: 0;
+  }
+
+  .master-nav-item {
+    min-height: 50px;
+
+    flex-direction: column;
+    justify-content: center;
+
+    gap: 2px;
+
+    padding: 5px 2px;
+
+    border-radius: 9px;
+
+    font-size: 8px;
+
+    text-align: center;
+  }
+
+  .master-nav-item span {
+    font-size: 16px;
+  }
+
+  .master-content {
+    width: 100%;
+
+    margin-left: 0;
+  }
+
+  .master-topbar {
+    min-height: auto;
+
+    align-items: flex-start;
+
+    gap: 12px;
+
+    padding: 16px;
+  }
+
+  .master-topbar h1 {
+    font-size: 20px;
+  }
+
+  .master-clock {
+    display: none;
+  }
+
+  .master-user-icon {
+    width: 34px;
+    height: 34px;
+
+    border-radius: 10px;
+
+    font-size: 15px;
+  }
+
+  .master-user strong {
+    max-width: 100px;
+
+    font-size: 11px;
+  }
+
+  .master-user span {
+    display: none;
+  }
+
+  .master-main {
+    padding: 18px 12px;
+  }
+
+  .page-heading {
+    flex-direction: column;
+    align-items: flex-start;
+
+    margin-bottom: 18px;
+  }
+
+  .page-heading h2 {
+    font-size: 22px;
+  }
+
+  .page-heading .btn-master {
+    width: 100%;
+  }
+
+  .period-filter {
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns:
+      repeat(3, 1fr);
+  }
+
+  .period-btn {
+    width: 100%;
+  }
+
+  .master-stats-grid {
+    grid-template-columns: 1fr;
+
+    gap: 11px;
+  }
+
+  .master-stat-card {
+    min-height: 95px;
+
+    padding: 16px;
+  }
+
+  .master-stat-card strong {
+    font-size: 21px;
+  }
+
+  .master-panel {
+    padding: 16px;
+  }
+
+  .panel-title {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ranking-item {
+    grid-template-columns:
+      30px
+      minmax(0, 1fr);
+  }
+
+  .ranking-value {
+    grid-column: 2;
+
+    text-align: left;
+  }
+
+  .products-summary-grid,
+  .stock-summary-grid,
+  .expenses-summary-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 9px;
+  }
+
+  .products-summary-card,
+  .stock-summary-card,
+  .expenses-summary-card {
+    min-height: 82px;
+
+    padding: 12px;
+
+    gap: 9px;
+  }
+
+  .products-summary-icon,
+  .stock-summary-icon,
+  .expenses-summary-icon {
+    width: 36px;
+    height: 36px;
+
+    border-radius: 10px;
+
+    font-size: 17px;
+  }
+
+  .products-summary-card strong,
+  .stock-summary-card strong,
+  .expenses-summary-card strong {
+    font-size: 15px;
+  }
+
+  .products-filters {
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns:
+      repeat(3, 1fr);
+  }
+
+  .stock-filters {
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .expenses-filters {
+    flex-direction: column;
+
+    width: 100%;
+  }
+
+  .expenses-filters select {
+    width: 100%;
+  }
+
+  .product-master-item {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    gap: 12px;
+  }
+
+  .product-master-value {
+    display: grid !important;
+
+    grid-template-columns:
+      1fr auto;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding-top: 8px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .product-master-value span {
+    margin: 0;
+  }
+
+  .product-master-actions {
+    justify-content: stretch;
+  }
+
+  .product-action-btn {
+    flex: 1;
+  }
+
+  .master-modal {
+    align-items: flex-end;
+
+    padding: 0;
+  }
+
+  .master-modal-dialog,
+  .master-modal-large {
+    max-width: none;
+    max-height: 92vh;
+
+    border-radius: 20px 20px 0 0;
+  }
+
+  .master-modal-header {
+    padding: 18px 16px 15px;
+  }
+
+  .master-form {
+    padding: 18px 16px 20px;
+  }
+
+  .master-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .master-field-full {
+    grid-column: auto;
+  }
+
+  .item-type-selector {
+    grid-template-columns: 1fr;
+  }
+
+  .stock-current-box,
+  .stock-preview,
+  .stock-adjust-preview {
+    grid-template-columns: 1fr;
+  }
+
+  .master-modal-actions {
+    display: grid;
+
+    grid-template-columns:
+      1fr 1fr;
+  }
+
+  .master-modal-actions .btn-master {
+    width: 100%;
+  }
+
+  .recipe-summary-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .recipe-ingredient-item {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    gap: 9px;
+  }
+
+  .recipe-ingredient-cost {
+    text-align: left;
+  }
+
+  .recipe-total-box {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .expense-active-row {
+    align-items: flex-start;
+  }
+
+  .expense-actions {
+    min-width: 190px;
+  }
+
+  .master-footer {
+    flex-direction: column;
+
+    gap: 5px;
+
+    padding: 16px;
+
+    text-align: center;
+  }
+}
+
+
+/* =========================================================
+   TELAS MUITO PEQUENAS
+========================================================= */
+
+@media (max-width: 420px) {
+
+  body {
+    padding-bottom: 112px;
+  }
+
+  .master-nav {
+    grid-template-columns:
+      repeat(3, 1fr);
+  }
+
+  .master-nav-item {
+    min-height: 45px;
+  }
+
+  .master-topbar {
+    flex-direction: column;
+  }
+
+  .topbar-right {
+    width: 100%;
+  }
+
+  .master-user {
+    width: 100%;
+  }
+
+  .master-user strong {
+    max-width: 180px;
+  }
+
+  .products-summary-grid,
+  .stock-summary-grid,
+  .expenses-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .master-modal-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .recipe-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stock-filters {
+    grid-template-columns: 1fr;
+  }
+}
