@@ -42,11 +42,16 @@ let periodoAtual = 'hoje';
 let carregandoMaster = false;
 let salvandoProdutoMaster = false;
 let salvandoEntradaMaster = false;
+let salvandoFichaMaster = false;
 
 let masterProdutos = [];
 
 let filtroProdutoMaster = 'all';
 let buscaProdutoMaster = '';
+
+let masterFichaProduto = null;
+let masterFichaSelecionados = new Map();
+let buscaFichaMaster = '';
 
 
 /* =========================================================
@@ -170,7 +175,9 @@ function formatarUnidade(unidade) {
 
   };
 
-  return unidades[unidade] || unidade || 'un';
+  return unidades[unidade] ||
+    unidade ||
+    'un';
 }
 
 
@@ -2071,6 +2078,20 @@ function renderizarProdutosMaster() {
 
               <div class="product-master-actions">
 
+                ${
+                  !tipoInsumo
+                    ? `
+                      <button
+                        type="button"
+                        class="product-action-btn recipe"
+                        data-master-recipe="${produto.id}"
+                      >
+                        🧾 Ficha
+                      </button>
+                    `
+                    : ''
+                }
+
                 <button
                   type="button"
                   class="product-action-btn"
@@ -2231,6 +2252,19 @@ function fecharModalPorNome(nome) {
     fecharModalMaster(
       byId(
         'modalMasterEntrada'
+      )
+    );
+
+    return;
+  }
+
+  if (
+    nome === 'ficha'
+  ) {
+
+    fecharModalMaster(
+      byId(
+        'modalMasterFicha'
       )
     );
   }
@@ -2875,11 +2909,6 @@ async function salvarProdutoMaster(evento) {
       resultado =
         data;
 
-      /*
-       * Se o usuário alterar manualmente o estoque
-       * durante uma edição, registramos como ajuste.
-       */
-
       if (
         produtoAnterior &&
         produtoAnterior.stock_control === true &&
@@ -2990,11 +3019,6 @@ async function salvarProdutoMaster(evento) {
       resultado =
         data;
 
-      /*
-       * Se o item nasce com estoque inicial,
-       * registra a primeira entrada.
-       */
-
       if (
         controlaEstoque &&
         estoque > 0
@@ -3100,15 +3124,6 @@ async function salvarProdutoMaster(evento) {
         'Já existe um item utilizando esse código.';
     }
 
-    if (
-      erro?.message
-    ) {
-
-      console.error(
-        erro.message
-      );
-    }
-
     mostrarMensagemFormulario(
       mensagem,
       texto
@@ -3127,6 +3142,1015 @@ async function salvarProdutoMaster(evento) {
       botao.textContent =
         textoBotao ||
         'Salvar item';
+    }
+  }
+}
+
+
+/* =========================================================
+   FICHA TÉCNICA - BUSCAR FICHA SALVA
+========================================================= */
+
+async function buscarFichaTecnicaProduto(
+  produtoId
+) {
+
+  if (!supabaseClient) {
+
+    return [];
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from('product_ingredients')
+      .select(
+        `
+        id,
+        product_id,
+        ingredient_id,
+        quantity
+        `
+      )
+      .eq(
+        'product_id',
+        produtoId
+      );
+
+  if (error) {
+
+    console.error(
+      'Erro ao carregar ficha técnica:',
+      error
+    );
+
+    throw error;
+  }
+
+  return Array.isArray(data)
+    ? data
+    : [];
+}
+
+
+/* =========================================================
+   FICHA TÉCNICA - INSUMOS
+========================================================= */
+
+function obterInsumosFichaMaster() {
+
+  const busca =
+    normalizarTexto(
+      buscaFichaMaster
+    );
+
+  return masterProdutos
+    .filter(
+      item => {
+
+        if (
+          item.item_type !==
+          'ingredient'
+        ) {
+
+          return false;
+        }
+
+        if (
+          item.active !== true
+        ) {
+
+          return false;
+        }
+
+        if (!busca) {
+
+          return true;
+        }
+
+        const texto =
+          normalizarTexto(
+            [
+              item.name,
+              item.product_code,
+              item.category,
+              item.supplier
+            ].join(' ')
+          );
+
+        return texto.includes(
+          busca
+        );
+      }
+    )
+    .sort(
+      (a, b) =>
+        String(a.name || '')
+          .localeCompare(
+            String(b.name || ''),
+            'pt-BR'
+          )
+    );
+}
+
+
+/* =========================================================
+   FICHA TÉCNICA - CÁLCULOS
+========================================================= */
+
+function calcularCustoFichaMaster() {
+
+  let total = 0;
+
+  masterFichaSelecionados.forEach(
+    (
+      quantidade,
+      ingredientId
+    ) => {
+
+      const insumo =
+        buscarProdutoLocalPorId(
+          ingredientId
+        );
+
+      if (!insumo) {
+
+        return;
+      }
+
+      total +=
+        numeroSeguro(
+          quantidade
+        ) *
+        numeroSeguro(
+          insumo.average_cost
+        );
+    }
+  );
+
+  return arredondarCusto(
+    total
+  );
+}
+
+
+function atualizarResumoFichaMaster() {
+
+  if (!masterFichaProduto) {
+
+    return;
+  }
+
+  const preco =
+    numeroSeguro(
+      masterFichaProduto.sale_price
+    );
+
+  const custo =
+    calcularCustoFichaMaster();
+
+  const lucro =
+    preco -
+    custo;
+
+  const margem =
+    preco > 0
+      ? (
+          lucro /
+          preco
+        ) * 100
+      : 0;
+
+  const precoElemento =
+    byId(
+      'masterFichaPrecoVenda'
+    );
+
+  const custoElemento =
+    byId(
+      'masterFichaCustoTotal'
+    );
+
+  const lucroElemento =
+    byId(
+      'masterFichaLucro'
+    );
+
+  const margemElemento =
+    byId(
+      'masterFichaMargem'
+    );
+
+  const custoRodape =
+    byId(
+      'masterFichaCustoRodape'
+    );
+
+  if (precoElemento) {
+
+    precoElemento.textContent =
+      formatarMoeda(
+        preco
+      );
+  }
+
+  if (custoElemento) {
+
+    custoElemento.textContent =
+      formatarMoeda(
+        custo
+      );
+  }
+
+  if (lucroElemento) {
+
+    lucroElemento.textContent =
+      formatarMoeda(
+        lucro
+      );
+  }
+
+  if (margemElemento) {
+
+    margemElemento.textContent =
+      margem.toLocaleString(
+        'pt-BR',
+        {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1
+        }
+      ) + '%';
+  }
+
+  if (custoRodape) {
+
+    custoRodape.textContent =
+      formatarMoeda(
+        custo
+      );
+  }
+}
+
+
+/* =========================================================
+   FICHA TÉCNICA - RENDERIZAR
+========================================================= */
+
+function renderizarFichaMaster() {
+
+  const container =
+    byId(
+      'masterFichaListaInsumos'
+    );
+
+  if (!container) {
+
+    return;
+  }
+
+  const insumos =
+    obterInsumosFichaMaster();
+
+  if (
+    insumos.length === 0
+  ) {
+
+    container.innerHTML =
+      `
+        <div class="master-empty">
+          Nenhum insumo cadastrado.
+        </div>
+      `;
+
+    atualizarResumoFichaMaster();
+
+    return;
+  }
+
+  container.innerHTML =
+    insumos
+      .map(
+        insumo => {
+
+          const selecionado =
+            masterFichaSelecionados.has(
+              String(insumo.id)
+            );
+
+          const quantidade =
+            selecionado
+              ? numeroSeguro(
+                  masterFichaSelecionados.get(
+                    String(insumo.id)
+                  )
+                )
+              : 0;
+
+          const custoUnitario =
+            numeroSeguro(
+              insumo.average_cost
+            );
+
+          const custoProporcional =
+            quantidade *
+            custoUnitario;
+
+          return `
+
+            <div
+              class="
+                recipe-ingredient-item
+                ${
+                  selecionado
+                    ? 'selected'
+                    : ''
+                }
+              "
+              data-recipe-ingredient="${insumo.id}"
+            >
+
+              <div class="recipe-ingredient-main">
+
+                <input
+                  type="checkbox"
+                  class="recipe-check"
+                  data-recipe-check="${insumo.id}"
+                  ${
+                    selecionado
+                      ? 'checked'
+                      : ''
+                  }
+                >
+
+                <div class="recipe-ingredient-info">
+
+                  <strong>
+                    ${escaparHtml(
+                      insumo.name
+                    )}
+                  </strong>
+
+                  <span>
+                    Custo médio:
+                    ${formatarMoeda(
+                      custoUnitario
+                    )}
+                    por
+                    ${escaparHtml(
+                      formatarUnidade(
+                        insumo.unit
+                      )
+                    )}
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <div class="recipe-quantity-box">
+
+                <input
+                  type="number"
+                  min="0.0001"
+                  step="0.0001"
+                  value="${
+                    selecionado
+                      ? quantidade
+                      : ''
+                  }"
+                  placeholder="0"
+                  data-recipe-quantity="${insumo.id}"
+                  ${
+                    selecionado
+                      ? ''
+                      : 'disabled'
+                  }
+                >
+
+                <span class="recipe-quantity-unit">
+                  ${escaparHtml(
+                    formatarUnidade(
+                      insumo.unit
+                    )
+                  )}
+                </span>
+
+              </div>
+
+
+              <div class="recipe-ingredient-cost">
+
+                <span>
+                  Custo na receita
+                </span>
+
+                <strong
+                  data-recipe-cost="${insumo.id}"
+                >
+                  ${formatarMoeda(
+                    custoProporcional
+                  )}
+                </strong>
+
+              </div>
+
+            </div>
+
+          `;
+        }
+      )
+      .join('');
+
+  atualizarResumoFichaMaster();
+}
+
+
+/* =========================================================
+   FICHA TÉCNICA - ABRIR
+========================================================= */
+
+async function abrirFichaTecnicaMaster(
+  produtoId
+) {
+
+  const produto =
+    buscarProdutoLocalPorId(
+      produtoId
+    );
+
+  if (!produto) {
+
+    alert(
+      'Produto não encontrado.'
+    );
+
+    return;
+  }
+
+  if (
+    produto.item_type !==
+    'product'
+  ) {
+
+    alert(
+      'Ficha técnica disponível apenas para produtos.'
+    );
+
+    return;
+  }
+
+  masterFichaProduto =
+    produto;
+
+  masterFichaSelecionados =
+    new Map();
+
+  buscaFichaMaster = '';
+
+  if (
+    byId(
+      'masterFichaBuscaInsumo'
+    )
+  ) {
+
+    byId(
+      'masterFichaBuscaInsumo'
+    ).value =
+      '';
+  }
+
+  if (
+    byId(
+      'masterFichaProdutoId'
+    )
+  ) {
+
+    byId(
+      'masterFichaProdutoId'
+    ).value =
+      produto.id;
+  }
+
+  if (
+    byId(
+      'tituloModalMasterFicha'
+    )
+  ) {
+
+    byId(
+      'tituloModalMasterFicha'
+    ).textContent =
+      'Ficha Técnica';
+  }
+
+  if (
+    byId(
+      'masterFichaProdutoNome'
+    )
+  ) {
+
+    byId(
+      'masterFichaProdutoNome'
+    ).textContent =
+      produto.name;
+  }
+
+  mostrarMensagemFormulario(
+    byId(
+      'masterFichaMensagem'
+    ),
+    ''
+  );
+
+  const lista =
+    byId(
+      'masterFichaListaInsumos'
+    );
+
+  if (lista) {
+
+    lista.innerHTML =
+      `
+        <div class="master-empty">
+          Carregando ficha técnica...
+        </div>
+      `;
+  }
+
+  abrirModalMaster(
+    byId(
+      'modalMasterFicha'
+    )
+  );
+
+  try {
+
+    const ficha =
+      await buscarFichaTecnicaProduto(
+        produto.id
+      );
+
+    ficha.forEach(
+      item => {
+
+        const quantidade =
+          numeroSeguro(
+            item.quantity
+          );
+
+        if (
+          quantidade > 0
+        ) {
+
+          masterFichaSelecionados.set(
+            String(
+              item.ingredient_id
+            ),
+            quantidade
+          );
+        }
+      }
+    );
+
+    renderizarFichaMaster();
+
+  } catch (erro) {
+
+    console.error(
+      'Erro ao abrir ficha técnica:',
+      erro
+    );
+
+    if (lista) {
+
+      lista.innerHTML =
+        `
+          <div class="master-empty">
+            Não foi possível carregar a ficha técnica.
+          </div>
+        `;
+    }
+
+    mostrarMensagemFormulario(
+      byId(
+        'masterFichaMensagem'
+      ),
+      'Não foi possível carregar a ficha técnica.'
+    );
+  }
+}
+
+
+/* =========================================================
+   FICHA TÉCNICA - INTERAÇÕES
+========================================================= */
+
+function configurarEventosFichaMaster() {
+
+  const lista =
+    byId(
+      'masterFichaListaInsumos'
+    );
+
+  if (lista) {
+
+    lista.addEventListener(
+      'change',
+      evento => {
+
+        const checkbox =
+          evento.target.closest(
+            '[data-recipe-check]'
+          );
+
+        if (checkbox) {
+
+          const ingredientId =
+            String(
+              checkbox.dataset
+                .recipeCheck
+            );
+
+          const linha =
+            checkbox.closest(
+              '.recipe-ingredient-item'
+            );
+
+          const input =
+            linha?.querySelector(
+              '[data-recipe-quantity]'
+            );
+
+          if (
+            checkbox.checked
+          ) {
+
+            let quantidade =
+              numeroSeguro(
+                input?.value
+              );
+
+            if (
+              quantidade <= 0
+            ) {
+
+              quantidade = 1;
+            }
+
+            masterFichaSelecionados.set(
+              ingredientId,
+              quantidade
+            );
+
+            if (input) {
+
+              input.disabled =
+                false;
+
+              input.value =
+                quantidade;
+
+              setTimeout(
+                () => {
+
+                  input.focus();
+
+                  input.select();
+
+                },
+                30
+              );
+            }
+
+          } else {
+
+            masterFichaSelecionados.delete(
+              ingredientId
+            );
+
+            if (input) {
+
+              input.disabled =
+                true;
+
+              input.value =
+                '';
+            }
+          }
+
+          renderizarFichaMaster();
+
+          return;
+        }
+      }
+    );
+
+
+    lista.addEventListener(
+      'input',
+      evento => {
+
+        const input =
+          evento.target.closest(
+            '[data-recipe-quantity]'
+          );
+
+        if (!input) {
+
+          return;
+        }
+
+        const ingredientId =
+          String(
+            input.dataset
+              .recipeQuantity
+          );
+
+        const quantidade =
+          numeroSeguro(
+            input.value
+          );
+
+        if (
+          quantidade > 0
+        ) {
+
+          masterFichaSelecionados.set(
+            ingredientId,
+            quantidade
+          );
+
+        } else {
+
+          masterFichaSelecionados.set(
+            ingredientId,
+            0
+          );
+        }
+
+        const insumo =
+          buscarProdutoLocalPorId(
+            ingredientId
+          );
+
+        const custo =
+          quantidade *
+          numeroSeguro(
+            insumo?.average_cost
+          );
+
+        const linha =
+          input.closest(
+            '.recipe-ingredient-item'
+          );
+
+        const custoElemento =
+          linha?.querySelector(
+            `[data-recipe-cost="${ingredientId}"]`
+          );
+
+        if (custoElemento) {
+
+          custoElemento.textContent =
+            formatarMoeda(
+              custo
+            );
+        }
+
+        atualizarResumoFichaMaster();
+      }
+    );
+  }
+
+
+  const busca =
+    byId(
+      'masterFichaBuscaInsumo'
+    );
+
+  if (busca) {
+
+    busca.addEventListener(
+      'input',
+      () => {
+
+        buscaFichaMaster =
+          busca.value || '';
+
+        renderizarFichaMaster();
+      }
+    );
+  }
+}
+
+
+/* =========================================================
+   FICHA TÉCNICA - SALVAR
+========================================================= */
+
+async function salvarFichaTecnicaMaster(
+  evento
+) {
+
+  evento.preventDefault();
+
+  if (
+    salvandoFichaMaster
+  ) {
+
+    return;
+  }
+
+  const mensagem =
+    byId(
+      'masterFichaMensagem'
+    );
+
+  mostrarMensagemFormulario(
+    mensagem,
+    ''
+  );
+
+  if (!masterFichaProduto) {
+
+    mostrarMensagemFormulario(
+      mensagem,
+      'Produto inválido.'
+    );
+
+    return;
+  }
+
+  const itens = [];
+
+  for (
+    const [
+      ingredientId,
+      quantidade
+    ]
+    of masterFichaSelecionados.entries()
+  ) {
+
+    const quantidadeNumerica =
+      numeroSeguro(
+        quantidade
+      );
+
+    if (
+      quantidadeNumerica <= 0
+    ) {
+
+      mostrarMensagemFormulario(
+        mensagem,
+        'Todos os insumos selecionados precisam ter quantidade maior que zero.'
+      );
+
+      return;
+    }
+
+    itens.push(
+      {
+
+        ingredient_id:
+          Number(
+            ingredientId
+          ),
+
+        quantity:
+          quantidadeNumerica
+      }
+    );
+  }
+
+  const botao =
+    byId(
+      'btnSalvarMasterFicha'
+    );
+
+  const textoAnterior =
+    botao?.textContent ||
+    'Salvar ficha técnica';
+
+  try {
+
+    salvandoFichaMaster =
+      true;
+
+    if (botao) {
+
+      botao.disabled =
+        true;
+
+      botao.textContent =
+        'Salvando...';
+    }
+
+    mostrarMensagemFormulario(
+      mensagem,
+      'Salvando ficha técnica...',
+      'warning'
+    );
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .rpc(
+          'save_product_recipe',
+          {
+
+            p_product_id:
+              Number(
+                masterFichaProduto.id
+              ),
+
+            p_items:
+              itens
+          }
+        );
+
+    if (error) {
+
+      throw error;
+    }
+
+    const novoCusto =
+      numeroSeguro(
+        data
+      );
+
+    mostrarMensagemFormulario(
+      mensagem,
+      `Ficha salva com sucesso. Custo calculado: ${formatarMoeda(
+        novoCusto
+      )}`,
+      'success'
+    );
+
+    await carregarProdutosMaster();
+
+    await carregarDashboard();
+
+    masterFichaProduto =
+      buscarProdutoLocalPorId(
+        masterFichaProduto.id
+      ) ||
+      masterFichaProduto;
+
+    atualizarResumoFichaMaster();
+
+    setTimeout(
+      () => {
+
+        fecharModalMaster(
+          byId(
+            'modalMasterFicha'
+          )
+        );
+
+      },
+      700
+    );
+
+  } catch (erro) {
+
+    console.error(
+      'Erro ao salvar ficha técnica:',
+      erro
+    );
+
+    let texto =
+      'Não foi possível salvar a ficha técnica.';
+
+    if (
+      erro?.message
+    ) {
+
+      texto =
+        erro.message;
+    }
+
+    mostrarMensagemFormulario(
+      mensagem,
+      texto
+    );
+
+  } finally {
+
+    salvandoFichaMaster =
+      false;
+
+    if (botao) {
+
+      botao.disabled =
+        false;
+
+      botao.textContent =
+        textoAnterior;
     }
   }
 }
@@ -3485,12 +4509,6 @@ async function salvarEntradaEstoqueMaster(
       'warning'
     );
 
-    /*
-     * Busca novamente no banco.
-     * Não usamos apenas o valor que estava na tela,
-     * pois o estoque pode ter mudado.
-     */
-
     const {
       data:
         produtoAtual,
@@ -3563,10 +4581,6 @@ async function salvarEntradaEstoqueMaster(
           : custoUnitario
       );
 
-    /*
-     * Primeiro atualizamos o produto.
-     */
-
     const {
       data:
         produtoAtualizado,
@@ -3607,21 +4621,12 @@ async function salvarEntradaEstoqueMaster(
       throw erroAtualizacao;
     }
 
-    /*
-     * Esse filtro pelo estoque anterior ajuda a evitar
-     * sobrescrever uma alteração simultânea.
-     */
-
     if (!produtoAtualizado) {
 
       throw new Error(
         'O estoque foi alterado por outra operação. Tente novamente.'
       );
     }
-
-    /*
-     * Depois registramos a movimentação.
-     */
 
     const {
       error:
@@ -3675,11 +4680,6 @@ async function salvarEntradaEstoqueMaster(
         'Falha ao registrar movimentação:',
         erroMovimento
       );
-
-      /*
-       * Como o estoque já foi atualizado, avisamos claramente
-       * em vez de fingir que nada aconteceu.
-       */
 
       throw new Error(
         'O estoque foi atualizado, mas houve erro ao gravar o histórico.'
@@ -3832,6 +4832,22 @@ function configurarEventosListaProdutos() {
     'click',
     evento => {
 
+      const botaoFicha =
+        evento.target.closest(
+          '[data-master-recipe]'
+        );
+
+      if (botaoFicha) {
+
+        abrirFichaTecnicaMaster(
+          botaoFicha.dataset
+            .masterRecipe
+        );
+
+        return;
+      }
+
+
       const botaoEditar =
         evento.target.closest(
           '[data-master-edit-product]'
@@ -3846,6 +4862,7 @@ function configurarEventosListaProdutos() {
 
         return;
       }
+
 
       const botaoEntrada =
         evento.target.closest(
@@ -3946,11 +4963,6 @@ function configurarBotoesMaster() {
     );
   }
 
-  /*
-   * O botão da página Estoque abre a página Produtos,
-   * onde o usuário escolhe qual item receberá a entrada.
-   */
-
   if (btnEntrada) {
 
     btnEntrada.addEventListener(
@@ -3997,6 +5009,11 @@ function configurarFormulariosMaster() {
       'formMasterEntrada'
     );
 
+  const formFicha =
+    byId(
+      'formMasterFicha'
+    );
+
   if (formProduto) {
 
     formProduto.addEventListener(
@@ -4010,6 +5027,14 @@ function configurarFormulariosMaster() {
     formEntrada.addEventListener(
       'submit',
       salvarEntradaEstoqueMaster
+    );
+  }
+
+  if (formFicha) {
+
+    formFicha.addEventListener(
+      'submit',
+      salvarFichaTecnicaMaster
     );
   }
 
@@ -4101,6 +5126,8 @@ function configurarEventosMaster() {
   configurarFiltrosProdutosMaster();
 
   configurarEventosListaProdutos();
+
+  configurarEventosFichaMaster();
 
   configurarModaisMaster();
 
