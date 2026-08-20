@@ -47,6 +47,7 @@ textarea {
   align-items: center;
   justify-content: center;
   padding: 24px;
+
   background:
     radial-gradient(
       circle at top,
@@ -59,31 +60,47 @@ textarea {
 .master-loading-box {
   width: 100%;
   max-width: 360px;
+
   padding: 34px 24px;
+
   text-align: center;
+
   background: #121214;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  border:
+    1px solid rgba(255, 255, 255, 0.08);
+
   border-radius: 22px;
-  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5);
+
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.5);
 }
 
 .master-loading-box img {
   width: 95px;
   height: 95px;
+
   border-radius: 50%;
+
   object-fit: cover;
+
   margin-bottom: 18px;
-  border: 3px solid #ffc107;
+
+  border:
+    3px solid #ffc107;
 }
 
 .master-loading-box strong {
   display: block;
+
   margin-bottom: 8px;
+
   font-size: 18px;
 }
 
 .master-loading-box span {
   color: #8f8f98;
+
   font-size: 13px;
 }
 
@@ -94,7 +111,9 @@ textarea {
 
 .master-app {
   min-height: 100vh;
+
   display: flex;
+
   background:
     radial-gradient(
       circle at top right,
@@ -112,7 +131,9 @@ textarea {
 .master-sidebar {
   width: 260px;
   min-height: 100vh;
+
   position: fixed;
+
   left: 0;
   top: 0;
   bottom: 0;
@@ -127,7 +148,8 @@ textarea {
       #0d0d0f 100%
     );
 
-  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  border-right:
+    1px solid rgba(255, 255, 255, 0.07);
 
   padding: 22px 16px;
 
@@ -142,20 +164,25 @@ textarea {
 .sidebar-brand {
   display: flex;
   align-items: center;
+
   gap: 12px;
 
   padding: 8px 8px 22px;
 
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.07);
 }
 
 .sidebar-brand img {
   width: 54px;
   height: 54px;
+
   border-radius: 50%;
+
   object-fit: cover;
 
-  border: 2px solid #ffc107;
+  border:
+    2px solid #ffc107;
 }
 
 .sidebar-brand div {
@@ -169,6 +196,7 @@ textarea {
 
   font-size: 10px;
   font-weight: 900;
+
   letter-spacing: 1px;
 
   margin-bottom: 4px;
@@ -182,7 +210,9 @@ textarea {
   font-size: 17px;
 
   white-space: nowrap;
+
   overflow: hidden;
+
   text-overflow: ellipsis;
 }
 
@@ -194,6 +224,7 @@ textarea {
 .master-nav {
   display: flex;
   flex-direction: column;
+
   gap: 7px;
 
   margin-top: 22px;
@@ -204,20 +235,25 @@ textarea {
 
   display: flex;
   align-items: center;
+
   gap: 12px;
 
   padding: 13px 14px;
 
-  border: 1px solid transparent;
+  border:
+    1px solid transparent;
+
   border-radius: 12px;
 
   background: transparent;
+
   color: #aaaab2;
 
   font-size: 14px;
   font-weight: 700;
 
   text-align: left;
+
   cursor: pointer;
 
   transition:
@@ -229,13 +265,17 @@ textarea {
 
 .master-nav-item span {
   width: 22px;
+
   font-size: 18px;
+
   text-align: center;
 }
 
 .master-nav-item:hover {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.035);
+
+  background:
+    rgba(255, 255, 255, 0.035);
 }
 
 .master-nav-item.active {
@@ -248,7 +288,8 @@ textarea {
       #f2aa00
     );
 
-  border-color: rgba(255, 193, 7, 0.7);
+  border-color:
+    rgba(255, 193, 7, 0.7);
 
   box-shadow:
     0 8px 22px rgba(255, 193, 7, 0.12);
@@ -264,11 +305,13 @@ textarea {
 
   display: flex;
   flex-direction: column;
+
   gap: 8px;
 
   padding-top: 20px;
 
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  border-top:
+    1px solid rgba(255, 255, 255, 0.07);
 }
 
 .sidebar-link,
@@ -296,26 +339,34 @@ textarea {
 
 .sidebar-link {
   color: #aaaab2;
+
   background: transparent;
 }
 
 .sidebar-link:hover {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.04);
+
+  background:
+    rgba(255, 255, 255, 0.04);
 }
 
 .sidebar-logout {
-  border: 1px solid rgba(255, 80, 80, 0.2);
+  border:
+    1px solid rgba(255, 80, 80, 0.2);
 
   color: #ff7272;
-  background: rgba(255, 80, 80, 0.06);
+
+  background:
+    rgba(255, 80, 80, 0.06);
 
   cursor: pointer;
 }
 
 .sidebar-logout:hover {
   color: #ffffff;
-  background: rgba(255, 80, 80, 0.15);
+
+  background:
+    rgba(255, 80, 80, 0.15);
 }
 
 
@@ -324,7 +375,9 @@ textarea {
 ========================================================= */
 
 .master-content {
-  width: calc(100% - 260px);
+  width:
+    calc(100% - 260px);
+
   min-height: 100vh;
 
   margin-left: 260px;
@@ -349,11 +402,14 @@ textarea {
 
   padding: 18px 28px;
 
-  background: rgba(10, 10, 11, 0.92);
+  background:
+    rgba(10, 10, 11, 0.92);
 
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.07);
 
   position: sticky;
+
   top: 0;
 
   backdrop-filter: blur(12px);
@@ -366,6 +422,7 @@ textarea {
 
   font-size: 11px;
   font-weight: 900;
+
   letter-spacing: 1px;
 
   margin-bottom: 4px;
@@ -375,12 +432,14 @@ textarea {
 
 .master-topbar h1 {
   font-size: 24px;
+
   line-height: 1.15;
 }
 
 .topbar-right {
   display: flex;
   align-items: center;
+
   gap: 16px;
 }
 
@@ -396,11 +455,13 @@ textarea {
 
   padding-right: 16px;
 
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  border-right:
+    1px solid rgba(255, 255, 255, 0.08);
 }
 
 .master-clock span {
   font-size: 11px;
+
   color: #777780;
 
   margin-bottom: 2px;
@@ -408,6 +469,7 @@ textarea {
 
 .master-clock strong {
   color: #ffffff;
+
   font-size: 15px;
 }
 
@@ -419,6 +481,7 @@ textarea {
 .master-user {
   display: flex;
   align-items: center;
+
   gap: 10px;
 
   min-width: 0;
@@ -436,8 +499,11 @@ textarea {
 
   border-radius: 12px;
 
-  background: rgba(255, 193, 7, 0.1);
-  border: 1px solid rgba(255, 193, 7, 0.22);
+  background:
+    rgba(255, 193, 7, 0.1);
+
+  border:
+    1px solid rgba(255, 193, 7, 0.22);
 
   font-size: 18px;
 }
@@ -456,7 +522,9 @@ textarea {
   margin-bottom: 3px;
 
   white-space: nowrap;
+
   overflow: hidden;
+
   text-overflow: ellipsis;
 }
 
@@ -466,10 +534,13 @@ textarea {
   max-width: 210px;
 
   color: #85858d;
+
   font-size: 11px;
 
   white-space: nowrap;
+
   overflow: hidden;
+
   text-overflow: ellipsis;
 }
 
@@ -511,6 +582,7 @@ textarea {
 
 .page-heading h2 {
   font-size: 25px;
+
   margin-bottom: 5px;
 }
 
@@ -518,6 +590,7 @@ textarea {
   color: #898991;
 
   font-size: 14px;
+
   line-height: 1.45;
 }
 
@@ -530,6 +603,7 @@ textarea {
   min-height: 42px;
 
   border: 0;
+
   border-radius: 11px;
 
   padding: 0 16px;
@@ -546,12 +620,15 @@ textarea {
 }
 
 .btn-master:hover {
-  transform: translateY(-1px);
+  transform:
+    translateY(-1px);
 }
 
 .btn-master:disabled {
   opacity: 0.55;
+
   cursor: wait;
+
   transform: none;
 }
 
@@ -576,6 +653,7 @@ textarea {
 
 .period-filter {
   display: inline-flex;
+
   gap: 6px;
 
   padding: 5px;
@@ -584,7 +662,9 @@ textarea {
 
   background: #111114;
 
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border:
+    1px solid rgba(255, 255, 255, 0.07);
+
   border-radius: 12px;
 }
 
@@ -592,11 +672,13 @@ textarea {
   min-height: 36px;
 
   border: 0;
+
   border-radius: 9px;
 
   padding: 0 14px;
 
   color: #8d8d96;
+
   background: transparent;
 
   font-size: 12px;
@@ -611,6 +693,7 @@ textarea {
 
 .period-btn.active {
   color: #111111;
+
   background: #ffc107;
 }
 
@@ -638,6 +721,7 @@ textarea {
 
   display: flex;
   align-items: center;
+
   gap: 14px;
 
   padding: 20px;
@@ -651,13 +735,16 @@ textarea {
       rgba(15, 15, 17, 0.98)
     );
 
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border:
+    1px solid rgba(255, 255, 255, 0.07);
 
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.14);
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.14);
 }
 
 .master-stat-card.highlight {
-  border-color: rgba(255, 193, 7, 0.24);
+  border-color:
+    rgba(255, 193, 7, 0.24);
 
   background:
     linear-gradient(
@@ -679,8 +766,11 @@ textarea {
 
   border-radius: 13px;
 
-  background: rgba(255, 193, 7, 0.08);
-  border: 1px solid rgba(255, 193, 7, 0.16);
+  background:
+    rgba(255, 193, 7, 0.08);
+
+  border:
+    1px solid rgba(255, 193, 7, 0.16);
 
   font-size: 22px;
 }
@@ -706,6 +796,7 @@ textarea {
   color: #ffffff;
 
   font-size: 24px;
+
   line-height: 1.1;
 
   overflow-wrap: anywhere;
@@ -743,13 +834,15 @@ textarea {
       #101012
     );
 
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border:
+    1px solid rgba(255, 255, 255, 0.07);
 
   border-radius: 17px;
 
   padding: 20px;
 
-  box-shadow: 0 15px 32px rgba(0, 0, 0, 0.13);
+  box-shadow:
+    0 15px 32px rgba(0, 0, 0, 0.13);
 }
 
 .master-panel-full {
@@ -768,12 +861,15 @@ textarea {
 
 .panel-title h3 {
   font-size: 16px;
+
   margin-bottom: 4px;
 }
 
 .panel-title p {
   color: #777780;
+
   font-size: 12px;
+
   line-height: 1.4;
 }
 
@@ -783,6 +879,7 @@ textarea {
   border: 0;
 
   color: #ffc107;
+
   background: transparent;
 
   font-size: 12px;
@@ -803,6 +900,7 @@ textarea {
 .panel-list {
   display: flex;
   flex-direction: column;
+
   gap: 9px;
 }
 
@@ -814,9 +912,12 @@ textarea {
   border-radius: 12px;
 
   color: #74747d;
-  background: rgba(255, 255, 255, 0.025);
 
-  border: 1px dashed rgba(255, 255, 255, 0.08);
+  background:
+    rgba(255, 255, 255, 0.025);
+
+  border:
+    1px dashed rgba(255, 255, 255, 0.08);
 
   font-size: 12px;
 
@@ -839,9 +940,11 @@ textarea {
 
   border-radius: 12px;
 
-  background: rgba(255, 255, 255, 0.025);
+  background:
+    rgba(255, 255, 255, 0.025);
 
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border:
+    1px solid rgba(255, 255, 255, 0.06);
 }
 
 .stock-warning-item strong {
@@ -873,9 +976,11 @@ textarea {
 
   color: #ffc107;
 
-  background: rgba(255, 193, 7, 0.08);
+  background:
+    rgba(255, 193, 7, 0.08);
 
-  border: 1px solid rgba(255, 193, 7, 0.18);
+  border:
+    1px solid rgba(255, 193, 7, 0.18);
 
   font-size: 12px;
   font-weight: 900;
@@ -884,9 +989,11 @@ textarea {
 .stock-warning-value.danger {
   color: #ff7373;
 
-  background: rgba(255, 75, 75, 0.08);
+  background:
+    rgba(255, 75, 75, 0.08);
 
-  border-color: rgba(255, 75, 75, 0.18);
+  border-color:
+    rgba(255, 75, 75, 0.18);
 }
 
 
@@ -910,9 +1017,11 @@ textarea {
 
   border-radius: 12px;
 
-  background: rgba(255, 255, 255, 0.025);
+  background:
+    rgba(255, 255, 255, 0.025);
 
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border:
+    1px solid rgba(255, 255, 255, 0.06);
 }
 
 .ranking-position {
@@ -926,6 +1035,7 @@ textarea {
   border-radius: 9px;
 
   color: #111111;
+
   background: #ffc107;
 
   font-size: 12px;
@@ -946,7 +1056,9 @@ textarea {
   margin-bottom: 3px;
 
   white-space: nowrap;
+
   overflow: hidden;
+
   text-overflow: ellipsis;
 }
 
@@ -983,6 +1095,7 @@ textarea {
 
 .table-wrap {
   width: 100%;
+
   overflow-x: auto;
 }
 
@@ -1004,7 +1117,8 @@ textarea {
   font-size: 11px;
   font-weight: 800;
 
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.07);
 
   white-space: nowrap;
 }
@@ -1016,11 +1130,13 @@ textarea {
 
   font-size: 12px;
 
-  border-bottom: 1px solid rgba(255, 255, 255, 0.045);
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.045);
 }
 
 .master-table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background:
+    rgba(255, 255, 255, 0.02);
 }
 
 .master-table tbody tr:last-child td {
@@ -1028,11 +1144,14 @@ textarea {
 }
 
 .table-empty {
-  padding: 28px !important;
+  padding:
+    28px !important;
 
-  color: #74747d !important;
+  color:
+    #74747d !important;
 
-  text-align: center !important;
+  text-align:
+    center !important;
 }
 
 
@@ -1061,7 +1180,8 @@ textarea {
       #101012
     );
 
-  border: 1px dashed rgba(255, 255, 255, 0.09);
+  border:
+    1px dashed rgba(255, 255, 255, 0.09);
 
   text-align: center;
 }
@@ -1080,6 +1200,7 @@ textarea {
   color: #85858e;
 
   font-size: 13px;
+
   line-height: 1.6;
 }
 
@@ -1099,7 +1220,8 @@ textarea {
 
   color: #66666f;
 
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top:
+    1px solid rgba(255, 255, 255, 0.06);
 
   font-size: 11px;
 }
@@ -1110,408 +1232,29 @@ textarea {
 
 
 /* =========================================================
-   RESPONSIVO - TABLET
-========================================================= */
-
-@media (max-width: 1100px) {
-
-  .master-stats-grid {
-    grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
-  }
-
-  .master-dashboard-grid {
-    grid-template-columns:
-      1fr;
-  }
-}
-
-
-/* =========================================================
-   RESPONSIVO - SIDEBAR MENOR
-========================================================= */
-
-@media (max-width: 900px) {
-
-  .master-sidebar {
-    width: 86px;
-
-    padding: 18px 10px;
-  }
-
-  .master-content {
-    width: calc(100% - 86px);
-
-    margin-left: 86px;
-  }
-
-  .sidebar-brand {
-    justify-content: center;
-
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  .sidebar-brand img {
-    width: 50px;
-    height: 50px;
-  }
-
-  .sidebar-brand div {
-    display: none;
-  }
-
-  .master-nav-item {
-    justify-content: center;
-
-    min-height: 48px;
-
-    padding-left: 8px;
-    padding-right: 8px;
-
-    font-size: 0;
-  }
-
-  .master-nav-item span {
-    width: auto;
-    font-size: 19px;
-  }
-
-  .sidebar-link,
-  .sidebar-logout {
-    justify-content: center;
-
-    font-size: 0;
-  }
-
-  .sidebar-link::first-letter,
-  .sidebar-logout::first-letter {
-    font-size: 17px;
-  }
-
-  .master-main {
-    padding: 24px 20px;
-  }
-
-  .master-topbar {
-    padding-left: 20px;
-    padding-right: 20px;
-  }
-}
-
-
-/* =========================================================
-   RESPONSIVO - MOBILE
-========================================================= */
-
-@media (max-width: 680px) {
-
-  body {
-    padding-bottom: 70px;
-  }
-
-  .master-app {
-    display: block;
-  }
-
-
-  /* SIDEBAR VIRA MENU INFERIOR */
-
-  .master-sidebar {
-    width: 100%;
-    min-height: auto;
-
-    left: 0;
-    right: 0;
-    top: auto;
-    bottom: 0;
-
-    padding: 7px 8px;
-
-    display: block;
-
-    border-right: 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-
-    background: rgba(14, 14, 16, 0.97);
-
-    backdrop-filter: blur(16px);
-  }
-
-  .sidebar-brand,
-  .sidebar-footer {
-    display: none;
-  }
-
-  .master-nav {
-    width: 100%;
-
-    display: grid;
-
-    grid-template-columns:
-      repeat(
-        6,
-        minmax(0, 1fr)
-      );
-
-    gap: 4px;
-
-    margin: 0;
-  }
-
-  .master-nav-item {
-    min-height: 50px;
-
-    flex-direction: column;
-    justify-content: center;
-
-    gap: 2px;
-
-    padding: 5px 2px;
-
-    border-radius: 9px;
-
-    font-size: 8px;
-    line-height: 1.1;
-
-    text-align: center;
-  }
-
-  .master-nav-item span {
-    font-size: 16px;
-  }
-
-  .master-nav-item.active {
-    color: #111111;
-  }
-
-
-  /* CONTENT */
-
-  .master-content {
-    width: 100%;
-
-    margin-left: 0;
-  }
-
-
-  /* TOPBAR */
-
-  .master-topbar {
-    min-height: auto;
-
-    align-items: flex-start;
-
-    padding: 16px;
-
-    gap: 12px;
-  }
-
-  .master-topbar h1 {
-    font-size: 20px;
-  }
-
-  .topbar-right {
-    gap: 8px;
-  }
-
-  .master-clock {
-    display: none;
-  }
-
-  .master-user-icon {
-    width: 34px;
-    height: 34px;
-
-    border-radius: 10px;
-
-    font-size: 15px;
-  }
-
-  .master-user strong {
-    max-width: 100px;
-
-    font-size: 11px;
-  }
-
-  .master-user span {
-    display: none;
-  }
-
-
-  /* MAIN */
-
-  .master-main {
-    padding: 18px 12px;
-  }
-
-  .page-heading {
-    align-items: flex-start;
-    flex-direction: column;
-
-    margin-bottom: 18px;
-  }
-
-  .page-heading h2 {
-    font-size: 22px;
-  }
-
-  .page-heading .btn-master {
-    width: 100%;
-  }
-
-
-  /* FILTER */
-
-  .period-filter {
-    width: 100%;
-
-    display: grid;
-
-    grid-template-columns:
-      repeat(
-        3,
-        1fr
-      );
-  }
-
-  .period-btn {
-    width: 100%;
-  }
-
-
-  /* CARDS */
-
-  .master-stats-grid {
-    grid-template-columns:
-      1fr;
-
-    gap: 11px;
-  }
-
-  .master-stat-card {
-    min-height: 95px;
-
-    padding: 16px;
-  }
-
-  .master-stat-card strong {
-    font-size: 21px;
-  }
-
-
-  /* PANEL */
-
-  .master-dashboard-grid {
-    gap: 12px;
-  }
-
-  .master-panel {
-    padding: 16px;
-  }
-
-  .panel-title {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-
-  /* RANKING */
-
-  .ranking-item {
-    grid-template-columns:
-      30px
-      minmax(0, 1fr);
-  }
-
-  .ranking-value {
-    grid-column:
-      2;
-
-    text-align: left;
-  }
-
-
-  /* PLACEHOLDER */
-
-  .master-placeholder {
-    min-height: 280px;
-
-    padding: 28px 18px;
-  }
-
-
-  /* FOOTER */
-
-  .master-footer {
-    flex-direction: column;
-
-    gap: 5px;
-
-    padding: 16px;
-
-    text-align: center;
-  }
-}
-
-
-/* =========================================================
-   TELAS MUITO PEQUENAS
-========================================================= */
-
-@media (max-width: 420px) {
-
-  .master-nav {
-    grid-template-columns:
-      repeat(
-        3,
-        1fr
-      );
-  }
-
-  body {
-    padding-bottom: 112px;
-  }
-
-  .master-nav-item {
-    min-height: 45px;
-  }
-
-  .master-topbar {
-    flex-direction: column;
-  }
-
-  .topbar-right {
-    width: 100%;
-  }
-
-  .master-user {
-    width: 100%;
-  }
-
-  .master-user strong {
-    max-width: 180px;
-  }
-}
-
-/* =========================================================
    PRODUTOS E INSUMOS
 ========================================================= */
 
 .products-summary-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(0, 1fr)
+    );
+
   gap: 14px;
+
   margin-bottom: 20px;
 }
 
 .products-summary-card {
   min-height: 92px;
+
   display: flex;
   align-items: center;
+
   gap: 13px;
 
   padding: 17px;
@@ -1525,7 +1268,8 @@ textarea {
       rgba(15, 15, 17, 0.98)
     );
 
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border:
+    1px solid rgba(255, 255, 255, 0.07);
 
   box-shadow:
     0 12px 28px rgba(0, 0, 0, 0.12);
@@ -1543,7 +1287,8 @@ textarea {
 
   border-radius: 12px;
 
-  background: rgba(255, 193, 7, 0.08);
+  background:
+    rgba(255, 193, 7, 0.08);
 
   border:
     1px solid rgba(255, 193, 7, 0.16);
@@ -1572,6 +1317,7 @@ textarea {
   color: #ffffff;
 
   font-size: 19px;
+
   line-height: 1.15;
 
   overflow-wrap: anywhere;
@@ -1595,10 +1341,12 @@ textarea {
 .products-search {
   width: 100%;
   max-width: 420px;
+
   min-height: 44px;
 
   display: flex;
   align-items: center;
+
   gap: 9px;
 
   padding: 0 13px;
@@ -1616,7 +1364,8 @@ textarea {
 }
 
 .products-search:focus-within {
-  border-color: rgba(255, 193, 7, 0.7);
+  border-color:
+    rgba(255, 193, 7, 0.7);
 
   box-shadow:
     0 0 0 3px rgba(255, 193, 7, 0.07);
@@ -1634,11 +1383,13 @@ textarea {
   width: 100%;
 
   border: 0;
+
   outline: 0;
 
   padding: 12px 0;
 
   color: #ffffff;
+
   background: transparent;
 
   font-size: 13px;
@@ -1651,6 +1402,7 @@ textarea {
 .products-filters {
   display: flex;
   align-items: center;
+
   gap: 6px;
 
   padding: 5px;
@@ -1669,9 +1421,11 @@ textarea {
   padding: 0 12px;
 
   border: 0;
+
   border-radius: 8px;
 
   color: #85858e;
+
   background: transparent;
 
   font-size: 11px;
@@ -1692,6 +1446,7 @@ textarea {
 
 .product-filter-btn.active {
   color: #111111;
+
   background: #ffc107;
 }
 
@@ -1703,6 +1458,7 @@ textarea {
 .products-list {
   display: flex;
   flex-direction: column;
+
   gap: 10px;
 }
 
@@ -1711,7 +1467,10 @@ textarea {
 
   grid-template-columns:
     minmax(200px, 1.5fr)
-    repeat(4, minmax(90px, 0.7fr))
+    repeat(
+      4,
+      minmax(90px, 0.7fr)
+    )
     auto;
 
   align-items: center;
@@ -1746,6 +1505,7 @@ textarea {
 
   display: flex;
   align-items: center;
+
   gap: 11px;
 }
 
@@ -1784,7 +1544,9 @@ textarea {
   font-size: 13px;
 
   white-space: nowrap;
+
   overflow: hidden;
+
   text-overflow: ellipsis;
 }
 
@@ -1792,6 +1554,7 @@ textarea {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+
   gap: 5px;
 }
 
@@ -1878,7 +1641,10 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+
   gap: 6px;
+
+  flex-wrap: wrap;
 }
 
 .product-action-btn {
@@ -1929,6 +1695,23 @@ textarea {
     rgba(255, 193, 7, 0.12);
 }
 
+.product-action-btn.recipe {
+  color: #70b9ff;
+
+  border-color:
+    rgba(85, 170, 255, 0.2);
+
+  background:
+    rgba(85, 170, 255, 0.06);
+}
+
+.product-action-btn.recipe:hover {
+  color: #a9d6ff;
+
+  background:
+    rgba(85, 170, 255, 0.12);
+}
+
 
 /* =========================================================
    MODAIS
@@ -1956,15 +1739,19 @@ textarea {
   background:
     rgba(0, 0, 0, 0.76);
 
-  backdrop-filter: blur(6px);
+  backdrop-filter:
+    blur(6px);
 }
 
 .master-modal-dialog {
   position: relative;
 
   width: 100%;
+
   max-width: 570px;
-  max-height: calc(100vh - 48px);
+
+  max-height:
+    calc(100vh - 48px);
 
   overflow-y: auto;
 
@@ -1992,6 +1779,7 @@ textarea {
 
 .master-modal-header {
   position: sticky;
+
   top: 0;
 
   display: flex;
@@ -2000,7 +1788,8 @@ textarea {
 
   gap: 18px;
 
-  padding: 22px 24px 18px;
+  padding:
+    22px 24px 18px;
 
   background:
     rgba(24, 24, 27, 0.96);
@@ -2008,7 +1797,8 @@ textarea {
   border-bottom:
     1px solid rgba(255, 255, 255, 0.07);
 
-  backdrop-filter: blur(12px);
+  backdrop-filter:
+    blur(12px);
 
   z-index: 5;
 }
@@ -2026,6 +1816,7 @@ textarea {
   color: #808089;
 
   font-size: 12px;
+
   line-height: 1.4;
 }
 
@@ -2049,6 +1840,7 @@ textarea {
 
   font-size: 9px;
   font-weight: 900;
+
   letter-spacing: 0.7px;
 }
 
@@ -2063,6 +1855,7 @@ textarea {
   flex: 0 0 auto;
 
   border: 0;
+
   border-radius: 9px;
 
   color: #96969e;
@@ -2071,6 +1864,7 @@ textarea {
     rgba(255, 255, 255, 0.04);
 
   font-size: 23px;
+
   line-height: 1;
 
   cursor: pointer;
@@ -2089,7 +1883,8 @@ textarea {
 ========================================================= */
 
 .master-form {
-  padding: 22px 24px 24px;
+  padding:
+    22px 24px 24px;
 }
 
 .master-form-section {
@@ -2108,6 +1903,7 @@ textarea {
 .master-form-section-title {
   display: flex;
   flex-direction: column;
+
   gap: 4px;
 
   margin-bottom: 14px;
@@ -2129,7 +1925,10 @@ textarea {
   display: grid;
 
   grid-template-columns:
-    repeat(2, minmax(0, 1fr));
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
 
   gap: 14px;
 }
@@ -2139,7 +1938,8 @@ textarea {
 }
 
 .master-field-full {
-  grid-column: 1 / -1;
+  grid-column:
+    1 / -1;
 }
 
 .master-field label {
@@ -2208,6 +2008,7 @@ textarea {
 
 .master-field select option {
   color: #ffffff;
+
   background: #161618;
 }
 
@@ -2219,6 +2020,7 @@ textarea {
   color: #66666f;
 
   font-size: 9px;
+
   line-height: 1.4;
 }
 
@@ -2276,10 +2078,14 @@ textarea {
 .money-input input {
   min-height: 41px;
 
-  border: 0 !important;
-  border-radius: 0 !important;
+  border:
+    0 !important;
 
-  box-shadow: none !important;
+  border-radius:
+    0 !important;
+
+  box-shadow:
+    none !important;
 
   padding-left: 10px;
 }
@@ -2293,7 +2099,10 @@ textarea {
   display: grid;
 
   grid-template-columns:
-    repeat(2, minmax(0, 1fr));
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
 
   gap: 11px;
 }
@@ -2343,7 +2152,8 @@ textarea {
 }
 
 .item-type-card:hover {
-  transform: translateY(-1px);
+  transform:
+    translateY(-1px);
 
   border-color:
     rgba(255, 193, 7, 0.2);
@@ -2367,7 +2177,9 @@ textarea {
   font-size: 10px;
 }
 
-.item-type-option input:checked + .item-type-card {
+.item-type-option
+input:checked +
+.item-type-card {
   color: #ffc107;
 
   background:
@@ -2389,7 +2201,10 @@ textarea {
   display: grid;
 
   grid-template-columns:
-    repeat(3, minmax(0, 1fr));
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
 
   gap: 10px;
 
@@ -2438,6 +2253,7 @@ textarea {
   color: #6e6e77;
 
   font-size: 9px;
+
   line-height: 1.3;
 }
 
@@ -2461,7 +2277,10 @@ textarea {
   display: grid;
 
   grid-template-columns:
-    repeat(2, minmax(0, 1fr));
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
 
   gap: 10px;
 
@@ -2504,7 +2323,10 @@ textarea {
   display: grid;
 
   grid-template-columns:
-    repeat(3, minmax(0, 1fr));
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
 
   gap: 9px;
 
@@ -2534,6 +2356,446 @@ textarea {
   font-size: 14px;
 
   overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   FICHA TÉCNICA - RESUMO
+========================================================= */
+
+.recipe-summary-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(0, 1fr)
+    );
+
+  gap: 10px;
+
+  margin-bottom: 18px;
+}
+
+.recipe-summary-card {
+  min-width: 0;
+
+  padding: 14px;
+
+  border-radius: 12px;
+
+  background:
+    rgba(255, 255, 255, 0.025);
+
+  border:
+    1px solid rgba(255, 255, 255, 0.07);
+}
+
+.recipe-summary-card span {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #74747d;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+}
+
+.recipe-summary-card strong {
+  display: block;
+
+  color: #ffffff;
+
+  font-size: 15px;
+
+  overflow-wrap: anywhere;
+}
+
+.recipe-summary-card:nth-child(2) strong {
+  color: #ffc107;
+}
+
+.recipe-summary-card:nth-child(3) strong {
+  color: #68d990;
+}
+
+
+/* =========================================================
+   FICHA TÉCNICA - INFORMAÇÃO
+========================================================= */
+
+.recipe-info-box {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 11px;
+
+  padding: 14px;
+
+  margin-bottom: 20px;
+
+  border-radius: 12px;
+
+  background:
+    rgba(85, 170, 255, 0.055);
+
+  border:
+    1px solid rgba(85, 170, 255, 0.16);
+}
+
+.recipe-info-icon {
+  flex: 0 0 auto;
+
+  font-size: 18px;
+}
+
+.recipe-info-box strong {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #b9dcff;
+
+  font-size: 11px;
+}
+
+.recipe-info-box p {
+  color: #8094a8;
+
+  font-size: 10px;
+
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   FICHA TÉCNICA - BUSCA
+========================================================= */
+
+.recipe-search {
+  width: 100%;
+
+  min-height: 42px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  padding: 0 12px;
+
+  margin-bottom: 12px;
+
+  border-radius: 10px;
+
+  background: #101012;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.08);
+}
+
+.recipe-search:focus-within {
+  border-color:
+    rgba(255, 193, 7, 0.55);
+
+  box-shadow:
+    0 0 0 3px rgba(255, 193, 7, 0.05);
+}
+
+.recipe-search span {
+  opacity: 0.65;
+
+  font-size: 14px;
+}
+
+.recipe-search input {
+  width: 100%;
+
+  min-height: 40px;
+
+  border: 0;
+
+  outline: 0;
+
+  color: #ffffff;
+
+  background: transparent;
+
+  font-size: 12px;
+}
+
+.recipe-search input::placeholder {
+  color: #5f5f68;
+}
+
+
+/* =========================================================
+   FICHA TÉCNICA - LISTA DE INSUMOS
+========================================================= */
+
+.recipe-ingredients-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+
+  max-height: 360px;
+
+  overflow-y: auto;
+
+  padding-right: 3px;
+}
+
+.recipe-ingredient-item {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1.3fr)
+    minmax(120px, 0.55fr)
+    minmax(90px, 0.45fr);
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 12px;
+
+  border-radius: 11px;
+
+  background:
+    rgba(255, 255, 255, 0.022);
+
+  border:
+    1px solid rgba(255, 255, 255, 0.06);
+
+  transition:
+    border-color 0.16s ease,
+    background 0.16s ease;
+}
+
+.recipe-ingredient-item.selected {
+  background:
+    rgba(255, 193, 7, 0.045);
+
+  border-color:
+    rgba(255, 193, 7, 0.18);
+}
+
+.recipe-ingredient-main {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.recipe-check {
+  width: 18px;
+  height: 18px;
+
+  flex: 0 0 auto;
+
+  accent-color: #ffc107;
+
+  cursor: pointer;
+}
+
+.recipe-ingredient-info {
+  min-width: 0;
+}
+
+.recipe-ingredient-info strong {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #ffffff;
+
+  font-size: 11px;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+.recipe-ingredient-info span {
+  color: #71717a;
+
+  font-size: 9px;
+}
+
+.recipe-quantity-box {
+  display: flex;
+  align-items: center;
+
+  overflow: hidden;
+
+  border-radius: 9px;
+
+  background: #0d0d0f;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.08);
+}
+
+.recipe-quantity-box input {
+  width: 100%;
+
+  min-width: 0;
+
+  height: 38px;
+
+  padding: 0 9px;
+
+  border: 0;
+
+  outline: 0;
+
+  color: #ffffff;
+
+  background: transparent;
+
+  font-size: 11px;
+
+  text-align: right;
+}
+
+.recipe-quantity-box input:disabled {
+  opacity: 0.35;
+
+  cursor: not-allowed;
+}
+
+.recipe-quantity-unit {
+  flex: 0 0 auto;
+
+  min-width: 38px;
+
+  padding: 0 8px;
+
+  color: #ffc107;
+
+  font-size: 9px;
+  font-weight: 900;
+
+  text-align: center;
+
+  border-left:
+    1px solid rgba(255, 255, 255, 0.06);
+}
+
+.recipe-ingredient-cost {
+  text-align: right;
+}
+
+.recipe-ingredient-cost span {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #6e6e77;
+
+  font-size: 8px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+}
+
+.recipe-ingredient-cost strong {
+  color: #ffffff;
+
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   FICHA TÉCNICA - TOTAL
+========================================================= */
+
+.recipe-total-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  padding: 15px;
+
+  margin-top: 18px;
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 193, 7, 0.075),
+      rgba(255, 193, 7, 0.025)
+    );
+
+  border:
+    1px solid rgba(255, 193, 7, 0.17);
+}
+
+.recipe-total-box > div {
+  min-width: 0;
+}
+
+.recipe-total-box span {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: #ffffff;
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.recipe-total-box small {
+  display: block;
+
+  color: #7f7f88;
+
+  font-size: 9px;
+}
+
+.recipe-total-box > strong {
+  flex: 0 0 auto;
+
+  color: #ffc107;
+
+  font-size: 20px;
+}
+
+
+/* =========================================================
+   FICHA TÉCNICA - SCROLL
+========================================================= */
+
+.recipe-ingredients-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.recipe-ingredients-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.recipe-ingredients-list::-webkit-scrollbar-thumb {
+  background:
+    rgba(255, 255, 255, 0.1);
+
+  border-radius: 999px;
+}
+
+.recipe-ingredients-list::-webkit-scrollbar-thumb:hover {
+  background:
+    rgba(255, 193, 7, 0.26);
 }
 
 
@@ -2621,20 +2883,26 @@ textarea {
 
 
 /* =========================================================
-   RESPONSIVO - PRODUTOS
+   RESPONSIVO - DESKTOP MENOR
 ========================================================= */
 
 @media (max-width: 1200px) {
 
   .products-summary-grid {
     grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
   }
 
   .product-master-item {
     grid-template-columns:
       minmax(180px, 1.4fr)
-      repeat(2, minmax(90px, 0.7fr))
+      repeat(
+        2,
+        minmax(90px, 0.7fr)
+      )
       auto;
   }
 
@@ -2642,13 +2910,114 @@ textarea {
   .product-master-value:nth-of-type(4) {
     display: none;
   }
+
+  .recipe-summary-grid {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
 }
 
 
+/* =========================================================
+   RESPONSIVO - TABLET
+========================================================= */
+
+@media (max-width: 1100px) {
+
+  .master-stats-grid {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+
+  .master-dashboard-grid {
+    grid-template-columns:
+      1fr;
+  }
+}
+
+
+/* =========================================================
+   RESPONSIVO - SIDEBAR MENOR
+========================================================= */
+
 @media (max-width: 900px) {
+
+  .master-sidebar {
+    width: 86px;
+
+    padding: 18px 10px;
+  }
+
+  .master-content {
+    width:
+      calc(100% - 86px);
+
+    margin-left: 86px;
+  }
+
+  .sidebar-brand {
+    justify-content: center;
+
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .sidebar-brand img {
+    width: 50px;
+    height: 50px;
+  }
+
+  .sidebar-brand div {
+    display: none;
+  }
+
+  .master-nav-item {
+    justify-content: center;
+
+    min-height: 48px;
+
+    padding-left: 8px;
+    padding-right: 8px;
+
+    font-size: 0;
+  }
+
+  .master-nav-item span {
+    width: auto;
+
+    font-size: 19px;
+  }
+
+  .sidebar-link,
+  .sidebar-logout {
+    justify-content: center;
+
+    font-size: 0;
+  }
+
+  .sidebar-link::first-letter,
+  .sidebar-logout::first-letter {
+    font-size: 17px;
+  }
+
+  .master-main {
+    padding: 24px 20px;
+  }
+
+  .master-topbar {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
 
   .products-toolbar {
     align-items: stretch;
+
     flex-direction: column;
   }
 
@@ -2663,14 +3032,279 @@ textarea {
   .master-switch-grid {
     grid-template-columns: 1fr;
   }
+
+  .recipe-ingredient-item {
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(110px, 0.5fr);
+  }
+
+  .recipe-ingredient-cost {
+    grid-column:
+      2;
+
+    text-align: left;
+  }
 }
 
 
+/* =========================================================
+   RESPONSIVO - MOBILE
+========================================================= */
+
 @media (max-width: 680px) {
+
+  body {
+    padding-bottom: 70px;
+  }
+
+  .master-app {
+    display: block;
+  }
+
+
+  /* SIDEBAR */
+
+  .master-sidebar {
+    width: 100%;
+
+    min-height: auto;
+
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+
+    padding: 7px 8px;
+
+    display: block;
+
+    border-right: 0;
+
+    border-top:
+      1px solid rgba(255, 255, 255, 0.08);
+
+    background:
+      rgba(14, 14, 16, 0.97);
+
+    backdrop-filter:
+      blur(16px);
+  }
+
+  .sidebar-brand,
+  .sidebar-footer {
+    display: none;
+  }
+
+  .master-nav {
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns:
+      repeat(
+        6,
+        minmax(0, 1fr)
+      );
+
+    gap: 4px;
+
+    margin: 0;
+  }
+
+  .master-nav-item {
+    min-height: 50px;
+
+    flex-direction: column;
+    justify-content: center;
+
+    gap: 2px;
+
+    padding: 5px 2px;
+
+    border-radius: 9px;
+
+    font-size: 8px;
+
+    line-height: 1.1;
+
+    text-align: center;
+  }
+
+  .master-nav-item span {
+    font-size: 16px;
+  }
+
+  .master-nav-item.active {
+    color: #111111;
+  }
+
+
+  /* CONTENT */
+
+  .master-content {
+    width: 100%;
+
+    margin-left: 0;
+  }
+
+
+  /* TOPBAR */
+
+  .master-topbar {
+    min-height: auto;
+
+    align-items: flex-start;
+
+    padding: 16px;
+
+    gap: 12px;
+  }
+
+  .master-topbar h1 {
+    font-size: 20px;
+  }
+
+  .topbar-right {
+    gap: 8px;
+  }
+
+  .master-clock {
+    display: none;
+  }
+
+  .master-user-icon {
+    width: 34px;
+    height: 34px;
+
+    border-radius: 10px;
+
+    font-size: 15px;
+  }
+
+  .master-user strong {
+    max-width: 100px;
+
+    font-size: 11px;
+  }
+
+  .master-user span {
+    display: none;
+  }
+
+
+  /* MAIN */
+
+  .master-main {
+    padding: 18px 12px;
+  }
+
+  .page-heading {
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    margin-bottom: 18px;
+  }
+
+  .page-heading h2 {
+    font-size: 22px;
+  }
+
+  .page-heading .btn-master {
+    width: 100%;
+  }
+
+
+  /* FILTER */
+
+  .period-filter {
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns:
+      repeat(
+        3,
+        1fr
+      );
+  }
+
+  .period-btn {
+    width: 100%;
+  }
+
+
+  /* CARDS */
+
+  .master-stats-grid {
+    grid-template-columns:
+      1fr;
+
+    gap: 11px;
+  }
+
+  .master-stat-card {
+    min-height: 95px;
+
+    padding: 16px;
+  }
+
+  .master-stat-card strong {
+    font-size: 21px;
+  }
+
+
+  /* PANEL */
+
+  .master-dashboard-grid {
+    gap: 12px;
+  }
+
+  .master-panel {
+    padding: 16px;
+  }
+
+  .panel-title {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+
+  /* RANKING */
+
+  .ranking-item {
+    grid-template-columns:
+      30px
+      minmax(0, 1fr);
+  }
+
+  .ranking-value {
+    grid-column:
+      2;
+
+    text-align: left;
+  }
+
+
+  /* PLACEHOLDER */
+
+  .master-placeholder {
+    min-height: 280px;
+
+    padding: 28px 18px;
+  }
+
+
+  /* PRODUTOS */
 
   .products-summary-grid {
     grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
 
     gap: 9px;
   }
@@ -2696,7 +3330,6 @@ textarea {
     font-size: 15px;
   }
 
-
   .products-toolbar {
     gap: 10px;
   }
@@ -2707,7 +3340,10 @@ textarea {
     display: grid;
 
     grid-template-columns:
-      repeat(3, 1fr);
+      repeat(
+        3,
+        1fr
+      );
   }
 
   .product-filter-btn {
@@ -2719,17 +3355,19 @@ textarea {
     font-size: 9px;
   }
 
-
   .product-master-item {
     display: flex;
+
     flex-direction: column;
+
     align-items: stretch;
 
     gap: 12px;
   }
 
   .product-master-value {
-    display: grid !important;
+    display:
+      grid !important;
 
     grid-template-columns:
       1fr auto;
@@ -2757,6 +3395,8 @@ textarea {
   }
 
 
+  /* MODAIS */
+
   .master-modal {
     align-items: flex-end;
 
@@ -2766,6 +3406,7 @@ textarea {
   .master-modal-dialog,
   .master-modal-large {
     max-width: none;
+
     max-height: 92vh;
 
     border-radius:
@@ -2783,7 +3424,8 @@ textarea {
   }
 
   .master-form-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
   }
 
   .master-field-full {
@@ -2791,11 +3433,13 @@ textarea {
   }
 
   .item-type-selector {
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
   }
 
   .stock-preview {
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
   }
 
   .master-modal-actions {
@@ -2805,23 +3449,116 @@ textarea {
       1fr 1fr;
   }
 
-  .master-modal-actions .btn-master {
+  .master-modal-actions
+  .btn-master {
     width: 100%;
+  }
+
+
+  /* FICHA TÉCNICA */
+
+  .recipe-summary-grid {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+
+  .recipe-ingredient-item {
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: stretch;
+
+    gap: 9px;
+  }
+
+  .recipe-ingredient-cost {
+    text-align: left;
+  }
+
+  .recipe-total-box {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+  .recipe-total-box > strong {
+    font-size: 22px;
+  }
+
+
+  /* FOOTER */
+
+  .master-footer {
+    flex-direction: column;
+
+    gap: 5px;
+
+    padding: 16px;
+
+    text-align: center;
   }
 }
 
 
+/* =========================================================
+   TELAS MUITO PEQUENAS
+========================================================= */
+
 @media (max-width: 420px) {
 
+  .master-nav {
+    grid-template-columns:
+      repeat(
+        3,
+        1fr
+      );
+  }
+
+  body {
+    padding-bottom: 112px;
+  }
+
+  .master-nav-item {
+    min-height: 45px;
+  }
+
+  .master-topbar {
+    flex-direction: column;
+  }
+
+  .topbar-right {
+    width: 100%;
+  }
+
+  .master-user {
+    width: 100%;
+  }
+
+  .master-user strong {
+    max-width: 180px;
+  }
+
   .products-summary-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
   }
 
   .stock-current-box {
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
   }
 
   .master-modal-actions {
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
+  }
+
+  .recipe-summary-grid {
+    grid-template-columns:
+      1fr;
   }
 }
