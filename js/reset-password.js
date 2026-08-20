@@ -512,6 +512,156 @@ if (
   );
 }
 
+/* =========================================================
+   RECUPERAÇÃO DE SENHA
+========================================================= */
+
+const btnEsqueciSenha =
+  document.getElementById(
+    'btnEsqueciSenha'
+  );
+
+
+if (
+  btnEsqueciSenha
+) {
+
+  btnEsqueciSenha.addEventListener(
+    'click',
+    async () => {
+
+      limparMensagemMaster();
+
+
+      const email =
+        String(
+          masterEmailInput?.value ||
+          ''
+        )
+          .trim()
+          .toLowerCase();
+
+
+      if (
+        !email
+      ) {
+
+        mostrarMensagemMaster(
+          'Digite seu e-mail primeiro.',
+          'erro'
+        );
+
+        if (
+          masterEmailInput
+        ) {
+
+          masterEmailInput.focus();
+        }
+
+        return;
+      }
+
+
+      if (
+        !supabaseClient
+      ) {
+
+        mostrarMensagemMaster(
+          'Não foi possível conectar ao sistema.',
+          'erro'
+        );
+
+        return;
+      }
+
+
+      try {
+
+        btnEsqueciSenha.disabled =
+          true;
+
+        btnEsqueciSenha.textContent =
+          'Enviando...';
+
+
+        const {
+          error
+        } =
+          await supabaseClient.auth
+            .resetPasswordForEmail(
+              email,
+              {
+
+                redirectTo:
+                  'https://le-lanches.vercel.app/reset-password.html'
+
+              }
+            );
+
+
+        if (
+          error
+        ) {
+
+          console.error(
+            'Erro ao enviar recuperação:',
+            error
+          );
+
+          throw error;
+        }
+
+
+        mostrarMensagemMaster(
+          'E-mail de recuperação enviado. Verifique sua caixa de entrada.',
+          'sucesso'
+        );
+
+      } catch (
+        erro
+      ) {
+
+        console.error(
+          'Falha na recuperação:',
+          erro
+        );
+
+
+        if (
+          String(
+            erro?.message ||
+            ''
+          )
+            .toLowerCase()
+            .includes(
+              'rate limit'
+            )
+        ) {
+
+          mostrarMensagemMaster(
+            'Muitas tentativas de recuperação foram feitas. Aguarde alguns minutos e tente novamente.',
+            'erro'
+          );
+
+        } else {
+
+          mostrarMensagemMaster(
+            'Não foi possível enviar o e-mail de recuperação.',
+            'erro'
+          );
+        }
+
+      } finally {
+
+        btnEsqueciSenha.disabled =
+          false;
+
+        btnEsqueciSenha.textContent =
+          'Esqueci minha senha';
+      }
+    }
+  );
+}
 
 /* =========================================================
    INICIALIZAÇÃO
