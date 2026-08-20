@@ -15,7 +15,7 @@ const GOOGLE_MAPS_API_KEY =
 
 const TEMPO_PREPARO_FIXO_MINUTOS = 45;
 
-const CHAVE_PIX = '';
+const CHAVE_PIX = '15996314700';
 
 
 /* =========================================================
@@ -844,7 +844,7 @@ function garantirModalOpcoesForaDoCarrinho() {
    PAGAMENTO
 ========================================================= */
 
-function atualizarPagamento() {
+function  {
 
   const pagamento =
     byId(
@@ -4514,7 +4514,7 @@ function limparCarrinho() {
       '';
   }
 
-  atualizarPagamento();
+  ;
 
   limparCacheCoordenadaCliente();
   limparCacheEntrega();
@@ -5070,7 +5070,7 @@ async function finalizarPedido(
 
     atualizarEntrega();
 
-    atualizarPagamento();
+    ;
 
     renderizarCarrinho();
 
@@ -5208,7 +5208,7 @@ async function iniciarSistema() {
 
   atualizarEntrega();
 
-  atualizarPagamento();
+  ;
 
   limparBloqueiosEndereco();
 
@@ -5263,7 +5263,7 @@ document.addEventListener(
 
     garantirModalOpcoesForaDoCarrinho();
 
-    atualizarPagamento();
+    ;
 
     filtrarCardapio();
   }
