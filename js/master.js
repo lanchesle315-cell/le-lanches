@@ -64,6 +64,11 @@ let dataInicioFinanceiroMaster = null;
 let dataFimFinanceiroMaster = null;
 let carregandoFinanceiroMaster = false;
 
+let periodoRelatoriosMaster = 'today';
+let dataInicioRelatoriosMaster = null;
+let dataFimRelatoriosMaster = null;
+let carregandoRelatoriosMaster = false;
+
 
 /* =========================================================
    UTILITÁRIOS
@@ -716,6 +721,22 @@ function abrirPaginaMaster(pagina) {
 
           console.error(
             'Erro ao carregar Despesas:',
+            erro
+          );
+        }
+      );
+  }
+
+  if (
+    pagina === 'relatorios'
+  ) {
+
+    carregarRelatoriosMaster()
+      .catch(
+        erro => {
+
+          console.error(
+            'Erro ao carregar Relatórios:',
             erro
           );
         }
@@ -2310,6 +2331,1275 @@ function configurarFinanceiroMaster() {
   }
 }
 
+
+
+
+
+/* =========================================================
+   RELATÓRIOS - PERÍODO
+========================================================= */
+
+function obterPeriodoRelatoriosMaster() {
+
+  const agora =
+    new Date();
+
+  let inicio = null;
+  let fim = null;
+  let label = '';
+
+  if (
+    periodoRelatoriosMaster === 'today'
+  ) {
+
+    inicio =
+      criarDataLocalFinanceiro(
+        agora.getFullYear(),
+        agora.getMonth(),
+        agora.getDate()
+      );
+
+    fim =
+      criarDataLocalFinanceiro(
+        agora.getFullYear(),
+        agora.getMonth(),
+        agora.getDate(),
+        true
+      );
+
+    label = 'Hoje';
+
+  } else if (
+    periodoRelatoriosMaster === 'month'
+  ) {
+
+    inicio =
+      criarDataLocalFinanceiro(
+        agora.getFullYear(),
+        agora.getMonth(),
+        1
+      );
+
+    fim =
+      criarDataLocalFinanceiro(
+        agora.getFullYear(),
+        agora.getMonth() + 1,
+        0,
+        true
+      );
+
+    label =
+      agora.toLocaleDateString(
+        'pt-BR',
+        {
+          month: 'long',
+          year: 'numeric'
+        }
+      );
+
+  } else if (
+    periodoRelatoriosMaster === 'custom'
+  ) {
+
+    inicio =
+      dataISOParaLocalFinanceiro(
+        dataInicioRelatoriosMaster
+      );
+
+    fim =
+      dataISOParaLocalFinanceiro(
+        dataFimRelatoriosMaster,
+        true
+      );
+
+    if (
+      !inicio ||
+      !fim
+    ) {
+
+      throw new Error(
+        'Informe a data inicial e a data final.'
+      );
+    }
+
+    if (
+      inicio.getTime() >
+      fim.getTime()
+    ) {
+
+      throw new Error(
+        'A data inicial não pode ser maior que a data final.'
+      );
+    }
+
+    label =
+      `${inicio.toLocaleDateString('pt-BR')} até ${fim.toLocaleDateString('pt-BR')}`;
+
+  } else {
+
+    const dias =
+      Number(
+        periodoRelatoriosMaster
+      );
+
+    const quantidadeDias =
+      Number.isFinite(dias) &&
+      dias > 0
+        ? dias
+        : 7;
+
+    inicio =
+      criarDataLocalFinanceiro(
+        agora.getFullYear(),
+        agora.getMonth(),
+        agora.getDate()
+      );
+
+    inicio.setDate(
+      inicio.getDate() -
+      (quantidadeDias - 1)
+    );
+
+    fim =
+      criarDataLocalFinanceiro(
+        agora.getFullYear(),
+        agora.getMonth(),
+        agora.getDate(),
+        true
+      );
+
+    label =
+      `Últimos ${quantidadeDias} dias`;
+  }
+
+  return {
+    inicio,
+    fim,
+    label
+  };
+}
+
+
+/* =========================================================
+   RELATÓRIOS - PRODUTOS
+========================================================= */
+
+function agruparProdutosRelatoriosMaster(
+  itens
+) {
+
+  const agrupados =
+    new Map();
+
+  itens.forEach(
+    item => {
+
+      const chave =
+        String(
+          item.product_id ||
+          item.product_code ||
+          item.product_name ||
+          'produto'
+        );
+
+      if (
+        !agrupados.has(
+          chave
+        )
+      ) {
+
+        agrupados.set(
+          chave,
+          {
+            nome:
+              item.product_name ||
+              'Produto',
+
+            codigo:
+              item.product_code ||
+              '',
+
+            quantidade:
+              0,
+
+            faturamento:
+              0,
+
+            custo:
+              0
+          }
+        );
+      }
+
+      const atual =
+        agrupados.get(
+          chave
+        );
+
+      atual.quantidade +=
+        numeroSeguro(
+          item.quantity
+        );
+
+      atual.faturamento +=
+        numeroSeguro(
+          item.sale_total
+        );
+
+      atual.custo +=
+        numeroSeguro(
+          item.cost_total
+        );
+    }
+  );
+
+  return Array
+    .from(
+      agrupados.values()
+    )
+    .map(
+      item => {
+
+        const lucro =
+          item.faturamento -
+          item.custo;
+
+        const margem =
+          item.faturamento > 0
+            ? (
+                lucro /
+                item.faturamento
+              ) * 100
+            : 0;
+
+        return {
+          ...item,
+          lucro,
+          margem
+        };
+      }
+    );
+}
+
+
+function renderizarRankingRelatoriosMaster(
+  produtos,
+  tipo
+) {
+
+  const maisVendidos =
+    tipo === 'vendidos';
+
+  const container =
+    byId(
+      maisVendidos
+        ? 'masterRelatoriosMaisVendidos'
+        : 'masterRelatoriosMaisLucrativos'
+    );
+
+  if (!container) {
+
+    return;
+  }
+
+  const ranking =
+    [...produtos]
+      .sort(
+        (a, b) =>
+          maisVendidos
+            ? b.quantidade -
+              a.quantidade
+            : b.lucro -
+              a.lucro
+      )
+      .slice(
+        0,
+        5
+      );
+
+  if (
+    ranking.length === 0
+  ) {
+
+    container.innerHTML =
+      `
+        <div class="master-empty">
+          Nenhuma venda encontrada no período.
+        </div>
+      `;
+
+    return;
+  }
+
+  container.innerHTML =
+    ranking
+      .map(
+        (
+          item,
+          index
+        ) => `
+
+          <div class="ranking-item">
+
+            <div class="ranking-position">
+              ${index + 1}
+            </div>
+
+            <div class="ranking-info">
+
+              <strong>
+                ${escaparHtml(
+                  item.nome
+                )}
+              </strong>
+
+              <span>
+                ${
+                  item.codigo
+                    ? `#${escaparHtml(item.codigo)} • `
+                    : ''
+                }
+                ${formatarQuantidade(
+                  item.quantidade
+                )}
+                unidade(s)
+              </span>
+
+            </div>
+
+            <div class="ranking-value">
+
+              <strong>
+                ${
+                  maisVendidos
+                    ? formatarQuantidade(
+                        item.quantidade
+                      ) + ' un.'
+                    : formatarMoeda(
+                        item.lucro
+                      )
+                }
+              </strong>
+
+              <span>
+                ${
+                  maisVendidos
+                    ? `Faturamento: ${formatarMoeda(
+                        item.faturamento
+                      )}`
+                    : `Faturamento: ${formatarMoeda(
+                        item.faturamento
+                      )}`
+                }
+              </span>
+
+            </div>
+
+          </div>
+
+        `
+      )
+      .join('');
+}
+
+
+function renderizarProdutosRelatoriosMaster(
+  produtos
+) {
+
+  const tbody =
+    byId(
+      'masterRelatoriosProdutosTabela'
+    );
+
+  if (!tbody) {
+
+    return;
+  }
+
+  const lista =
+    [...produtos]
+      .sort(
+        (a, b) =>
+          b.faturamento -
+          a.faturamento
+      );
+
+  if (
+    lista.length === 0
+  ) {
+
+    tbody.innerHTML =
+      `
+        <tr>
+          <td
+            colspan="6"
+            class="table-empty"
+          >
+            Nenhum produto encontrado no período.
+          </td>
+        </tr>
+      `;
+
+    return;
+  }
+
+  tbody.innerHTML =
+    lista
+      .map(
+        item => `
+
+          <tr>
+
+            <td class="reports-product-name">
+
+              <strong>
+                ${escaparHtml(
+                  item.nome
+                )}
+              </strong>
+
+              <span>
+                ${
+                  item.codigo
+                    ? `#${escaparHtml(item.codigo)}`
+                    : ''
+                }
+              </span>
+
+            </td>
+
+            <td>
+              ${formatarQuantidade(
+                item.quantidade
+              )}
+            </td>
+
+            <td>
+              ${formatarMoeda(
+                item.faturamento
+              )}
+            </td>
+
+            <td>
+              ${formatarMoeda(
+                item.custo
+              )}
+            </td>
+
+            <td
+              class="${
+                item.lucro >= 0
+                  ? 'reports-positive'
+                  : 'reports-negative'
+              }"
+            >
+              ${formatarMoeda(
+                item.lucro
+              )}
+            </td>
+
+            <td>
+              ${formatarPercentualFinanceiro(
+                item.margem
+              )}
+            </td>
+
+          </tr>
+
+        `
+      )
+      .join('');
+}
+
+
+/* =========================================================
+   RELATÓRIOS - DESPESAS
+========================================================= */
+
+function renderizarDespesasRelatoriosMaster(
+  despesas
+) {
+
+  const tbody =
+    byId(
+      'masterRelatoriosDespesasTabela'
+    );
+
+  if (!tbody) {
+
+    return;
+  }
+
+  const agrupadas =
+    new Map();
+
+  despesas.forEach(
+    despesa => {
+
+      const categoria =
+        despesa.category ||
+        'outros';
+
+      if (
+        !agrupadas.has(
+          categoria
+        )
+      ) {
+
+        agrupadas.set(
+          categoria,
+          {
+            categoria,
+            quantidade: 0,
+            total: 0
+          }
+        );
+      }
+
+      const atual =
+        agrupadas.get(
+          categoria
+        );
+
+      atual.quantidade += 1;
+
+      atual.total +=
+        numeroSeguro(
+          despesa.amount
+        );
+    }
+  );
+
+  const totalGeral =
+    despesas.reduce(
+      (
+        total,
+        despesa
+      ) =>
+        total +
+        numeroSeguro(
+          despesa.amount
+        ),
+      0
+    );
+
+  const lista =
+    Array
+      .from(
+        agrupadas.values()
+      )
+      .sort(
+        (a, b) =>
+          b.total -
+          a.total
+      );
+
+  if (
+    lista.length === 0
+  ) {
+
+    tbody.innerHTML =
+      `
+        <tr>
+          <td
+            colspan="4"
+            class="table-empty"
+          >
+            Nenhuma despesa encontrada no período.
+          </td>
+        </tr>
+      `;
+
+    return;
+  }
+
+  tbody.innerHTML =
+    lista
+      .map(
+        item => {
+
+          const participacao =
+            totalGeral > 0
+              ? (
+                  item.total /
+                  totalGeral
+                ) * 100
+              : 0;
+
+          return `
+
+            <tr>
+
+              <td>
+                <span class="reports-category-badge">
+                  ${escaparHtml(
+                    obterLabelCategoriaDespesa(
+                      item.categoria
+                    )
+                  )}
+                </span>
+              </td>
+
+              <td>
+                ${formatarNumero(
+                  item.quantidade
+                )}
+              </td>
+
+              <td>
+                <strong>
+                  ${formatarMoeda(
+                    item.total
+                  )}
+                </strong>
+              </td>
+
+              <td>
+                ${formatarPercentualFinanceiro(
+                  participacao
+                )}
+              </td>
+
+            </tr>
+
+          `;
+        }
+      )
+      .join('');
+}
+
+
+/* =========================================================
+   RELATÓRIOS - ESTOQUE
+========================================================= */
+
+function renderizarEstoqueRelatoriosMaster(
+  produtos
+) {
+
+  const controlados =
+    produtos.filter(
+      produto =>
+        produto.active === true &&
+        produto.stock_control === true
+    );
+
+  const estoqueBaixo =
+    controlados.filter(
+      produto =>
+        numeroSeguro(
+          produto.stock_quantity
+        ) <=
+        numeroSeguro(
+          produto.minimum_stock
+        )
+    );
+
+  const esgotados =
+    controlados.filter(
+      produto =>
+        numeroSeguro(
+          produto.stock_quantity
+        ) <= 0
+    );
+
+  const valorEstoque =
+    controlados.reduce(
+      (
+        total,
+        produto
+      ) =>
+        total +
+        (
+          numeroSeguro(
+            produto.stock_quantity
+          ) *
+          numeroSeguro(
+            produto.average_cost
+          )
+        ),
+      0
+    );
+
+  atualizarElementoFinanceiro(
+    'masterRelatoriosEstoqueItens',
+    formatarNumero(
+      controlados.length
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterRelatoriosEstoqueBaixo',
+    formatarNumero(
+      estoqueBaixo.length
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterRelatoriosEstoqueEsgotado',
+    formatarNumero(
+      esgotados.length
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterRelatoriosValorEstoque',
+    formatarMoeda(
+      valorEstoque
+    )
+  );
+
+  const tbody =
+    byId(
+      'masterRelatoriosEstoqueTabela'
+    );
+
+  if (!tbody) {
+
+    return;
+  }
+
+  const lista =
+    [...estoqueBaixo]
+      .sort(
+        (a, b) =>
+          numeroSeguro(
+            a.stock_quantity
+          ) -
+          numeroSeguro(
+            b.stock_quantity
+          )
+      );
+
+  if (
+    lista.length === 0
+  ) {
+
+    tbody.innerHTML =
+      `
+        <tr>
+          <td
+            colspan="7"
+            class="table-empty"
+          >
+            Nenhum item com estoque baixo.
+          </td>
+        </tr>
+      `;
+
+    return;
+  }
+
+  tbody.innerHTML =
+    lista
+      .map(
+        produto => {
+
+          const estoque =
+            numeroSeguro(
+              produto.stock_quantity
+            );
+
+          const minimo =
+            numeroSeguro(
+              produto.minimum_stock
+            );
+
+          const custo =
+            numeroSeguro(
+              produto.average_cost
+            );
+
+          const unidade =
+            formatarUnidade(
+              produto.unit
+            );
+
+          const esgotado =
+            estoque <= 0;
+
+          return `
+
+            <tr>
+
+              <td class="reports-product-name">
+
+                <strong>
+                  ${escaparHtml(
+                    produto.name
+                  )}
+                </strong>
+
+                <span>
+                  ${
+                    produto.product_code
+                      ? `#${escaparHtml(
+                          produto.product_code
+                        )}`
+                      : ''
+                  }
+                </span>
+
+              </td>
+
+              <td>
+                ${
+                  produto.item_type ===
+                  'ingredient'
+                    ? 'Insumo'
+                    : 'Produto'
+                }
+              </td>
+
+              <td
+                class="${
+                  esgotado
+                    ? 'reports-negative'
+                    : 'reports-warning'
+                }"
+              >
+                ${formatarQuantidade(
+                  estoque
+                )}
+                ${escaparHtml(
+                  unidade
+                )}
+              </td>
+
+              <td>
+                ${formatarQuantidade(
+                  minimo
+                )}
+                ${escaparHtml(
+                  unidade
+                )}
+              </td>
+
+              <td>
+                ${formatarMoeda(
+                  custo
+                )}
+              </td>
+
+              <td>
+                ${formatarMoeda(
+                  estoque *
+                  custo
+                )}
+              </td>
+
+              <td
+                class="${
+                  esgotado
+                    ? 'reports-negative'
+                    : 'reports-warning'
+                }"
+              >
+                ${
+                  esgotado
+                    ? 'ESGOTADO'
+                    : 'ESTOQUE BAIXO'
+                }
+              </td>
+
+            </tr>
+
+          `;
+        }
+      )
+      .join('');
+}
+
+
+/* =========================================================
+   RELATÓRIOS - RESUMO
+========================================================= */
+
+function renderizarResumoRelatoriosMaster(
+  resumo,
+  labelPeriodo
+) {
+
+  atualizarElementoFinanceiro(
+    'masterRelatoriosPeriodoLabel',
+    labelPeriodo
+  );
+
+  atualizarElementoFinanceiro(
+    'masterRelatoriosPedidos',
+    formatarNumero(
+      resumo.quantidadePedidos
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterRelatoriosFaturamento',
+    formatarMoeda(
+      resumo.faturamento
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterRelatoriosCusto',
+    formatarMoeda(
+      resumo.custoProdutos
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterRelatoriosDespesas',
+    formatarMoeda(
+      resumo.totalDespesas
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterRelatoriosLucroLiquido',
+    formatarMoeda(
+      resumo.lucroLiquido
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterRelatoriosTicketMedio',
+    formatarMoeda(
+      resumo.ticketMedio
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterRelatoriosVendaProdutos',
+    formatarMoeda(
+      resumo.vendaProdutos
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterRelatoriosTaxasEntrega',
+    formatarMoeda(
+      resumo.taxaEntrega
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterRelatoriosLucroBruto',
+    formatarMoeda(
+      resumo.lucroBruto
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterRelatoriosMargemBruta',
+    formatarPercentualFinanceiro(
+      resumo.margemBruta
+    )
+  );
+
+  atualizarElementoFinanceiro(
+    'masterRelatoriosMargemLiquida',
+    formatarPercentualFinanceiro(
+      resumo.margemLiquida
+    )
+  );
+}
+
+
+/* =========================================================
+   RELATÓRIOS - CARREGAR
+========================================================= */
+
+async function carregarRelatoriosMaster() {
+
+  if (
+    carregandoRelatoriosMaster
+  ) {
+
+    return;
+  }
+
+  const botao =
+    byId(
+      'btnAtualizarRelatorios'
+    );
+
+  const mensagem =
+    byId(
+      'masterRelatoriosMensagem'
+    );
+
+  const textoAnterior =
+    botao?.innerHTML ||
+    '🔄 Atualizar relatório';
+
+  try {
+
+    carregandoRelatoriosMaster =
+      true;
+
+    if (botao) {
+
+      botao.disabled =
+        true;
+
+      botao.innerHTML =
+        '⏳ Atualizando...';
+    }
+
+    mostrarMensagemFormulario(
+      mensagem,
+      'Carregando relatório...',
+      'warning'
+    );
+
+    const periodo =
+      obterPeriodoRelatoriosMaster();
+
+    const [
+      dadosFinanceiros,
+      produtosEstoque
+    ] =
+      await Promise.all(
+        [
+          buscarDadosFinanceirosMaster(
+            periodo.inicio,
+            periodo.fim
+          ),
+
+          buscarProdutos(false)
+        ]
+      );
+
+    const resumo =
+      calcularResumoFinanceiroMaster(
+        dadosFinanceiros.pedidos,
+        dadosFinanceiros.itens,
+        dadosFinanceiros.despesas
+      );
+
+    const produtosRelatorio =
+      agruparProdutosRelatoriosMaster(
+        dadosFinanceiros.itens
+      );
+
+    renderizarResumoRelatoriosMaster(
+      resumo,
+      periodo.label
+    );
+
+    renderizarRankingRelatoriosMaster(
+      produtosRelatorio,
+      'vendidos'
+    );
+
+    renderizarRankingRelatoriosMaster(
+      produtosRelatorio,
+      'lucrativos'
+    );
+
+    renderizarProdutosRelatoriosMaster(
+      produtosRelatorio
+    );
+
+    renderizarDespesasRelatoriosMaster(
+      dadosFinanceiros.despesas
+    );
+
+    renderizarEstoqueRelatoriosMaster(
+      produtosEstoque
+    );
+
+    mostrarMensagemFormulario(
+      mensagem,
+      ''
+    );
+
+  } catch (erro) {
+
+    console.error(
+      'Erro ao carregar Relatórios:',
+      erro
+    );
+
+    mostrarMensagemFormulario(
+      mensagem,
+      erro?.message ||
+      'Não foi possível carregar os relatórios.'
+    );
+
+  } finally {
+
+    carregandoRelatoriosMaster =
+      false;
+
+    if (botao) {
+
+      botao.disabled =
+        false;
+
+      botao.innerHTML =
+        textoAnterior;
+    }
+  }
+}
+
+
+/* =========================================================
+   RELATÓRIOS - FILTROS E EVENTOS
+========================================================= */
+
+function configurarRelatoriosMaster() {
+
+  document
+    .querySelectorAll(
+      '.reports-period-btn'
+    )
+    .forEach(
+      botao => {
+
+        botao.addEventListener(
+          'click',
+          async () => {
+
+            document
+              .querySelectorAll(
+                '.reports-period-btn'
+              )
+              .forEach(
+                item => {
+
+                  item.classList.remove(
+                    'active'
+                  );
+                }
+              );
+
+            botao.classList.add(
+              'active'
+            );
+
+            periodoRelatoriosMaster =
+              botao.dataset
+                .reportsPeriod ||
+              'today';
+
+            const personalizado =
+              byId(
+                'masterRelatoriosPeriodoPersonalizado'
+              );
+
+            if (
+              periodoRelatoriosMaster ===
+              'custom'
+            ) {
+
+              personalizado
+                ?.classList
+                .remove(
+                  'hidden'
+                );
+
+              const hoje =
+                dataHojeISO();
+
+              if (
+                !dataInicioRelatoriosMaster
+              ) {
+
+                dataInicioRelatoriosMaster =
+                  hoje;
+              }
+
+              if (
+                !dataFimRelatoriosMaster
+              ) {
+
+                dataFimRelatoriosMaster =
+                  hoje;
+              }
+
+              if (
+                byId(
+                  'masterRelatoriosDataInicio'
+                )
+              ) {
+
+                byId(
+                  'masterRelatoriosDataInicio'
+                ).value =
+                  dataInicioRelatoriosMaster;
+              }
+
+              if (
+                byId(
+                  'masterRelatoriosDataFim'
+                )
+              ) {
+
+                byId(
+                  'masterRelatoriosDataFim'
+                ).value =
+                  dataFimRelatoriosMaster;
+              }
+
+              return;
+            }
+
+            personalizado
+              ?.classList
+              .add(
+                'hidden'
+              );
+
+            await carregarRelatoriosMaster();
+          }
+        );
+      }
+    );
+
+
+  const aplicar =
+    byId(
+      'btnAplicarPeriodoRelatorios'
+    );
+
+  if (aplicar) {
+
+    aplicar.addEventListener(
+      'click',
+      async () => {
+
+        dataInicioRelatoriosMaster =
+          byId(
+            'masterRelatoriosDataInicio'
+          )?.value ||
+          null;
+
+        dataFimRelatoriosMaster =
+          byId(
+            'masterRelatoriosDataFim'
+          )?.value ||
+          null;
+
+        await carregarRelatoriosMaster();
+      }
+    );
+  }
+
+
+  const atualizar =
+    byId(
+      'btnAtualizarRelatorios'
+    );
+
+  if (atualizar) {
+
+    atualizar.addEventListener(
+      'click',
+      carregarRelatoriosMaster
+    );
+  }
+}
 
 
 /* =========================================================
@@ -7896,6 +9186,8 @@ function configurarEventosMaster() {
 
   configurarFinanceiroMaster();
 
+  configurarRelatoriosMaster();
+
   configurarBotoesMaster();
 
   configurarFiltrosProdutosMaster();
@@ -7979,7 +9271,8 @@ async function iniciarMaster() {
       carregarDashboard(),
       carregarFinanceiroMaster(),
       carregarProdutosMaster(),
-      carregarDespesasMaster()
+      carregarDespesasMaster(),
+      carregarRelatoriosMaster()
     ]
   );
 
