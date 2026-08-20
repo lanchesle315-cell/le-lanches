@@ -2012,20 +2012,6 @@ function converterValorDigitado(valor) {
   return Number.isFinite(numero) ? numero : NaN;
 }
 
-function formatarCampoMoeda(input) {
-  if (!input) return;
-
-  const numero = converterValorDigitado(input.value);
-
-  if (!Number.isFinite(numero) || numero < 0) {
-    input.value = "0,00";
-    atualizarResumoVendaExterna();
-    return;
-  }
-
-  input.value = numero.toFixed(2).replace(".", ",");
-  atualizarResumoVendaExterna();
-}
 
 function adicionarItemEdicao() {
   if (!pedidoEmEdicao) {
@@ -2715,6 +2701,7 @@ function formatarCampoMoedaVendaExterna(campo) {
 
   if (texto === "") {
     campo.value = "0,00";
+    atualizarResumoVendaExterna();
     return;
   }
 
@@ -2722,31 +2709,37 @@ function formatarCampoMoedaVendaExterna(campo) {
 
   if (!Number.isFinite(valor) || valor < 0) {
     campo.value = "0,00";
+    atualizarResumoVendaExterna();
     return;
   }
 
   campo.value = valor.toFixed(2).replace(".", ",");
+  atualizarResumoVendaExterna();
 }
 
 function atualizarResumoVendaExterna() {
   const subtotal =
     calcularSubtotalVendaExterna();
 
-  const taxaEntrega =
-    Math.max(
-      0,
-      converterValorDigitado(
-        byId("vendaExternaTaxaEntrega")?.value || 0
-      ) || 0
+  const taxaPlataformaValor =
+    converterValorDigitado(
+      byId("vendaExternaTaxaPlataforma")?.value ?? "0"
+    );
+
+  const taxaEntregaValor =
+    converterValorDigitado(
+      byId("vendaExternaTaxaEntrega")?.value ?? "0"
     );
 
   const taxaPlataforma =
-    Math.max(
-      0,
-      converterValorDigitado(
-        byId("vendaExternaTaxaPlataforma")?.value || 0
-      ) || 0
-    );
+    Number.isFinite(taxaPlataformaValor)
+      ? Math.max(0, taxaPlataformaValor)
+      : 0;
+
+  const taxaEntregaDigitada =
+    Number.isFinite(taxaEntregaValor)
+      ? Math.max(0, taxaEntregaValor)
+      : 0;
 
   const tipo =
     String(
@@ -2756,7 +2749,7 @@ function atualizarResumoVendaExterna() {
 
   const taxaEntregaAplicada =
     tipo === "delivery"
-      ? taxaEntrega
+      ? taxaEntregaDigitada
       : 0;
 
   const total =
@@ -3573,7 +3566,7 @@ if (vendaExternaTaxaPlataforma) {
   vendaExternaTaxaPlataforma.addEventListener(
     "blur",
     function () {
-      formatarCampoMoeda(this);
+      formatarCampoMoedaVendaExterna(this);
     }
   );
 }
@@ -3587,7 +3580,7 @@ if (vendaExternaTaxaEntrega) {
   vendaExternaTaxaEntrega.addEventListener(
     "blur",
     function () {
-      formatarCampoMoeda(this);
+      formatarCampoMoedaVendaExterna(this);
     }
   );
 }
