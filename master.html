@@ -2147,30 +2147,790 @@
               </h2>
 
               <p>
-                Indicadores gerenciais e análise do negócio.
+                Indicadores gerenciais completos da Lê Lanches.
               </p>
+
+            </div>
+
+
+            <button
+              id="btnAtualizarRelatorios"
+              class="btn-master btn-yellow"
+              type="button"
+            >
+              🔄 Atualizar relatório
+            </button>
+
+          </div>
+
+
+          <!-- ===============================================
+               FILTRO DE PERÍODO
+          ================================================ -->
+
+          <div class="reports-period-toolbar">
+
+            <div class="reports-period-filter">
+
+              <button
+                type="button"
+                class="reports-period-btn active"
+                data-reports-period="today"
+              >
+                Hoje
+              </button>
+
+              <button
+                type="button"
+                class="reports-period-btn"
+                data-reports-period="7"
+              >
+                7 dias
+              </button>
+
+              <button
+                type="button"
+                class="reports-period-btn"
+                data-reports-period="30"
+              >
+                30 dias
+              </button>
+
+              <button
+                type="button"
+                class="reports-period-btn"
+                data-reports-period="month"
+              >
+                Este mês
+              </button>
+
+              <button
+                type="button"
+                class="reports-period-btn"
+                data-reports-period="custom"
+              >
+                Personalizado
+              </button>
+
+            </div>
+
+
+            <div
+              id="masterRelatoriosPeriodoPersonalizado"
+              class="reports-custom-period hidden"
+            >
+
+              <div class="reports-date-field">
+
+                <label for="masterRelatoriosDataInicio">
+                  De
+                </label>
+
+                <input
+                  type="date"
+                  id="masterRelatoriosDataInicio"
+                >
+
+              </div>
+
+
+              <div class="reports-date-field">
+
+                <label for="masterRelatoriosDataFim">
+                  Até
+                </label>
+
+                <input
+                  type="date"
+                  id="masterRelatoriosDataFim"
+                >
+
+              </div>
+
+
+              <button
+                type="button"
+                id="btnAplicarPeriodoRelatorios"
+                class="btn-master btn-secondary"
+              >
+                Aplicar
+              </button>
 
             </div>
 
           </div>
 
 
-          <div class="master-placeholder">
+          <div class="reports-period-label">
 
             <span>
-              📈
+              Período analisado
             </span>
 
-            <h3>
-              Relatórios Gerenciais
-            </h3>
-
-            <p>
-              Produtos mais vendidos, mais lucrativos,
-              evolução financeira e demais indicadores.
-            </p>
+            <strong id="masterRelatoriosPeriodoLabel">
+              Hoje
+            </strong>
 
           </div>
+
+
+          <!-- ===============================================
+               RESUMO FINANCEIRO
+          ================================================ -->
+
+          <div class="reports-summary-grid">
+
+            <article class="reports-summary-card">
+
+              <span class="reports-summary-icon">
+                🧾
+              </span>
+
+              <div>
+
+                <span>
+                  Pedidos
+                </span>
+
+                <strong id="masterRelatoriosPedidos">
+                  0
+                </strong>
+
+                <small>
+                  Pedidos válidos no período
+                </small>
+
+              </div>
+
+            </article>
+
+
+            <article class="reports-summary-card revenue">
+
+              <span class="reports-summary-icon">
+                💰
+              </span>
+
+              <div>
+
+                <span>
+                  Faturamento
+                </span>
+
+                <strong id="masterRelatoriosFaturamento">
+                  R$ 0,00
+                </strong>
+
+                <small>
+                  Produtos + taxas de entrega
+                </small>
+
+              </div>
+
+            </article>
+
+
+            <article class="reports-summary-card cost">
+
+              <span class="reports-summary-icon">
+                🧮
+              </span>
+
+              <div>
+
+                <span>
+                  Custo dos produtos
+                </span>
+
+                <strong id="masterRelatoriosCusto">
+                  R$ 0,00
+                </strong>
+
+                <small>
+                  Custo das vendas
+                </small>
+
+              </div>
+
+            </article>
+
+
+            <article class="reports-summary-card expense">
+
+              <span class="reports-summary-icon">
+                💸
+              </span>
+
+              <div>
+
+                <span>
+                  Despesas
+                </span>
+
+                <strong id="masterRelatoriosDespesas">
+                  R$ 0,00
+                </strong>
+
+                <small>
+                  Despesas ativas
+                </small>
+
+              </div>
+
+            </article>
+
+
+            <article class="reports-summary-card profit">
+
+              <span class="reports-summary-icon">
+                💵
+              </span>
+
+              <div>
+
+                <span>
+                  Lucro líquido
+                </span>
+
+                <strong id="masterRelatoriosLucroLiquido">
+                  R$ 0,00
+                </strong>
+
+                <small>
+                  Faturamento - custos - despesas
+                </small>
+
+              </div>
+
+            </article>
+
+
+            <article class="reports-summary-card">
+
+              <span class="reports-summary-icon">
+                🛒
+              </span>
+
+              <div>
+
+                <span>
+                  Ticket médio
+                </span>
+
+                <strong id="masterRelatoriosTicketMedio">
+                  R$ 0,00
+                </strong>
+
+                <small>
+                  Média por pedido
+                </small>
+
+              </div>
+
+            </article>
+
+          </div>
+
+
+          <!-- ===============================================
+               INDICADORES SECUNDÁRIOS
+          ================================================ -->
+
+          <div class="reports-secondary-grid">
+
+            <article class="reports-secondary-card">
+
+              <span>
+                Venda de produtos
+              </span>
+
+              <strong id="masterRelatoriosVendaProdutos">
+                R$ 0,00
+              </strong>
+
+            </article>
+
+
+            <article class="reports-secondary-card">
+
+              <span>
+                Taxas de entrega
+              </span>
+
+              <strong id="masterRelatoriosTaxasEntrega">
+                R$ 0,00
+              </strong>
+
+            </article>
+
+
+            <article class="reports-secondary-card">
+
+              <span>
+                Lucro bruto
+              </span>
+
+              <strong id="masterRelatoriosLucroBruto">
+                R$ 0,00
+              </strong>
+
+            </article>
+
+
+            <article class="reports-secondary-card">
+
+              <span>
+                Margem bruta
+              </span>
+
+              <strong id="masterRelatoriosMargemBruta">
+                0,0%
+              </strong>
+
+            </article>
+
+
+            <article class="reports-secondary-card">
+
+              <span>
+                Margem líquida
+              </span>
+
+              <strong id="masterRelatoriosMargemLiquida">
+                0,0%
+              </strong>
+
+            </article>
+
+          </div>
+
+
+          <!-- ===============================================
+               RANKINGS
+          ================================================ -->
+
+          <div class="reports-panels-grid">
+
+            <section class="master-panel">
+
+              <div class="panel-title">
+
+                <div>
+
+                  <h3>
+                    🔥 Produtos mais vendidos
+                  </h3>
+
+                  <p>
+                    Ranking por quantidade vendida.
+                  </p>
+
+                </div>
+
+              </div>
+
+
+              <div
+                id="masterRelatoriosMaisVendidos"
+                class="panel-list"
+              >
+
+                <div class="master-empty">
+                  Nenhuma venda encontrada no período.
+                </div>
+
+              </div>
+
+            </section>
+
+
+            <section class="master-panel">
+
+              <div class="panel-title">
+
+                <div>
+
+                  <h3>
+                    💎 Produtos mais lucrativos
+                  </h3>
+
+                  <p>
+                    Ranking por lucro bruto gerado.
+                  </p>
+
+                </div>
+
+              </div>
+
+
+              <div
+                id="masterRelatoriosMaisLucrativos"
+                class="panel-list"
+              >
+
+                <div class="master-empty">
+                  Nenhuma venda encontrada no período.
+                </div>
+
+              </div>
+
+            </section>
+
+          </div>
+
+
+          <!-- ===============================================
+               PRODUTOS DETALHADOS
+          ================================================ -->
+
+          <section class="master-panel reports-section-gap">
+
+            <div class="panel-title">
+
+              <div>
+
+                <h3>
+                  🍔 Desempenho por produto
+                </h3>
+
+                <p>
+                  Quantidade, faturamento, custo, lucro e margem.
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <div class="table-wrap">
+
+              <table class="master-table reports-products-table">
+
+                <thead>
+
+                  <tr>
+
+                    <th>
+                      Produto
+                    </th>
+
+                    <th>
+                      Qtd.
+                    </th>
+
+                    <th>
+                      Faturamento
+                    </th>
+
+                    <th>
+                      Custo
+                    </th>
+
+                    <th>
+                      Lucro bruto
+                    </th>
+
+                    <th>
+                      Margem
+                    </th>
+
+                  </tr>
+
+                </thead>
+
+
+                <tbody id="masterRelatoriosProdutosTabela">
+
+                  <tr>
+
+                    <td
+                      colspan="6"
+                      class="table-empty"
+                    >
+                      Nenhum produto encontrado no período.
+                    </td>
+
+                  </tr>
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </section>
+
+
+          <!-- ===============================================
+               DESPESAS
+          ================================================ -->
+
+          <section class="master-panel reports-section-gap">
+
+            <div class="panel-title">
+
+              <div>
+
+                <h3>
+                  💸 Despesas por categoria
+                </h3>
+
+                <p>
+                  Participação de cada categoria nas despesas do período.
+                </p>
+
+              </div>
+
+
+              <button
+                type="button"
+                class="panel-link"
+                data-go-page="despesas"
+              >
+                Abrir despesas
+              </button>
+
+            </div>
+
+
+            <div class="table-wrap">
+
+              <table class="master-table reports-expenses-table">
+
+                <thead>
+
+                  <tr>
+
+                    <th>
+                      Categoria
+                    </th>
+
+                    <th>
+                      Lançamentos
+                    </th>
+
+                    <th>
+                      Total
+                    </th>
+
+                    <th>
+                      Participação
+                    </th>
+
+                  </tr>
+
+                </thead>
+
+
+                <tbody id="masterRelatoriosDespesasTabela">
+
+                  <tr>
+
+                    <td
+                      colspan="4"
+                      class="table-empty"
+                    >
+                      Nenhuma despesa encontrada no período.
+                    </td>
+
+                  </tr>
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </section>
+
+
+          <!-- ===============================================
+               ESTOQUE
+          ================================================ -->
+
+          <div class="reports-stock-summary-grid reports-section-gap">
+
+            <article class="reports-stock-card">
+
+              <span class="reports-stock-icon">
+                📦
+              </span>
+
+              <div>
+
+                <span>
+                  Itens controlados
+                </span>
+
+                <strong id="masterRelatoriosEstoqueItens">
+                  0
+                </strong>
+
+              </div>
+
+            </article>
+
+
+            <article class="reports-stock-card">
+
+              <span class="reports-stock-icon">
+                ⚠️
+              </span>
+
+              <div>
+
+                <span>
+                  Estoque baixo
+                </span>
+
+                <strong id="masterRelatoriosEstoqueBaixo">
+                  0
+                </strong>
+
+              </div>
+
+            </article>
+
+
+            <article class="reports-stock-card">
+
+              <span class="reports-stock-icon">
+                ❌
+              </span>
+
+              <div>
+
+                <span>
+                  Esgotados
+                </span>
+
+                <strong id="masterRelatoriosEstoqueEsgotado">
+                  0
+                </strong>
+
+              </div>
+
+            </article>
+
+
+            <article class="reports-stock-card">
+
+              <span class="reports-stock-icon">
+                💰
+              </span>
+
+              <div>
+
+                <span>
+                  Valor em estoque
+                </span>
+
+                <strong id="masterRelatoriosValorEstoque">
+                  R$ 0,00
+                </strong>
+
+              </div>
+
+            </article>
+
+          </div>
+
+
+          <section class="master-panel reports-section-gap">
+
+            <div class="panel-title">
+
+              <div>
+
+                <h3>
+                  ⚠️ Itens com estoque baixo
+                </h3>
+
+                <p>
+                  Itens que atingiram ou ficaram abaixo do estoque mínimo.
+                </p>
+
+              </div>
+
+
+              <button
+                type="button"
+                class="panel-link"
+                data-go-page="estoque"
+              >
+                Abrir estoque
+              </button>
+
+            </div>
+
+
+            <div class="table-wrap">
+
+              <table class="master-table reports-stock-table">
+
+                <thead>
+
+                  <tr>
+
+                    <th>
+                      Item
+                    </th>
+
+                    <th>
+                      Tipo
+                    </th>
+
+                    <th>
+                      Estoque atual
+                    </th>
+
+                    <th>
+                      Mínimo
+                    </th>
+
+                    <th>
+                      Custo médio
+                    </th>
+
+                    <th>
+                      Valor em estoque
+                    </th>
+
+                    <th>
+                      Status
+                    </th>
+
+                  </tr>
+
+                </thead>
+
+
+                <tbody id="masterRelatoriosEstoqueTabela">
+
+                  <tr>
+
+                    <td
+                      colspan="7"
+                      class="table-empty"
+                    >
+                      Nenhum item com estoque baixo.
+                    </td>
+
+                  </tr>
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </section>
+
+
+          <div
+            id="masterRelatoriosMensagem"
+            class="master-form-message"
+          ></div>
 
         </section>
 
