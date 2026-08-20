@@ -2012,6 +2012,21 @@ function converterValorDigitado(valor) {
   return Number.isFinite(numero) ? numero : NaN;
 }
 
+function formatarCampoMoeda(input) {
+  if (!input) return;
+
+  const numero = converterValorDigitado(input.value);
+
+  if (!Number.isFinite(numero) || numero < 0) {
+    input.value = "0,00";
+    atualizarResumoVendaExterna();
+    return;
+  }
+
+  input.value = numero.toFixed(2).replace(".", ",");
+  atualizarResumoVendaExterna();
+}
+
 function adicionarItemEdicao() {
   if (!pedidoEmEdicao) {
     alert("Nenhum pedido selecionado.");
@@ -2460,8 +2475,8 @@ function abrirModalVendaExterna() {
   if (cliente) cliente.value = "";
   if (tipo) tipo.value = "retirada";
   if (busca) busca.value = "";
-  if (taxaPlataforma) taxaPlataforma.value = "0";
-  if (taxaEntrega) taxaEntrega.value = "0";
+  if (taxaPlataforma) taxaPlataforma.value = "0,00";
+  if (taxaEntrega) taxaEntrega.value = "0,00";
   if (observacao) observacao.value = "";
 
   renderizarCarrinhoVendaExterna();
@@ -3534,12 +3549,26 @@ if (vendaExternaTaxaPlataforma) {
     "input",
     atualizarResumoVendaExterna
   );
+
+  vendaExternaTaxaPlataforma.addEventListener(
+    "blur",
+    function () {
+      formatarCampoMoeda(this);
+    }
+  );
 }
 
 if (vendaExternaTaxaEntrega) {
   vendaExternaTaxaEntrega.addEventListener(
     "input",
     atualizarResumoVendaExterna
+  );
+
+  vendaExternaTaxaEntrega.addEventListener(
+    "blur",
+    function () {
+      formatarCampoMoeda(this);
+    }
   );
 }
 
