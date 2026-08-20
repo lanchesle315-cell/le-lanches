@@ -23,14 +23,10 @@ const CHAVE_PIX = '';
 ========================================================= */
 
 const REGRAS_ENTREGA_PADRAO = [
-  { km_min: 0, km_max: 2, fee: 4, active: true },
-  { km_min: 2.01, km_max: 3, fee: 5, active: true },
-  { km_min: 3.01, km_max: 4, fee: 6, active: true },
-  { km_min: 4.01, km_max: 6, fee: 8, active: true },
-  { km_min: 6.01, km_max: 7, fee: 9, active: true },
-  { km_min: 7.01, km_max: 8, fee: 11, active: true },
-  { km_min: 8.01, km_max: 9, fee: 13, active: true },
-  { km_min: 9.01, km_max: 10, fee: 15, active: true }
+  { km_min: 0, km_max: 3, fee: 5, active: true },
+  { km_min: 3.000001, km_max: 6, fee: 8, active: true },
+  { km_min: 6.000001, km_max: 8, fee: 11, active: true },
+  { km_min: 8.000001, km_max: 12, fee: 15, active: true }
 ];
 
 
@@ -278,7 +274,161 @@ const INGREDIENTES_POR_LANCHE = {
    PRODUTOS COM OPÇÕES
 ========================================================= */
 
-const PRODUTOS_COM_OPCOES = {};
+const PRODUTOS_COM_OPCOES = {
+
+  agua: {
+    nome: 'Água',
+    preco: 4,
+    tipo: 'bebida',
+    tituloOpcao: 'Escolha a água',
+    opcoes: [
+      'Com gás',
+      'Sem gás'
+    ]
+  },
+
+  delvalle450: {
+    nome: 'Suco Del Valle 450ml',
+    preco: 6,
+    tipo: 'bebida',
+    tituloOpcao: 'Escolha o sabor',
+    opcoes: [
+      'Uva',
+      'Laranja'
+    ]
+  },
+
+  bellas500: {
+    nome: 'Suco Bellas 500ml',
+    preco: 10,
+    tipo: 'bebida',
+    tituloOpcao: 'Escolha o sabor',
+    opcoes: [
+      'Goiaba',
+      'Laranja',
+      'Caju',
+      'Maracujá',
+      'Acerola',
+      'Guaraná com açaí'
+    ]
+  },
+
+  refriLata: {
+    nome: 'Refrigerante Lata',
+    preco: 6,
+    tipo: 'bebida',
+    tituloOpcao: 'Escolha o refrigerante',
+    opcoes: [
+      'Coca-Cola',
+      'Coca-Cola Zero',
+      'Fanta Laranja',
+      'Fanta Uva',
+      'Sprite'
+    ]
+  },
+
+  cervejaLata: {
+    nome: 'Cerveja Lata',
+    preco: 6,
+    tipo: 'bebida',
+    tituloOpcao: 'Escolha a cerveja',
+    opcoes: [
+      'Brahma',
+      'Skol'
+    ]
+  },
+
+  cervejaLongNeck: {
+    nome: 'Cerveja Long Neck 330ml',
+    preco: 12,
+    tipo: 'bebida',
+    tituloOpcao: 'Escolha a cerveja',
+    opcoes: [
+      'Heineken'
+    ]
+  },
+
+  refri2l: {
+    nome: 'Refrigerante 2 Litros',
+    preco: 13,
+    tipo: 'bebida',
+    tituloOpcao: 'Escolha o refrigerante',
+    opcoes: [
+      'Fanta',
+      'Sprite'
+    ]
+  },
+
+  vedete2l: {
+    nome: 'Vedete 2 Litros',
+    preco: 11,
+    tipo: 'bebida',
+    tituloOpcao: 'Escolha o sabor',
+    opcoes: [
+      'Tubaína',
+      'Guaraná'
+    ]
+  },
+
+  coca2l: {
+    nome: 'Coca-Cola 2 Litros',
+    preco: 16,
+    tipo: 'bebida',
+    tituloOpcao: 'Escolha a Coca-Cola',
+    opcoes: [
+      'Coca-Cola',
+      'Coca-Cola Zero'
+    ]
+  },
+
+  adicional3: {
+    nome: 'Adicionais R$ 3,00',
+    preco: 3,
+    tipo: 'adicional',
+    tituloOpcao: 'Escolha o adicional',
+    opcoes: [
+      'Ovo',
+      'Mussarela',
+      'Salsicha'
+    ]
+  },
+
+  adicional5: {
+    nome: 'Adicionais R$ 5,00',
+    preco: 5,
+    tipo: 'adicional',
+    tituloOpcao: 'Escolha o adicional',
+    opcoes: [
+      'Bacon',
+      'Calabresa',
+      'Hambúrguer tradicional'
+    ]
+  },
+
+  adicional6: {
+    nome: 'Adicionais R$ 6,00',
+    preco: 6,
+    tipo: 'adicional',
+    tituloOpcao: 'Escolha o adicional',
+    opcoes: [
+      'Catupiry',
+      'Cheddar',
+      'Cream Cheese'
+    ]
+  },
+
+  adicional8: {
+    nome: 'Adicionais R$ 8,00',
+    preco: 8,
+    tipo: 'adicional',
+    tituloOpcao: 'Escolha o adicional',
+    opcoes: [
+      'Hambúrguer Smash',
+      'Frango',
+      'Costela'
+    ]
+  }
+};
 
 
 /* =========================================================
@@ -1821,8 +1971,11 @@ function ehLanche(nome) {
     !n.includes('agua') &&
     !n.includes('suco') &&
     !n.includes('refrigerante') &&
+    !n.includes('cerveja') &&
+    !n.includes('vedete') &&
     !n.includes('fritas') &&
-    !n.includes('batata')
+    !n.includes('batata') &&
+    !n.includes('adicionais')
   );
 }
 
@@ -1965,9 +2118,8 @@ function adicionarAoCarrinho(
   );
 }
 
-
 /* =========================================================
-   PERSONALIZAÇÃO
+   PERSONALIZAÇÃO DOS LANCHES
 ========================================================= */
 
 function abrirPersonalizacaoLanche(
@@ -2027,26 +2179,14 @@ function abrirPersonalizacaoLanche(
 
   lista.innerHTML = `
 
-    <div style="
-      display:grid;
-      gap:10px;
-      padding-bottom:15px;
-    ">
+    <div class="ll-options-list">
 
       ${
         ingredientes
           .map(
             ingrediente => `
 
-              <label style="
-                display:flex;
-                align-items:center;
-                gap:10px;
-                padding:12px;
-                border:1px solid rgba(255,255,255,.12);
-                border-radius:12px;
-                cursor:pointer;
-              ">
+              <label class="ll-option-item">
 
                 <input
                   type="checkbox"
@@ -2065,28 +2205,15 @@ function abrirPersonalizacaoLanche(
           .join('')
       }
 
-      <label style="
-        display:block;
-        margin-top:8px;
-      ">
+      <label class="ll-observacao-item">
 
-        <span style="
-          display:block;
-          margin-bottom:6px;
-        ">
+        <span>
           Observação do lanche:
         </span>
 
         <textarea
           id="observacaoItemLanche"
           placeholder="Ex.: carne bem passada, pouco molho..."
-          style="
-            width:100%;
-            min-height:70px;
-            border-radius:12px;
-            padding:10px;
-            box-sizing:border-box;
-          "
         ></textarea>
 
       </label>
@@ -2103,9 +2230,15 @@ function abrirPersonalizacaoLanche(
 }
 
 
+/* =========================================================
+   PRODUTOS COM OPÇÕES
+========================================================= */
+
 function abrirOpcoesProduto(
   produtoId
 ) {
+
+  garantirModalOpcoesForaDoCarrinho();
 
   const produto =
     PRODUTOS_COM_OPCOES[
@@ -2113,17 +2246,134 @@ function abrirOpcoesProduto(
     ];
 
   if (!produto) {
+
+    console.warn(
+      'Produto com opções não encontrado:',
+      produtoId
+    );
+
     return;
   }
 
-  produtoOpcoesAtual =
-    produto;
+  /*
+   * Adicionais possuem um fluxo diferente:
+   *
+   * 1. escolhe qual adicional;
+   * 2. escolhe em qual lanche será colocado.
+   */
+  if (
+    produto.tipo ===
+    'adicional'
+  ) {
 
-  abrirPersonalizacaoLanche(
-    produto
+    abrirEscolhaOpcaoAdicional(
+      produtoId
+    );
+
+    return;
+  }
+
+  produtoPersonalizacaoAtual =
+    null;
+
+  adicionalPendente =
+    null;
+
+  produtoOpcoesAtual = {
+    id:
+      produtoId,
+
+    ...produto
+  };
+
+  const modal =
+    byId(
+      'modalOpcoesProduto'
+    );
+
+  const titulo =
+    byId(
+      'tituloOpcoesProduto'
+    );
+
+  const descricao =
+    byId(
+      'descricaoOpcoesProduto'
+    );
+
+  const lista =
+    byId(
+      'listaOpcoesProduto'
+    );
+
+  if (
+    !modal ||
+    !titulo ||
+    !descricao ||
+    !lista
+  ) {
+    return;
+  }
+
+  titulo.innerText =
+    produto.nome;
+
+  descricao.innerText =
+    produto.tituloOpcao ||
+    'Escolha uma opção';
+
+  lista.innerHTML = `
+
+    <div class="ll-options-list">
+
+      ${
+        produto.opcoes
+          .map(
+            (
+              opcao,
+              index
+            ) => `
+
+              <label class="ll-option-item">
+
+                <input
+                  type="radio"
+                  name="opcaoProduto"
+                  value="${escaparHtml(opcao)}"
+                  ${
+                    produto.opcoes.length === 1 &&
+                    index === 0
+                      ? 'checked'
+                      : ''
+                  }
+                >
+
+                <span>
+                  ${escaparHtml(opcao)}
+                </span>
+
+              </label>
+
+            `
+          )
+          .join('')
+      }
+
+    </div>
+  `;
+
+  modal.style.display =
+    'flex';
+
+  modal.classList.add(
+    'ativo'
   );
 }
 
+
+/* =========================================================
+   FECHAR MODAL DE OPÇÕES
+========================================================= */
 
 function fecharOpcoesProduto() {
 
@@ -2164,7 +2414,17 @@ function fecharOpcoesProduto() {
 }
 
 
+/* =========================================================
+   CONFIRMAR MODAL
+========================================================= */
+
 function confirmarOpcoesProduto() {
+
+  /*
+   * ==========================================
+   * PERSONALIZAÇÃO DO LANCHE
+   * ==========================================
+   */
 
   if (
     produtoPersonalizacaoAtual
@@ -2189,7 +2449,9 @@ function confirmarOpcoesProduto() {
       [
         produtoPersonalizacaoAtual
           .observacaoBase || '',
+
         ...removidos,
+
         observacao
           ? `Obs: ${observacao}`
           : ''
@@ -2210,12 +2472,589 @@ function confirmarOpcoesProduto() {
     return;
   }
 
+
+  /*
+   * ==========================================
+   * ETAPA 1 DO ADICIONAL
+   * ==========================================
+   */
+
+  if (
+    produtoOpcoesAtual?.tipo ===
+    'adicional'
+  ) {
+
+    const selecionado =
+      document.querySelector(
+        'input[name="opcaoAdicional"]:checked'
+      );
+
+    if (!selecionado) {
+
+      alert(
+        'Escolha qual adicional deseja.'
+      );
+
+      return;
+    }
+
+    adicionalPendente = {
+      nome:
+        selecionado.value,
+
+      preco:
+        Number(
+          produtoOpcoesAtual.preco ||
+          0
+        )
+    };
+
+    abrirEscolhaLancheParaAdicional();
+
+    return;
+  }
+
+
+  /*
+   * ==========================================
+   * ETAPA 2 DO ADICIONAL
+   * ==========================================
+   */
+
+  if (
+    adicionalPendente &&
+    produtoOpcoesAtual?.tipo ===
+    'escolha-lanche-adicional'
+  ) {
+
+    const selecionado =
+      document.querySelector(
+        'input[name="lancheAdicional"]:checked'
+      );
+
+    if (!selecionado) {
+
+      alert(
+        'Escolha em qual lanche deseja colocar o adicional.'
+      );
+
+      return;
+    }
+
+    const index =
+      Number(
+        selecionado.value
+      );
+
+    aplicarAdicionalNoLanche(
+      index
+    );
+
+    return;
+  }
+
+
+  /*
+   * ==========================================
+   * BEBIDAS / PRODUTOS COM OPÇÃO
+   * ==========================================
+   */
+
+  if (
+    produtoOpcoesAtual
+  ) {
+
+    const selecionado =
+      document.querySelector(
+        'input[name="opcaoProduto"]:checked'
+      );
+
+    if (!selecionado) {
+
+      alert(
+        'Escolha uma opção antes de adicionar ao carrinho.'
+      );
+
+      return;
+    }
+
+    const opcao =
+      selecionado.value;
+
+    const observacao =
+      `Opção: ${opcao}`;
+
+    adicionarItemFinalAoCarrinho(
+      produtoOpcoesAtual.nome,
+      produtoOpcoesAtual.preco,
+      observacao
+    );
+
+    fecharOpcoesProduto();
+
+    return;
+  }
+
   fecharOpcoesProduto();
 }
 
 
 /* =========================================================
    ADICIONAIS
+========================================================= */
+
+function abrirEscolhaOpcaoAdicional(
+  produtoId
+) {
+
+  garantirModalOpcoesForaDoCarrinho();
+
+  const produto =
+    PRODUTOS_COM_OPCOES[
+      produtoId
+    ];
+
+  if (
+    !produto ||
+    produto.tipo !==
+      'adicional'
+  ) {
+    return;
+  }
+
+  const lanches =
+    carrinho.filter(
+      item =>
+        ehLanche(
+          item.nome
+        )
+    );
+
+  /*
+   * O cliente precisa primeiro colocar um lanche
+   * no carrinho para depois adicionar um extra.
+   */
+  if (
+    lanches.length === 0
+  ) {
+
+    alert(
+      'Adicione um lanche ao carrinho antes de escolher um adicional.'
+    );
+
+    return;
+  }
+
+  produtoPersonalizacaoAtual =
+    null;
+
+  adicionalPendente =
+    null;
+
+  produtoOpcoesAtual = {
+    id:
+      produtoId,
+
+    ...produto
+  };
+
+  const modal =
+    byId(
+      'modalOpcoesProduto'
+    );
+
+  const titulo =
+    byId(
+      'tituloOpcoesProduto'
+    );
+
+  const descricao =
+    byId(
+      'descricaoOpcoesProduto'
+    );
+
+  const lista =
+    byId(
+      'listaOpcoesProduto'
+    );
+
+  if (
+    !modal ||
+    !titulo ||
+    !descricao ||
+    !lista
+  ) {
+    return;
+  }
+
+  titulo.innerText =
+    produto.nome;
+
+  descricao.innerText =
+    'Qual adicional você deseja?';
+
+  lista.innerHTML = `
+
+    <div class="ll-options-list">
+
+      ${
+        produto.opcoes
+          .map(
+            opcao => `
+
+              <label class="ll-option-item">
+
+                <input
+                  type="radio"
+                  name="opcaoAdicional"
+                  value="${escaparHtml(opcao)}"
+                >
+
+                <span class="ll-option-content">
+
+                  <strong>
+                    ${escaparHtml(opcao)}
+                  </strong>
+
+                  <small>
+                    + ${formatarPreco(produto.preco)}
+                  </small>
+
+                </span>
+
+              </label>
+
+            `
+          )
+          .join('')
+      }
+
+    </div>
+  `;
+
+  modal.style.display =
+    'flex';
+
+  modal.classList.add(
+    'ativo'
+  );
+}
+
+
+/* =========================================================
+   ESCOLHER EM QUAL LANCHE COLOCAR O ADICIONAL
+========================================================= */
+
+function abrirEscolhaLancheParaAdicional() {
+
+  if (!adicionalPendente) {
+    return;
+  }
+
+  const lanches =
+    carrinho
+      .map(
+        (
+          item,
+          index
+        ) => ({
+          ...item,
+          index
+        })
+      )
+      .filter(
+        item =>
+          ehLanche(
+            item.nome
+          )
+      );
+
+  if (
+    lanches.length === 0
+  ) {
+
+    alert(
+      'Não há nenhum lanche no carrinho.'
+    );
+
+    fecharOpcoesProduto();
+
+    return;
+  }
+
+  const modal =
+    byId(
+      'modalOpcoesProduto'
+    );
+
+  const titulo =
+    byId(
+      'tituloOpcoesProduto'
+    );
+
+  const descricao =
+    byId(
+      'descricaoOpcoesProduto'
+    );
+
+  const lista =
+    byId(
+      'listaOpcoesProduto'
+    );
+
+  if (
+    !modal ||
+    !titulo ||
+    !descricao ||
+    !lista
+  ) {
+    return;
+  }
+
+  produtoOpcoesAtual = {
+    tipo:
+      'escolha-lanche-adicional'
+  };
+
+  titulo.innerText =
+    adicionalPendente.nome;
+
+  descricao.innerText =
+    'Em qual lanche você deseja colocar este adicional?';
+
+  lista.innerHTML = `
+
+    <div class="ll-options-list">
+
+      ${
+        lanches
+          .map(
+            (
+              item,
+              posicao
+            ) => {
+
+              const observacao =
+                item.observacao
+                  ? item.observacao
+                  : 'Sem alterações';
+
+              return `
+
+                <label class="ll-option-item ll-option-lanche">
+
+                  <input
+                    type="radio"
+                    name="lancheAdicional"
+                    value="${item.index}"
+                  >
+
+                  <span class="ll-option-content">
+
+                    <strong>
+                      ${escaparHtml(item.nome)}
+                    </strong>
+
+                    <small>
+                      Lanche ${posicao + 1}
+                      ${
+                        item.quantidade > 1
+                          ? ` • Quantidade: ${item.quantidade}`
+                          : ''
+                      }
+                    </small>
+
+                    <small>
+                      ${escaparHtml(observacao)}
+                    </small>
+
+                    <small class="ll-option-extra">
+                      + ${formatarPreco(adicionalPendente.preco)}
+                    </small>
+
+                  </span>
+
+                </label>
+
+              `;
+            }
+          )
+          .join('')
+      }
+
+    </div>
+  `;
+
+  modal.style.display =
+    'flex';
+
+  modal.classList.add(
+    'ativo'
+  );
+}
+
+
+/* =========================================================
+   APLICAR ADICIONAL NO LANCHE ESCOLHIDO
+========================================================= */
+
+function aplicarAdicionalNoLanche(
+  index
+) {
+
+  if (
+    !adicionalPendente ||
+    !carrinho[index]
+  ) {
+
+    return;
+  }
+
+  const item =
+    carrinho[index];
+
+  /*
+   * Se o item tiver quantidade maior que 1,
+   * separamos uma unidade para que o adicional
+   * não seja aplicado acidentalmente em todas.
+   *
+   * Exemplo:
+   * 2x X-Bacon
+   *
+   * Ao adicionar Bacon em apenas um:
+   *
+   * 1x X-Bacon normal
+   * 1x X-Bacon + Bacon
+   */
+  if (
+    Number(
+      item.quantidade
+    ) > 1
+  ) {
+
+    item.quantidade -=
+      1;
+
+    const novoPreco =
+      Number(
+        item.preco || 0
+      ) +
+      Number(
+        adicionalPendente.preco || 0
+      );
+
+    const novaObservacao =
+      item.observacao
+
+        ? item.observacao +
+          ' | Adicional: ' +
+          adicionalPendente.nome +
+          ' (+' +
+          formatarPreco(
+            adicionalPendente.preco
+          ) +
+          ')'
+
+        : 'Adicional: ' +
+          adicionalPendente.nome +
+          ' (+' +
+          formatarPreco(
+            adicionalPendente.preco
+          ) +
+          ')';
+
+    carrinho.push(
+      {
+        chave:
+          gerarChaveItem(
+            item.nome,
+            novoPreco,
+            novaObservacao
+          ),
+
+        nome:
+          item.nome,
+
+        preco:
+          novoPreco,
+
+        quantidade:
+          1,
+
+        observacao:
+          novaObservacao
+      }
+    );
+
+  } else {
+
+    item.preco =
+      Number(
+        item.preco || 0
+      ) +
+      Number(
+        adicionalPendente.preco || 0
+      );
+
+    item.observacao =
+      item.observacao
+
+        ? item.observacao +
+          ' | Adicional: ' +
+          adicionalPendente.nome +
+          ' (+' +
+          formatarPreco(
+            adicionalPendente.preco
+          ) +
+          ')'
+
+        : 'Adicional: ' +
+          adicionalPendente.nome +
+          ' (+' +
+          formatarPreco(
+            adicionalPendente.preco
+          ) +
+          ')';
+
+    /*
+     * Atualiza a chave porque preço e observação
+     * foram alterados.
+     */
+    item.chave =
+      gerarChaveItem(
+        item.nome,
+        item.preco,
+        item.observacao
+      );
+  }
+
+  const nomeAdicional =
+    adicionalPendente.nome;
+
+  const nomeLanche =
+    item.nome;
+
+  adicionalPendente =
+    null;
+
+  produtoOpcoesAtual =
+    null;
+
+  produtoPersonalizacaoAtual =
+    null;
+
+  renderizarCarrinho();
+
+  fecharOpcoesProduto();
+
+  mostrarToastLeLanches(
+    `${nomeAdicional} adicionado ao ${nomeLanche}.`
+  );
+}
+
+
+/* =========================================================
+   COMPATIBILIDADE COM CHAMADAS ANTIGAS DE ADICIONAL
 ========================================================= */
 
 function abrirAdicionalParaLanche(
@@ -2246,7 +3085,7 @@ function abrirAdicionalParaLanche(
   ) {
 
     alert(
-      'Escolha um lanche primeiro.'
+      'Adicione um lanche ao carrinho primeiro.'
     );
 
     return;
@@ -2255,44 +3094,14 @@ function abrirAdicionalParaLanche(
   adicionalPendente = {
     nome:
       nomeAdicional,
+
     preco:
       Number(
         precoAdicional || 0
       )
   };
 
-  const index =
-    lanches[0].index;
-
-  carrinho[index].preco +=
-    adicionalPendente.preco;
-
-  carrinho[index].observacao =
-    carrinho[index].observacao
-
-      ? carrinho[index].observacao +
-        ' | Adicional: ' +
-        nomeAdicional
-
-      : 'Adicional: ' +
-        nomeAdicional;
-
-  adicionalPendente =
-    null;
-
-  renderizarCarrinho();
-}
-
-
-function abrirEscolhaOpcaoAdicional() {
-
-  return;
-}
-
-
-function abrirEscolhaLancheParaAdicional() {
-
-  return;
+  abrirEscolhaLancheParaAdicional();
 }
 
 
@@ -2514,77 +3323,19 @@ function atualizarEntrega() {
 
 async function carregarRegrasEntrega() {
 
-  if (!supabaseClient) {
+  /*
+   * As regras abaixo são as regras oficiais do cardápio.
+   * Não carregamos a tabela antiga do Supabase para evitar
+   * que faixas antigas sobrescrevam os valores atuais.
+   */
+  regrasEntrega = [
+    ...REGRAS_ENTREGA_PADRAO
+  ];
 
-    regrasEntrega =
-      [
-        ...REGRAS_ENTREGA_PADRAO
-      ];
-
-    return;
-  }
-
-  try {
-
-    const {
-      data,
-      error
-    } =
-      await supabaseClient
-        .from(
-          'delivery_rules'
-        )
-        .select('*')
-        .eq(
-          'active',
-          true
-        )
-        .order(
-          'km_min',
-          {
-            ascending: true
-          }
-        );
-
-    if (error) {
-
-      console.error(
-        'Erro ao carregar regras de entrega:',
-        error
-      );
-
-      regrasEntrega =
-        [
-          ...REGRAS_ENTREGA_PADRAO
-        ];
-
-      return;
-    }
-
-    regrasEntrega =
-      data?.length
-        ? data
-        : [
-            ...REGRAS_ENTREGA_PADRAO
-          ];
-
-    console.log(
-      'Regras de entrega carregadas:',
-      regrasEntrega
-    );
-
-  } catch (erro) {
-
-    console.error(
-      'Falha ao carregar regras:',
-      erro
-    );
-
-    regrasEntrega =
-      [
-        ...REGRAS_ENTREGA_PADRAO
-      ];
-  }
+  console.log(
+    'Regras de entrega atuais:',
+    regrasEntrega
+  );
 }
 
 
@@ -2664,50 +3415,63 @@ function descobrirTaxaPorDistancia(
   distanciaKm
 ) {
 
+  const distancia =
+    Number(
+      distanciaKm
+    );
+
   if (
     !Number.isFinite(
-      distanciaKm
+      distancia
     ) ||
-    distanciaKm < 0
+    distancia < 0
   ) {
 
     return null;
   }
 
-  const regra =
-    regrasEntrega.find(
-      item => {
-
-        if (
-          item.active === false
-        ) {
-          return false;
-        }
-
-        const min =
-          Number(
-            item.km_min
-          );
-
-        const max =
-          Number(
-            item.km_max
-          );
-
-        return (
-          distanciaKm >= min &&
-          distanciaKm <= max
-        );
-      }
-    );
-
-  if (!regra) {
-
-    return null;
+  if (
+    distancia <= 3
+  ) {
+    return 5;
   }
 
-  return Number(
-    regra.fee || 0
+  if (
+    distancia <= 6
+  ) {
+    return 8;
+  }
+
+  if (
+    distancia <= 8
+  ) {
+    return 11;
+  }
+
+  if (
+    distancia <= 12
+  ) {
+    return 15;
+  }
+
+  /*
+   * Acima de 12 km:
+   * R$ 15,00 + R$ 2,00 por km excedente.
+   * Qualquer fração de km excedente conta como 1 km.
+   *
+   * Ex.: 12,1 km = 13 km para cobrança => R$ 17,00.
+   */
+  const kmExcedente =
+    Math.ceil(
+      distancia - 12
+    );
+
+  return (
+    15 +
+    (
+      kmExcedente *
+      2
+    )
   );
 }
 
@@ -3991,11 +4755,14 @@ async function finalizarPedido(
     ) {
 
       alert(
-        'Este endereço está fora da nossa área de entrega.'
+        'Não foi possível calcular a taxa de entrega.'
       );
 
       return;
     }
+
+    taxaEntrega =
+      taxaLocalizada;
   }
 
   const subtotal =
@@ -4036,7 +4803,8 @@ async function finalizarPedido(
       tipoEntrega === 'delivery'
         ? byId(
             'cidadeEntrega'
-          )?.value.trim() || 'Sorocaba'
+          )?.value.trim() ||
+          'Sorocaba'
         : 'Sorocaba',
 
     customer_notes:
@@ -4233,6 +5001,7 @@ async function finalizarPedido(
       null;
 
     limparCacheCoordenadaCliente();
+
     limparCacheEntrega();
 
     [
@@ -4457,7 +5226,7 @@ async function iniciarSistema() {
   );
 
   console.log(
-    'Lê Lanches 2.3 iniciado.'
+    'Lê Lanches 3.0 iniciado.'
   );
 }
 
