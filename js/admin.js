@@ -2759,12 +2759,8 @@ function atualizarResumoVendaExterna() {
 }
 
 function atualizarClientePadraoVendaExterna() {
-  const cliente = byId("vendaExternaCliente");
-
-  if (!cliente) return;
-
-  // O nome do cliente será preenchido manualmente pelo funcionário.
-  cliente.value = "";
+  // Não altera o nome do cliente ao trocar a origem.
+  // O funcionário preenche manualmente.
 }
 
 function validarVendaExterna() {
