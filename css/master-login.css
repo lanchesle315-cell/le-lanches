@@ -386,3 +386,26 @@ body {
   }
 
 }
+
+/* =========================================================
+   ESQUECI MINHA SENHA
+========================================================= */
+
+.forgot-password-box {
+  text-align: center;
+  margin-top: -6px;
+}
+
+.btn-esqueci-senha {
+  border: 0;
+  background: transparent;
+  color: #a9a9b2;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+}
+
+.btn-esqueci-senha:hover {
+  color: #ffc107;
+}
