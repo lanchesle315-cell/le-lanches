@@ -1,14 +1,17 @@
 /* ==========================================================
-   LE LANCHES
+   LÊ LANCHES
 ========================================================== */
 
 :root {
   --ll-bg: #0b0b0b;
   --ll-bg-soft: #111111;
+
   --ll-card: #171717;
   --ll-card-hover: #1d1d1d;
+
   --ll-border: #292929;
   --ll-border-soft: rgba(255, 255, 255, .08);
+
   --ll-text: #f7f7f7;
   --ll-muted: #a9a9a9;
 
@@ -77,6 +80,10 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+button {
+  cursor: pointer;
 }
 
 
@@ -211,7 +218,7 @@ textarea {
 
 
 /* ==========================================================
-   STATUS LOJA
+   STATUS DA LOJA
 ========================================================== */
 
 .status-loja {
@@ -256,7 +263,7 @@ textarea {
 
 
 /* ==========================================================
-   BOTÃO WHATSAPP HEADER
+   WHATSAPP HEADER
 ========================================================== */
 
 .ll-btn-whatsapp {
@@ -439,7 +446,7 @@ textarea {
 
 
 /* ==========================================================
-   PAINEL INFORMAÇÕES
+   PAINEL DE INFORMAÇÕES
 ========================================================== */
 
 .ll-info-panel {
@@ -538,7 +545,7 @@ textarea {
 
 
 /* ==========================================================
-   CATEGORY BAR
+   BARRA DE CATEGORIAS
 ========================================================== */
 
 .ll-category-bar {
@@ -630,11 +637,6 @@ textarea {
     box-shadow .2s ease;
 }
 
-
-/* ==========================================================
-   IMAGEM DOS BOTÕES DE CATEGORIA
-========================================================== */
-
 .ll-category-scroll a img {
   display: block;
 
@@ -652,6 +654,8 @@ textarea {
 
   object-fit: contain;
 
+  object-position: center;
+
   border-radius: 10px;
 
   transition:
@@ -668,11 +672,6 @@ textarea {
 
   white-space: nowrap;
 }
-
-
-/* ==========================================================
-   HOVER CATEGORIAS
-========================================================== */
 
 .ll-category-scroll a:hover {
   color:
@@ -907,7 +906,7 @@ textarea {
 
 
 /* ==========================================================
-   ÍCONE DO TÍTULO DA CATEGORIA
+   ÍCONES DAS SEÇÕES
 ========================================================== */
 
 .ll-section-icon {
@@ -950,9 +949,6 @@ textarea {
     0 8px 20px rgba(0, 0, 0, .18);
 }
 
-
-/* IMAGEM DENTRO DO ÍCONE */
-
 .ll-section-icon img {
   display: block;
 
@@ -973,16 +969,11 @@ textarea {
 
   padding: 0;
 
-  position: static;
-
   transform: none;
 
   transition:
     transform .2s ease;
 }
-
-
-/* efeito sutil */
 
 .ll-section:hover
 .ll-section-icon img {
@@ -1018,7 +1009,7 @@ textarea {
 
 
 /* ==========================================================
-   PRODUCT CARDS
+   CARDS DE PRODUTOS
 ========================================================== */
 
 .ll-product-card {
@@ -1093,7 +1084,7 @@ textarea {
 
 
 /* ==========================================================
-   TOPO CARD
+   TOPO DOS CARDS
 ========================================================== */
 
 .ll-product-top {
@@ -1108,11 +1099,6 @@ textarea {
 
   margin-bottom: 17px;
 }
-
-
-/* ==========================================================
-   CÓDIGO
-========================================================== */
 
 .ll-product-code {
   display: inline-flex;
@@ -1142,11 +1128,6 @@ textarea {
   letter-spacing: .8px;
 }
 
-
-/* ==========================================================
-   CATEGORIA NO CARD
-========================================================== */
-
 .ll-product-category {
   color: #717171;
 
@@ -1159,7 +1140,7 @@ textarea {
 
 
 /* ==========================================================
-   NOME DO PRODUTO
+   PRODUTO
 ========================================================== */
 
 .ll-product-name {
@@ -1173,11 +1154,6 @@ textarea {
 
   letter-spacing: -.5px;
 }
-
-
-/* ==========================================================
-   DESCRIÇÃO
-========================================================== */
 
 .ll-product-description {
   flex: 1;
@@ -1194,7 +1170,7 @@ textarea {
 
 
 /* ==========================================================
-   RODAPÉ PRODUTO
+   RODAPÉ DOS CARDS
 ========================================================== */
 
 .ll-product-footer {
@@ -1226,7 +1202,7 @@ textarea {
 
 
 /* ==========================================================
-   BOTÃO ADICIONAR
+   BOTÃO ADICIONAR / ESCOLHER
 ========================================================== */
 
 .ll-btn-add {
@@ -1279,7 +1255,20 @@ textarea {
 
 
 /* ==========================================================
-   FLOATING CART
+   ADICIONAIS
+========================================================== */
+
+#adicionais .ll-product-card {
+  min-height: 250px;
+}
+
+#adicionais .ll-product-description {
+  margin-bottom: 18px;
+}
+
+
+/* ==========================================================
+   CARRINHO FLUTUANTE
 ========================================================== */
 
 .ll-floating-cart {
@@ -1395,7 +1384,7 @@ textarea {
 
 
 /* ==========================================================
-   MODAL
+   MODAIS
 ========================================================== */
 
 .modal {
@@ -1415,6 +1404,9 @@ textarea {
     rgba(0, 0, 0, .78);
 
   backdrop-filter:
+    blur(9px);
+
+  -webkit-backdrop-filter:
     blur(9px);
 }
 
@@ -1451,6 +1443,13 @@ textarea {
 
   box-shadow:
     0 28px 80px rgba(0, 0, 0, .5);
+}
+
+#modalOpcoesProduto
+.modal-conteudo {
+  max-height: 88vh;
+
+  overflow-y: auto;
 }
 
 .modal-topo {
@@ -1505,16 +1504,270 @@ textarea {
   font-size: 24px;
 
   line-height: 1;
+
+  transition:
+    background .2s ease,
+    border-color .2s ease;
 }
 
 .fechar:hover {
   background:
     #252525;
+
+  border-color:
+    #454545;
 }
 
 .modal-corpo {
   padding:
     22px 24px 26px;
+}
+
+#descricaoOpcoesProduto {
+  margin-bottom: 4px;
+
+  color: #a8a8a8;
+
+  font-size: 14px;
+
+  line-height: 1.5;
+}
+
+
+/* ==========================================================
+   OPÇÕES DO MODAL
+   BEBIDAS / PERSONALIZAÇÃO / ADICIONAIS
+========================================================== */
+
+.ll-options-list {
+  display: grid;
+
+  gap: 10px;
+
+  padding:
+    14px 0 4px;
+}
+
+.ll-option-item {
+  width: 100%;
+
+  min-height: 58px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding:
+    13px 14px;
+
+  margin: 0;
+
+  color: #fff;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, .025),
+      rgba(255, 255, 255, .01)
+    ),
+    #171717;
+
+  border:
+    1px solid #303030;
+
+  border-radius: 14px;
+
+  cursor: pointer;
+
+  user-select: none;
+
+  transition:
+    transform .2s ease,
+    border-color .2s ease,
+    background .2s ease,
+    box-shadow .2s ease;
+}
+
+.ll-option-item:hover {
+  transform:
+    translateY(-1px);
+
+  background:
+    #1c1c1c;
+
+  border-color:
+    rgba(255, 189, 0, .45);
+}
+
+.ll-option-item:has(
+  input:checked
+) {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 189, 0, .12),
+      rgba(255, 122, 0, .06)
+    ),
+    #181818;
+
+  border-color:
+    rgba(255, 189, 0, .82);
+
+  box-shadow:
+    0 0 0 3px rgba(255, 189, 0, .05);
+}
+
+.ll-option-item input {
+  width: 19px;
+  height: 19px;
+
+  min-width: 19px;
+
+  flex:
+    0 0 19px;
+
+  margin: 0;
+
+  accent-color:
+    var(--ll-yellow);
+}
+
+.ll-option-item > span:not(
+  .ll-option-content
+) {
+  flex: 1;
+
+  min-width: 0;
+
+  color: #f4f4f4;
+
+  font-size: 14px;
+
+  font-weight: 800;
+}
+
+
+/* ==========================================================
+   CONTEÚDO DA OPÇÃO
+========================================================== */
+
+.ll-option-content {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 3px;
+
+  flex: 1;
+
+  min-width: 0;
+}
+
+.ll-option-content strong {
+  color: #fff;
+
+  font-size: 14px;
+
+  font-weight: 900;
+
+  line-height: 1.35;
+}
+
+.ll-option-content small {
+  display: block;
+
+  color: #8f8f8f;
+
+  font-size: 11px;
+
+  line-height: 1.45;
+}
+
+.ll-option-extra {
+  margin-top: 2px;
+
+  color:
+    var(--ll-yellow) !important;
+
+  font-weight: 950 !important;
+}
+
+
+/* ==========================================================
+   ESCOLHA DO LANCHE PARA ADICIONAL
+========================================================== */
+
+.ll-option-lanche {
+  align-items:
+    flex-start;
+
+  min-height: 76px;
+}
+
+.ll-option-lanche input {
+  margin-top: 2px;
+}
+
+
+/* ==========================================================
+   OBSERVAÇÃO DO LANCHE
+========================================================== */
+
+.ll-observacao-item {
+  display: grid;
+
+  gap: 7px;
+
+  margin-top: 8px;
+}
+
+.ll-observacao-item > span {
+  color: #d7d7d7;
+
+  font-size: 13px;
+
+  font-weight: 850;
+}
+
+.ll-observacao-item textarea {
+  width: 100%;
+
+  min-height: 82px;
+
+  resize: vertical;
+
+  padding:
+    12px 14px;
+
+  color: #fff;
+
+  background:
+    #0d0d0d;
+
+  border:
+    1px solid #323232;
+
+  border-radius: 12px;
+
+  outline: none;
+
+  transition:
+    border-color .2s ease,
+    box-shadow .2s ease;
+}
+
+.ll-observacao-item textarea::placeholder {
+  color: #6f6f6f;
+}
+
+.ll-observacao-item textarea:focus {
+  border-color:
+    rgba(255, 189, 0, .6);
+
+  box-shadow:
+    0 0 0 3px rgba(255, 189, 0, .07);
 }
 
 
@@ -1562,12 +1815,21 @@ textarea {
   border-radius: 16px;
 }
 
+.item-carrinho > div:first-child {
+  min-width: 180px;
+
+  flex:
+    1 1 260px;
+}
+
 .item-carrinho strong {
   color: #fff;
 }
 
 .item-carrinho small {
   color: #969696;
+
+  line-height: 1.5;
 }
 
 .acoes-carrinho {
@@ -1613,6 +1875,14 @@ textarea {
   color: #fff;
 
   font-weight: 900;
+
+  transition:
+    background .2s ease;
+}
+
+.qtd-btn:hover {
+  background:
+    #373737;
 }
 
 .btn-remover {
@@ -1631,6 +1901,14 @@ textarea {
   font-size: 12px;
 
   font-weight: 900;
+
+  transition:
+    background .2s ease;
+}
+
+.btn-remover:hover {
+  background:
+    rgba(255, 90, 90, .2);
 }
 
 
@@ -1723,6 +2001,22 @@ textarea {
   border-radius: 12px;
 
   outline: 0;
+
+  transition:
+    border-color .2s ease,
+    box-shadow .2s ease;
+}
+
+.campo input::placeholder,
+.campo textarea::placeholder {
+  color: #6f6f6f;
+}
+
+.campo select option {
+  color: #fff;
+
+  background:
+    #111;
 }
 
 .campo input:focus,
@@ -1762,8 +2056,28 @@ textarea {
   gap: 12px;
 }
 
-.aviso-entrega,
+.aviso-entrega {
+  padding:
+    10px 12px;
+
+  color: #aaa;
+
+  background:
+    rgba(255, 255, 255, .025);
+
+  border:
+    1px solid rgba(255, 255, 255, .05);
+
+  border-radius: 10px;
+
+  font-size: 12px;
+
+  line-height: 1.5;
+}
+
 .obs {
+  margin-top: 13px;
+
   color: #888;
 
   font-size: 12px;
@@ -1773,14 +2087,14 @@ textarea {
 
 
 /* ==========================================================
-   BOTÕES FINALIZAÇÃO
+   BOTÕES DE FINALIZAÇÃO
 ========================================================== */
 
 .acoes-final {
   display: grid;
 
   grid-template-columns:
-    1fr 1fr;
+    repeat(2, minmax(0, 1fr));
 
   gap: 10px;
 
@@ -1791,9 +2105,21 @@ textarea {
 .btn-finalizar {
   min-height: 46px;
 
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
   border-radius: 12px;
 
   font-weight: 900;
+
+  transition:
+    transform .2s ease,
+    filter .2s ease,
+    background .2s ease;
 }
 
 .btn-limpar {
@@ -1804,6 +2130,13 @@ textarea {
 
   border:
     1px solid #333;
+}
+
+.btn-limpar:hover {
+  color: #fff;
+
+  background:
+    #2b2b2b;
 }
 
 .btn-finalizar {
@@ -1821,12 +2154,17 @@ textarea {
 
 .btn-finalizar:hover {
   color: #111;
+
+  filter:
+    brightness(1.04);
 }
 
 .btn-finalizar:disabled {
   opacity: .5;
 
   cursor: not-allowed;
+
+  transform: none;
 }
 
 .ghost {
@@ -1843,11 +2181,20 @@ textarea {
     none !important;
 }
 
-#modalOpcoesProduto
-.modal-conteudo {
-  max-height: 88vh;
 
-  overflow-y: auto;
+/* ==========================================================
+   BOTÃO CONFIRMAR DO MODAL DE OPÇÕES
+========================================================== */
+
+#modalOpcoesProduto
+.acoes-final {
+  grid-template-columns:
+    minmax(120px, .7fr)
+    minmax(180px, 1.3fr);
+}
+
+#btnConfirmarOpcoesProduto {
+  width: 100%;
 }
 
 
@@ -1898,7 +2245,8 @@ textarea {
   pointer-events: none;
 
   transition:
-    .25s ease;
+    transform .25s ease,
+    opacity .25s ease;
 }
 
 .ll-toast i {
@@ -2017,6 +2365,13 @@ textarea {
   font-weight: 900;
 }
 
+.ll-footer-whatsapp:hover {
+  color: #70ed97;
+
+  border-color:
+    rgba(37, 211, 102, .4);
+}
+
 .ll-footer-bottom {
   display: flex;
 
@@ -2076,6 +2431,7 @@ textarea {
   .ll-info-panel {
     margin-top: 12px;
   }
+
 }
 
 
@@ -2122,7 +2478,7 @@ textarea {
   }
 
 
-  /* ÍCONE CATEGORIA */
+  /* ÍCONES */
 
   .ll-section-icon {
     width: 54px;
@@ -2183,7 +2539,7 @@ textarea {
   }
 
 
-  /* MODAL */
+  /* MODAIS */
 
   .modal {
     padding: 10px;
@@ -2202,6 +2558,8 @@ textarea {
     padding-right: 16px;
   }
 
+  .acoes-final,
+  #modalOpcoesProduto
   .acoes-final {
     grid-template-columns:
       1fr;
@@ -2210,6 +2568,7 @@ textarea {
   .ll-footer-bottom {
     padding-bottom: 70px;
   }
+
 }
 
 
@@ -2258,6 +2617,26 @@ textarea {
   .ll-category-scroll a span {
     font-size: 12px;
   }
+
+
+  /* OPÇÕES DO POPUP */
+
+  .ll-option-item {
+    min-height: 54px;
+
+    align-items: flex-start;
+
+    padding: 12px;
+  }
+
+  .ll-option-item input {
+    margin-top: 2px;
+  }
+
+  .ll-option-lanche {
+    min-height: 72px;
+  }
+
 }
 
 
@@ -2307,143 +2686,49 @@ textarea {
   .ll-search-control {
     min-height: 54px;
   }
-}
 
-
-/* ==========================================================
-   OPÇÕES DE BEBIDAS E ADICIONAIS
-========================================================== */
-
-.ll-option-grid {
-  display: grid;
-  gap: 10px;
-  padding: 14px 0 4px;
-}
-
-.ll-option-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-  width: 100%;
-  min-height: 58px;
-
-  padding: 13px 14px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, .025),
-      rgba(255, 255, 255, .01)
-    ),
-    #171717;
-
-  border:
-    1px solid #303030;
-
-  border-radius: 14px;
-
-  cursor: pointer;
-
-  transition:
-    border-color .2s ease,
-    background .2s ease,
-    transform .2s ease,
-    box-shadow .2s ease;
-}
-
-.ll-option-card:hover {
-  transform: translateY(-1px);
-
-  border-color:
-    rgba(255, 189, 0, .45);
-
-  background:
-    #1c1c1c;
-}
-
-.ll-option-card:has(input:checked) {
-  border-color:
-    rgba(255, 189, 0, .82);
-
-  background:
-    rgba(255, 189, 0, .07);
-
-  box-shadow:
-    0 0 0 3px rgba(255, 189, 0, .05);
-}
-
-.ll-option-card input {
-  width: 19px;
-  height: 19px;
-
-  flex:
-    0 0 19px;
-
-  accent-color:
-    var(--ll-yellow);
-}
-
-.ll-option-card > span {
-  flex: 1;
-  min-width: 0;
-}
-
-.ll-option-title {
-  display: block;
-
-  color: #fff;
-
-  font-size: 14px;
-  font-weight: 900;
-}
-
-.ll-option-subtitle {
-  display: block;
-
-  margin-top: 3px;
-
-  color: #8f8f8f;
-
-  font-size: 11px;
-  line-height: 1.45;
-}
-
-.ll-option-price {
-  flex: 0 0 auto;
-
-  color:
-    var(--ll-yellow);
-
-  font-size: 13px;
-  font-weight: 950;
-
-  white-space: nowrap;
-}
-
-
-/* ==========================================================
-   ADICIONAIS - CARDS MAIS COMPACTOS
-========================================================== */
-
-#adicionais .ll-product-card {
-  min-height: 250px;
-}
-
-
-/* ==========================================================
-   OPÇÕES - MOBILE
-========================================================== */
-
-@media (max-width: 576px) {
-
-  .ll-option-card {
-    align-items: flex-start;
-
-    padding: 12px;
+  .item-carrinho {
+    align-items:
+      stretch;
   }
 
-  .ll-option-price {
-    font-size: 12px;
+  .acoes-carrinho {
+    width: 100%;
+
+    justify-content:
+      space-between;
   }
+
+}
+
+
+/* ==========================================================
+   MOBILE MUITO PEQUENO
+========================================================== */
+
+@media (max-width: 380px) {
+
+  .ll-hero h1 {
+    font-size: 40px;
+
+    letter-spacing:
+      -2px;
+  }
+
+  .ll-search-box {
+    padding: 18px;
+  }
+
+  .ll-product-card {
+    padding: 18px;
+  }
+
+  .ll-product-name {
+    font-size: 22px;
+  }
+
+  .modal-topo h3 {
+    font-size: 22px;
+  }
+
 }
