@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Painel Master - Lê Lanches</title>
+
+  <link
+    rel="icon"
+    href="img/le-lanches-logo.png"
+  >
+
+  <link
+    rel="stylesheet"
+    href="css/master-login.css"
+  >
+</head>
+
+<body>
+
+  <main class="master-login-page">
+
+    <section class="master-login-card">
+
+      <!-- ===================================================
+           LOGO / CABEÇALHO
+      ==================================================== -->
+
+      <div class="master-login-logo">
+
+        <div class="logo-circle">
+          <img
+            src="img/le-lanches-logo.png"
+            alt="Logo Lê Lanches"
+          >
+        </div>
+
+        <span class="master-badge">
+          👑 ACESSO MASTER
+        </span>
+
+        <h1>
+          Painel Master
+        </h1>
+
+        <p>
+          Gestão financeira, estoque e administração da Lê Lanches.
+        </p>
+
+      </div>
+
+
+      <!-- ===================================================
+           FORMULÁRIO
+      ==================================================== -->
+
+      <form
+        id="masterLoginForm"
+        class="master-login-form"
+        autocomplete="off"
+      >
+
+        <!-- E-MAIL -->
+
+        <div class="form-group">
+
+          <label for="masterEmail">
+            E-mail
+          </label>
+
+          <div class="input-wrap">
+
+            <span class="input-icon">
+              ✉️
+            </span>
+
+            <input
+              type="email"
+              id="masterEmail"
+              name="masterEmail"
+              placeholder="Digite seu e-mail"
+              autocomplete="email"
+              required
+            >
+
+          </div>
+
+        </div>
+
+
+        <!-- SENHA -->
+
+        <div class="form-group">
+
+          <label for="masterSenha">
+            Senha
+          </label>
+
+          <div class="input-wrap">
+
+            <span class="input-icon">
+              🔒
+            </span>
+
+            <input
+              type="password"
+              id="masterSenha"
+              name="masterSenha"
+              placeholder="Digite sua senha"
+              autocomplete="current-password"
+              required
+            >
+
+            <button
+              type="button"
+              id="toggleMasterSenha"
+              class="toggle-senha"
+              aria-label="Mostrar ou ocultar senha"
+            >
+              Mostrar
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- MENSAGEM -->
+
+        <div
+          id="mensagemMasterLogin"
+          class="mensagem-login"
+          aria-live="polite"
+        ></div>
+
+
+        <!-- BOTÃO ENTRAR -->
+
+        <button
+          type="submit"
+          id="btnMasterLogin"
+          class="btn-master-login"
+        >
+          <span id="btnMasterLoginTexto">
+            Entrar no Painel Master
+          </span>
+        </button>
+
+      </form>
+
+
+      <!-- ===================================================
+           INFORMAÇÕES
+      ==================================================== -->
+
+      <div class="master-login-info">
+
+        <div class="security-box">
+
+          <span>
+            🛡️
+          </span>
+
+          <div>
+
+            <strong>
+              Área protegida
+            </strong>
+
+            <small>
+              Somente usuários autorizados com perfil Master podem acessar.
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <a
+          href="login.html"
+          class="link-admin"
+        >
+          ← Ir para o Painel Admin
+        </a>
+
+      </div>
+
+
+      <!-- ===================================================
+           RODAPÉ
+      ==================================================== -->
+
+      <footer class="master-login-footer">
+
+        <p>
+          Lê Lanches © 2026
+        </p>
+
+        <small>
+          Sistema de Gestão
+          <strong>SMATech</strong>
+        </small>
+
+      </footer>
+
+    </section>
+
+  </main>
+
+
+  <!-- =====================================================
+       SCRIPTS
+  ====================================================== -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+  <script
+    src="js/config.js"
+  ></script>
+
+  <script
+    src="js/master-login.js"
+  ></script>
+
+</body>
+</html>
