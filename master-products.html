@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Produtos e Insumos - Lê Lanches</title>
+
+  <link
+    rel="icon"
+    href="img/le-lanches-logo.png"
+  >
+
+  <link
+    rel="stylesheet"
+    href="css/master-products.css"
+  >
+
+</head>
+
+
+<body>
+
+  <!-- =====================================================
+       LOADING
+  ====================================================== -->
+
+  <div
+    id="productsLoading"
+    class="products-loading"
+  >
+
+    <div class="products-loading-card">
+
+      <img
+        src="img/le-lanches-logo.png"
+        alt="Lê Lanches"
+      >
+
+      <strong>
+        Validando acesso Master...
+      </strong>
+
+      <span>
+        Aguarde um momento.
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       APP
+  ====================================================== -->
+
+  <div
+    id="productsApp"
+    class="products-app hidden"
+  >
+
+
+    <!-- ===================================================
+         SIDEBAR
+    ==================================================== -->
+
+    <aside class="products-sidebar">
+
+      <div class="sidebar-brand">
+
+        <img
+          src="img/le-lanches-logo.png"
+          alt="Lê Lanches"
+        >
+
+        <div>
+
+          <span>
+            👑 MASTER
+          </span>
+
+          <strong>
+            Lê Lanches
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <nav class="sidebar-nav">
+
+        <a
+          href="master.html"
+          class="sidebar-item"
+        >
+          <span>🏠</span>
+          Painel Master
+        </a>
+
+        <a
+          href="master-products.html"
+          class="sidebar-item active"
+        >
+          <span>🍔</span>
+          Produtos e Insumos
+        </a>
+
+        <a
+          href="admin.html"
+          class="sidebar-item"
+        >
+          <span>⚙️</span>
+          Painel Admin
+        </a>
+
+        <a
+          href="index.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="sidebar-item"
+        >
+          <span>🌐</span>
+          Abrir Cardápio
+        </a>
+
+      </nav>
+
+
+      <div class="sidebar-bottom">
+
+        <div class="sidebar-user">
+
+          <div class="sidebar-user-icon">
+            👑
+          </div>
+
+          <div>
+
+            <strong id="productsMasterName">
+              Master
+            </strong>
+
+            <span id="productsMasterEmail">
+              carregando...
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <button
+          id="btnProductsLogout"
+          type="button"
+          class="btn-logout"
+        >
+          🚪 Sair
+        </button>
+
+      </div>
+
+    </aside>
+
+
+    <!-- ===================================================
+         CONTEÚDO
+    ==================================================== -->
+
+    <main class="products-content">
+
+
+      <!-- =================================================
+           HEADER
+      ================================================== -->
+
+      <header class="products-header">
+
+        <div>
+
+          <span class="header-label">
+            PAINEL MASTER
+          </span>
+
+          <h1>
+            Produtos e Insumos
+          </h1>
+
+          <p>
+            Controle custos, estoque, compras e fichas técnicas.
+          </p>
+
+        </div>
+
+
+        <div class="header-actions">
+
+          <button
+            id="btnRefreshProducts"
+            type="button"
+            class="btn-secondary"
+          >
+            🔄 Atualizar
+          </button>
+
+          <button
+            id="btnNewProduct"
+            type="button"
+            class="btn-primary"
+          >
+            + Novo item
+          </button>
+
+        </div>
+
+      </header>
+
+
+      <!-- =================================================
+           RESUMO
+      ================================================== -->
+
+      <section class="summary-grid">
+
+        <article class="summary-card">
+
+          <div class="summary-icon">
+            🍔
+          </div>
+
+          <div>
+
+            <span>
+              Produtos
+            </span>
+
+            <strong id="summaryProducts">
+              0
+            </strong>
+
+          </div>
+
+        </article>
+
+
+        <article class="summary-card">
+
+          <div class="summary-icon">
+            🥩
+          </div>
+
+          <div>
+
+            <span>
+              Insumos
+            </span>
+
+            <strong id="summaryIngredients">
+              0
+            </strong>
+
+          </div>
+
+        </article>
+
+
+        <article class="summary-card">
+
+          <div class="summary-icon">
+            ⚠️
+          </div>
+
+          <div>
+
+            <span>
+              Estoque baixo
+            </span>
+
+            <strong id="summaryLowStock">
+              0
+            </strong>
+
+          </div>
+
+        </article>
+
+
+        <article class="summary-card">
+
+          <div class="summary-icon">
+            💰
+          </div>
+
+          <div>
+
+            <span>
+              Valor em estoque
+            </span>
+
+            <strong id="summaryStockValue">
+              R$ 0,00
+            </strong>
+
+          </div>
+
+        </article>
+
+      </section>
+
+
+      <!-- =================================================
+           TOOLBAR
+      ================================================== -->
+
+      <section class="products-toolbar">
+
+        <div class="search-box">
+
+          <span>
+            🔎
+          </span>
+
+          <input
+            type="search"
+            id="productsSearch"
+            placeholder="Buscar produto, insumo, categoria ou código..."
+            autocomplete="off"
+          >
+
+        </div>
+
+
+        <div class="filter-box">
+
+          <button
+            type="button"
+            class="filter-btn active"
+            data-filter="all"
+          >
+            Todos
+          </button>
+
+          <button
+            type="button"
+            class="filter-btn"
+            data-filter="product"
+          >
+            🍔 Produtos
+          </button>
+
+          <button
+            type="button"
+            class="filter-btn"
+            data-filter="ingredient"
+          >
+            🥩 Insumos
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           LISTA
+      ================================================== -->
+
+      <section class="products-panel">
+
+        <div class="panel-header">
+
+          <div>
+
+            <h2>
+              Cadastro
+            </h2>
+
+            <p>
+              Produtos vendidos e insumos utilizados na produção.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div
+          id="productsList"
+          class="products-list"
+        >
+
+          <div class="empty-state">
+
+            <span>
+              🍔
+            </span>
+
+            <strong>
+              Nenhum item cadastrado
+            </strong>
+
+            <p>
+              Clique em “Novo item” para começar.
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+
+  <!-- =====================================================
+       MODAL PRODUTO / INSUMO
+  ====================================================== -->
+
+  <div
+    id="productModal"
+    class="modal hidden"
+    aria-hidden="true"
+  >
+
+    <div
+      class="modal-backdrop"
+      data-close-modal="product"
+    ></div>
+
+
+    <section
+      class="modal-dialog modal-large"
+      role="dialog"
+      aria-modal="true"
+    >
+
+      <header class="modal-header">
+
+        <div>
+
+          <span class="modal-badge">
+            🍔 CADASTRO
+          </span>
+
+          <h2 id="productModalTitle">
+            Novo item
+          </h2>
+
+          <p>
+            Cadastre um produto do cardápio ou um insumo.
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close"
+          data-close-modal="product"
+        >
+          ×
+        </button>
+
+      </header>
+
+
+      <form
+        id="productForm"
+        class="modal-form"
+      >
+
+        <input
+          type="hidden"
+          id="productId"
+        >
+
+
+        <!-- TIPO -->
+
+        <div class="form-section">
+
+          <div class="section-title">
+
+            <strong>
+              Tipo do item
+            </strong>
+
+            <span>
+              Escolha como será utilizado.
+            </span>
+
+          </div>
+
+
+          <div class="type-selector">
+
+            <label class="type-option">
+
+              <input
+                type="radio"
+                name="itemType"
+                value="product"
+                checked
+              >
+
+              <span class="type-card">
+
+                <span class="type-icon">
+                  🍔
+                </span>
+
+                <strong>
+                  Produto
+                </strong>
+
+                <small>
+                  Item vendido no cardápio.
+                </small>
+
+              </span>
+
+            </label>
+
+
+            <label class="type-option">
+
+              <input
+                type="radio"
+                name="itemType"
+                value="ingredient"
+              >
+
+              <span class="type-card">
+
+                <span class="type-icon">
+                  🥩
+                </span>
+
+                <strong>
+                  Insumo
+                </strong>
+
+                <small>
+                  Ingrediente ou mercadoria.
+                </small>
+
+              </span>
+
+            </label>
+
+          </div>
+
+        </div>
+
+
+        <!-- INFORMAÇÕES -->
+
+        <div class="form-section">
+
+          <div class="section-title">
+
+            <strong>
+              Informações
+            </strong>
+
+            <span>
+              Dados principais do item.
+            </span>
+
+          </div>
+
+
+          <div class="form-grid">
+
+            <div class="field full">
+
+              <label for="productName">
+                Nome *
+              </label>
+
+              <input
+                type="text"
+                id="productName"
+                maxlength="120"
+                placeholder="Ex.: Bacon"
+                required
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label for="productCode">
+                Código
+              </label>
+
+              <input
+                type="text"
+                id="productCode"
+                maxlength="60"
+                placeholder="Ex.: BACON"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label for="productCategory">
+                Categoria
+              </label>
+
+              <input
+                type="text"
+                id="productCategory"
+                maxlength="80"
+                placeholder="Ex.: Ingredientes"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label for="productUnit">
+                Unidade *
+              </label>
+
+              <select
+                id="productUnit"
+                required
+              >
+
+                <option value="un">
+                  Unidade (un)
+                </option>
+
+                <option value="kg">
+                  Quilograma (kg)
+                </option>
+
+                <option value="g">
+                  Grama (g)
+                </option>
+
+                <option value="l">
+                  Litro (L)
+                </option>
+
+                <option value="ml">
+                  Mililitro (ml)
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="field">
+
+              <label for="productSupplier">
+                Fornecedor
+              </label>
+
+              <input
+                type="text"
+                id="productSupplier"
+                maxlength="120"
+                placeholder="Opcional"
+              >
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- VALORES -->
+
+        <div class="form-section">
+
+          <div class="section-title">
+
+            <strong>
+              Valores
+            </strong>
+
+            <span>
+              Preço de venda e custo médio atual.
+            </span>
+
+          </div>
+
+
+          <div class="form-grid">
+
+            <div
+              id="salePriceField"
+              class="field"
+            >
+
+              <label for="productSalePrice">
+                Preço de venda
+              </label>
+
+              <div class="money-field">
+
+                <span>
+                  R$
+                </span>
+
+                <input
+                  type="number"
+                  id="productSalePrice"
+                  min="0"
+                  step="0.01"
+                  value="0"
+                >
+
+              </div>
+
+            </div>
+
+
+            <div class="field">
+
+              <label for="productAverageCost">
+                Custo médio
+              </label>
+
+              <div class="money-field">
+
+                <span>
+                  R$
+                </span>
+
+                <input
+                  type="number"
+                  id="productAverageCost"
+                  min="0"
+                  step="0.0001"
+                  value="0"
+                >
+
+              </div>
+
+              <small>
+                Para insumos, será recalculado automaticamente nas compras.
+              </small>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ESTOQUE -->
+
+        <div class="form-section">
+
+          <div class="section-title">
+
+            <strong>
+              Estoque
+            </strong>
+
+            <span>
+              O estoque mínimo é opcional.
+            </span>
+
+          </div>
+
+
+          <div class="form-grid">
+
+            <div class="field">
+
+              <label for="productStock">
+                Estoque atual
+              </label>
+
+              <input
+                type="number"
+                id="productStock"
+                min="0"
+                step="0.001"
+                value="0"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label for="productMinimumStock">
+                Estoque mínimo
+              </label>
+
+              <input
+                type="number"
+                id="productMinimumStock"
+                min="0"
+                step="0.001"
+                placeholder="Opcional"
+              >
+
+            </div>
+
+          </div>
+
+
+          <div class="switch-grid">
+
+            <label class="switch-card">
+
+              <div>
+
+                <strong>
+                  Controlar estoque
+                </strong>
+
+                <span>
+                  Ativa entradas e saídas.
+                </span>
+
+              </div>
+
+              <input
+                type="checkbox"
+                id="productStockControl"
+                checked
+              >
+
+            </label>
+
+
+            <label class="switch-card">
+
+              <div>
+
+                <strong>
+                  Disponível
+                </strong>
+
+                <span>
+                  Disponível para uso ou venda.
+                </span>
+
+              </div>
+
+              <input
+                type="checkbox"
+                id="productAvailable"
+                checked
+              >
+
+            </label>
+
+
+            <label class="switch-card">
+
+              <div>
+
+                <strong>
+                  Ativo
+                </strong>
+
+                <span>
+                  Mantém no sistema.
+                </span>
+
+              </div>
+
+              <input
+                type="checkbox"
+                id="productActive"
+                checked
+              >
+
+            </label>
+
+          </div>
+
+        </div>
+
+
+        <!-- OBSERVAÇÕES -->
+
+        <div class="field full">
+
+          <label for="productNotes">
+            Observações
+          </label>
+
+          <textarea
+            id="productNotes"
+            rows="3"
+            maxlength="500"
+            placeholder="Informações adicionais..."
+          ></textarea>
+
+        </div>
+
+
+        <div
+          id="productFormMessage"
+          class="form-message"
+        ></div>
+
+
+        <div class="modal-actions">
+
+          <button
+            type="button"
+            class="btn-secondary"
+            data-close-modal="product"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            id="btnSaveProduct"
+            class="btn-primary"
+          >
+            Salvar item
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+  </div>
+
+
+  <!-- =====================================================
+       MODAL ENTRADA DE ESTOQUE
+  ====================================================== -->
+
+  <div
+    id="stockModal"
+    class="modal hidden"
+    aria-hidden="true"
+  >
+
+    <div
+      class="modal-backdrop"
+      data-close-modal="stock"
+    ></div>
+
+
+    <section
+      class="modal-dialog"
+      role="dialog"
+      aria-modal="true"
+    >
+
+      <header class="modal-header">
+
+        <div>
+
+          <span class="modal-badge">
+            📦 ESTOQUE
+          </span>
+
+          <h2>
+            Entrada de estoque
+          </h2>
+
+          <p id="stockProductName">
+            Produto
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close"
+          data-close-modal="stock"
+        >
+          ×
+        </button>
+
+      </header>
+
+
+      <form
+        id="stockForm"
+        class="modal-form"
+      >
+
+        <input
+          type="hidden"
+          id="stockProductId"
+        >
+
+
+        <div class="current-stock-grid">
+
+          <div>
+
+            <span>
+              Estoque atual
+            </span>
+
+            <strong id="stockCurrentQuantity">
+              0
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Custo médio atual
+            </span>
+
+            <strong id="stockCurrentCost">
+              R$ 0,00
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="form-grid">
+
+          <div class="field">
+
+            <label for="stockEntryQuantity">
+              Quantidade comprada *
+            </label>
+
+            <input
+              type="number"
+              id="stockEntryQuantity"
+              min="0.001"
+              step="0.001"
+              required
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label for="stockEntryUnitCost">
+              Custo unitário *
+            </label>
+
+            <div class="money-field">
+
+              <span>
+                R$
+              </span>
+
+              <input
+                type="number"
+                id="stockEntryUnitCost"
+                min="0"
+                step="0.0001"
+                required
+              >
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="stock-preview">
+
+          <div>
+
+            <span>
+              Novo estoque
+            </span>
+
+            <strong id="stockNewQuantity">
+              0
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Novo custo médio
+            </span>
+
+            <strong id="stockNewAverageCost">
+              R$ 0,00
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Total da compra
+            </span>
+
+            <strong id="stockPurchaseTotal">
+              R$ 0,00
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="field full">
+
+          <label for="stockEntryNotes">
+            Observação
+          </label>
+
+          <textarea
+            id="stockEntryNotes"
+            rows="3"
+            maxlength="500"
+            placeholder="Ex.: Compra semanal..."
+          ></textarea>
+
+        </div>
+
+
+        <div
+          id="stockFormMessage"
+          class="form-message"
+        ></div>
+
+
+        <div class="modal-actions">
+
+          <button
+            type="button"
+            class="btn-secondary"
+            data-close-modal="stock"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            id="btnSaveStockEntry"
+            class="btn-primary"
+          >
+            Registrar entrada
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+  </div>
+
+
+  <!-- =====================================================
+       MODAL FICHA TÉCNICA
+  ====================================================== -->
+
+  <div
+    id="recipeModal"
+    class="modal hidden"
+    aria-hidden="true"
+  >
+
+    <div
+      class="modal-backdrop"
+      data-close-modal="recipe"
+    ></div>
+
+
+    <section
+      class="modal-dialog modal-large"
+      role="dialog"
+      aria-modal="true"
+    >
+
+      <header class="modal-header">
+
+        <div>
+
+          <span class="modal-badge">
+            🧾 FICHA TÉCNICA
+          </span>
+
+          <h2>
+            Ficha técnica
+          </h2>
+
+          <p id="recipeProductName">
+            Produto
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close"
+          data-close-modal="recipe"
+        >
+          ×
+        </button>
+
+      </header>
+
+
+      <div class="modal-form">
+
+        <input
+          type="hidden"
+          id="recipeProductId"
+        >
+
+
+        <div class="recipe-help">
+
+          <span>
+            💡
+          </span>
+
+          <p>
+            Informe quanto de cada insumo é utilizado para produzir
+            uma unidade deste produto.
+          </p>
+
+        </div>
+
+
+        <div
+          id="recipeIngredientsList"
+          class="recipe-list"
+        >
+
+          <div class="empty-state small">
+
+            <p>
+              Nenhum insumo cadastrado.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="recipe-summary">
+
+          <span>
+            Custo calculado do produto
+          </span>
+
+          <strong id="recipeCalculatedCost">
+            R$ 0,00
+          </strong>
+
+        </div>
+
+
+        <div
+          id="recipeFormMessage"
+          class="form-message"
+        ></div>
+
+
+        <div class="modal-actions">
+
+          <button
+            type="button"
+            class="btn-secondary"
+            data-close-modal="recipe"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="button"
+            id="btnSaveRecipe"
+            class="btn-primary"
+          >
+            Salvar ficha técnica
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </div>
+
+
+  <!-- =====================================================
+       SCRIPTS
+  ====================================================== -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+  <script
+    src="js/config.js"
+  ></script>
+
+  <script
+    src="js/master-products.js"
+  ></script>
+
+</body>
+
+</html>
