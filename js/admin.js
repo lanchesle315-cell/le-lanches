@@ -2765,34 +2765,12 @@ function atualizarResumoVendaExterna() {
 }
 
 function atualizarClientePadraoVendaExterna() {
-  const origem =
-    String(
-      byId("vendaExternaOrigem")?.value ||
-      "IFOOD"
-    ).toUpperCase();
-
-  const cliente =
-    byId("vendaExternaCliente");
+  const cliente = byId("vendaExternaCliente");
 
   if (!cliente) return;
 
-  const valorAtual =
-    String(cliente.value || "").trim();
-
-  const nomesPadrao = [
-    "Cliente iFood",
-    "Cliente 99",
-    "Cliente Balcão",
-    "Cliente Telefone",
-    ""
-  ];
-
-  if (
-    nomesPadrao.includes(valorAtual)
-  ) {
-    cliente.value =
-      obterNomeClientePadraoVendaExterna(origem);
-  }
+  // O nome do cliente será preenchido manualmente pelo funcionário.
+  cliente.value = "";
 }
 
 function validarVendaExterna() {
