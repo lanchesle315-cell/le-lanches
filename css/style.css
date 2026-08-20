@@ -2732,3 +2732,94 @@ button {
   }
 
 }
+
+/* ==========================================================
+   PIX
+========================================================== */
+
+.ll-pix-box {
+  margin-top: 10px;
+
+  padding: 14px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(37, 211, 102, .08),
+      rgba(255, 255, 255, .02)
+    ),
+    #101010;
+
+  border:
+    1px solid rgba(37, 211, 102, .25);
+
+  border-radius: 14px;
+}
+
+.ll-pix-info {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.ll-pix-label {
+  color: #8f8f8f;
+
+  font-size: 11px;
+
+  font-weight: 900;
+
+  letter-spacing: 1px;
+
+  text-transform: uppercase;
+}
+
+#chavePixTexto {
+  color: #fff;
+
+  font-size: 18px;
+
+  font-weight: 950;
+
+  letter-spacing: .5px;
+}
+
+.ll-btn-copy-pix {
+  width: 100%;
+
+  min-height: 44px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  margin-top: 12px;
+
+  border: 0;
+
+  border-radius: 11px;
+
+  background:
+    var(--ll-green);
+
+  color: #07150b;
+
+  font-weight: 950;
+
+  transition:
+    transform .2s ease,
+    filter .2s ease;
+}
+
+.ll-btn-copy-pix:hover {
+  transform:
+    translateY(-1px);
+
+  filter:
+    brightness(1.05);
+}
