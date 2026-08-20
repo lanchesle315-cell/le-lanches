@@ -6194,10 +6194,282 @@ async function salvarPedidoNoBanco(
 }
 
 /* =========================================================
+   VALIDAR DISPONIBILIDADE ANTES DE FINALIZAR
+========================================================= */
+
+function encontrarProdutoComOpcoesPorNome(nome) {
+
+  const nomeNormalizado =
+    removerAcentos(
+      String(nome || '').toLowerCase()
+    ).trim();
+
+  for (
+    const [produtoId, produto]
+    of Object.entries(PRODUTOS_COM_OPCOES)
+  ) {
+
+    const nomeProdutoNormalizado =
+      removerAcentos(
+        String(produto.nome || '').toLowerCase()
+      ).trim();
+
+    if (
+      nomeProdutoNormalizado ===
+      nomeNormalizado
+    ) {
+
+      return {
+        produtoId,
+        produto,
+        codigoProduto:
+          CODIGO_POR_PRODUTO_OPCOES[produtoId] || null
+      };
+    }
+  }
+
+  return null;
+}
+
+
+function obterOpcaoDaObservacao(observacao) {
+
+  const texto =
+    String(observacao || '');
+
+  const match =
+    texto.match(
+      /(?:^|\|\s*)Opção:\s*([^|]+)/i
+    );
+
+  return match
+    ? match[1].trim()
+    : null;
+}
+
+
+function obterAdicionaisDaObservacao(observacao) {
+
+  const texto =
+    String(observacao || '');
+
+  const adicionais = [];
+
+  const regex =
+    /Adicional:\s*([^|(]+?)(?=\s*\(\+|$|\|)/gi;
+
+  let match;
+
+  while (
+    (match = regex.exec(texto)) !== null
+  ) {
+
+    const nome =
+      String(match[1] || '').trim();
+
+    if (nome) {
+      adicionais.push(nome);
+    }
+  }
+
+  return adicionais;
+}
+
+
+function encontrarCodigoAdicionalPorOpcao(nomeOpcao) {
+
+  const opcaoNormalizada =
+    removerAcentos(
+      String(nomeOpcao || '').toLowerCase()
+    ).trim();
+
+  for (
+    const [produtoId, produto]
+    of Object.entries(PRODUTOS_COM_OPCOES)
+  ) {
+
+    if (
+      produto.tipo !== 'adicional'
+    ) {
+      continue;
+    }
+
+    const encontrou =
+      (produto.opcoes || []).find(
+        opcao =>
+          removerAcentos(
+            String(opcao || '').toLowerCase()
+          ).trim() === opcaoNormalizada
+      );
+
+    if (encontrou) {
+
+      return {
+
+        codigoProduto:
+          CODIGO_POR_PRODUTO_OPCOES[produtoId] || null,
+
+        opcao:
+          encontrou
+      };
+    }
+  }
+
+  return null;
+}
+
+
+async function validarDisponibilidadeCarrinho() {
+
+  await carregarDisponibilidadeProdutos();
+
+  for (
+    const item
+    of carrinho
+  ) {
+
+    /*
+     * PRODUTO NORMAL
+     */
+
+    const codigoProduto =
+      codigoProdutoPorNome(item.nome);
+
+    if (
+      codigoProduto &&
+      !estaDisponivelPorCodigo(codigoProduto)
+    ) {
+
+      return {
+        ok: false,
+        mensagem:
+          `${item.nome} ficou esgotado enquanto você montava o pedido.\n\n` +
+          'Remova o item do carrinho para continuar.'
+      };
+    }
+
+
+    /*
+     * PRODUTOS COM OPÇÕES
+     * Ex.: Refrigerante Lata → Coca-Cola
+     */
+
+    const produtoComOpcoes =
+      encontrarProdutoComOpcoesPorNome(item.nome);
+
+    if (produtoComOpcoes) {
+
+      const codigo =
+        produtoComOpcoes.codigoProduto;
+
+      if (
+        codigo &&
+        !estaDisponivelPorCodigo(codigo)
+      ) {
+
+        return {
+          ok: false,
+          mensagem:
+            `${item.nome} ficou esgotado enquanto você montava o pedido.\n\n` +
+            'Remova o item do carrinho para continuar.'
+        };
+      }
+
+      const opcao =
+        obterOpcaoDaObservacao(
+          item.observacao
+        );
+
+      if (
+        opcao &&
+        codigo &&
+        !opcaoEstaDisponivel(
+          codigo,
+          opcao
+        )
+      ) {
+
+        return {
+          ok: false,
+          mensagem:
+            `${opcao} ficou esgotado enquanto você montava o pedido.\n\n` +
+            'Remova o item e escolha outra opção.'
+        };
+      }
+    }
+
+
+    /*
+     * ADICIONAIS
+     * Ex.: Ovo, Mussarela, Bacon...
+     */
+
+    const adicionais =
+      obterAdicionaisDaObservacao(
+        item.observacao
+      );
+
+    for (
+      const adicional
+      of adicionais
+    ) {
+
+      const resultado =
+        encontrarCodigoAdicionalPorOpcao(
+          adicional
+        );
+
+      if (
+        !resultado?.codigoProduto
+      ) {
+        continue;
+      }
+
+      if (
+        !estaDisponivelPorCodigo(
+          resultado.codigoProduto
+        )
+      ) {
+
+        return {
+          ok: false,
+          mensagem:
+            `O adicional ${adicional} ficou indisponível.\n\n` +
+            'Remova o adicional para continuar.'
+        };
+      }
+
+      if (
+        !opcaoEstaDisponivel(
+          resultado.codigoProduto,
+          resultado.opcao
+        )
+      ) {
+
+        return {
+          ok: false,
+          mensagem:
+            `O adicional ${adicional} ficou esgotado enquanto você montava o pedido.\n\n` +
+            'Remova o adicional para continuar.'
+        };
+      }
+    }
+  }
+
+  return {
+    ok: true,
+    mensagem: ''
+  };
+}
+
+
+/* =========================================================
    FINALIZAR PEDIDO
 ========================================================= */
 
-async function finalizarPedido() {
+async function finalizarPedido(
+  enviarWhatsapp = true
+) {
 
   if (
     carrinho.length === 0
@@ -6211,12 +6483,8 @@ async function finalizarPedido() {
   }
 
 
-  const aberta =
-    await lojaAbertaAgora();
-
-
   if (
-    !aberta
+    !(await lojaAbertaAgora())
   ) {
 
     alert(
@@ -6230,147 +6498,100 @@ async function finalizarPedido() {
 
 
   /*
-   * =======================================================
-   * CONFERE DISPONIBILIDADE ANTES DE FINALIZAR
-   * =======================================================
-   *
-   * Isso é importante porque o cliente pode ter colocado
-   * um produto no carrinho e, enquanto estava escolhendo
-   * o restante do pedido, o administrador pode ter
-   * congelado esse produto.
+   * CONFERE ESTOQUE NOVAMENTE
    */
 
-  await carregarDisponibilidadeProdutos();
+  try {
 
-
-  for (
-    const item
-    of carrinho
-  ) {
-
-    const codigoProduto =
-      codigoProdutoPorNome(
-        item.nome
-      );
-
+    const validacao =
+      await validarDisponibilidadeCarrinho();
 
     if (
-      codigoProduto &&
-      !estaDisponivelPorCodigo(
-        codigoProduto
-      )
+      !validacao.ok
     ) {
 
       alert(
-        `${item.nome} ficou esgotado enquanto você montava o pedido.\n\n` +
-        'Remova o item do carrinho para continuar.'
+        validacao.mensagem
       );
 
       return;
     }
+
+  } catch (erro) {
+
+    console.error(
+      'Erro ao conferir disponibilidade:',
+      erro
+    );
+
+    alert(
+      'Não foi possível conferir a disponibilidade dos produtos.\n\n' +
+      'Tente novamente.'
+    );
+
+    return;
   }
 
 
-  const nomeCliente =
-    byId(
-      'nomeCliente'
-    )?.value.trim() || '';
-
+  const nome =
+    byId('nomeCliente')?.value.trim() || '';
 
   const tipoEntrega =
-    byId(
-      'tipoEntrega'
-    )?.value ||
-    'retirada';
+    byId('tipoEntrega')?.value || 'retirada';
 
-
-  const formaPagamento =
-    byId(
-      'formaPagamento'
-    )?.value || '';
-
+  const pagamento =
+    byId('formaPagamento')?.value || '';
 
   const observacoes =
-    byId(
-      'observacoes'
-    )?.value.trim() || '';
+    byId('observacoes')?.value.trim() || '';
 
 
-  if (
-    !nomeCliente
-  ) {
+  if (!nome) {
 
     alert(
-      'Informe seu nome.'
+      'Digite seu nome.'
     );
-
-    byId(
-      'nomeCliente'
-    )?.focus();
 
     return;
   }
 
 
-  if (
-    !formaPagamento
-  ) {
+  if (!pagamento) {
 
     alert(
-      'Escolha a forma de pagamento.'
+      'Selecione a forma de pagamento.'
     );
-
-    byId(
-      'formaPagamento'
-    )?.focus();
 
     return;
   }
+
+
+  const endereco =
+    enderecoClienteTextoHumano();
 
 
   /*
-   * =======================================================
    * DELIVERY
-   * =======================================================
    */
 
-  let enderecoEntrega =
-    'Retirada no local';
-
-
   if (
-    tipoEntrega ===
-    'delivery'
+    tipoEntrega === 'delivery'
   ) {
 
     const cep =
-      byId(
-        'cepEntrega'
-      )?.value.trim() || '';
-
+      byId('cepEntrega')?.value.trim() || '';
 
     const rua =
-      byId(
-        'ruaEntrega'
-      )?.value.trim() || '';
-
+      byId('ruaEntrega')?.value.trim() || '';
 
     const numero =
-      byId(
-        'numeroEntrega'
-      )?.value.trim() || '';
-
+      byId('numeroEntrega')?.value.trim() || '';
 
     const bairro =
-      byId(
-        'bairroEntrega'
-      )?.value.trim() || '';
-
+      byId('bairroEntrega')?.value.trim() || '';
 
     const cidade =
-      byId(
-        'cidadeEntrega'
-      )?.value.trim() || '';
+      byId('cidadeEntrega')?.value.trim() || '';
 
 
     if (
@@ -6382,21 +6603,15 @@ async function finalizarPedido() {
     ) {
 
       alert(
-        'Preencha o endereço completo para entrega.'
+        'Digite o CEP e informe o número.'
       );
 
       return;
     }
 
 
-    /*
-     * Se ainda não calculou a distância,
-     * tenta calcular antes de finalizar.
-     */
-
     if (
-      distanciaEntregaKm ===
-      null
+      distanciaEntregaKm === null
     ) {
 
       await calcularEntregaAutomaticamente();
@@ -6404,154 +6619,171 @@ async function finalizarPedido() {
 
 
     if (
-      distanciaEntregaKm ===
-      null
+      distanciaEntregaKm === null
     ) {
 
       alert(
-        'Não foi possível calcular a entrega.\n\n' +
-        'Confira o CEP e o número.'
+        'Não foi possível calcular a entrega.'
       );
 
       return;
     }
 
 
-    enderecoEntrega =
-      enderecoClienteTextoHumano();
+    const taxaLocalizada =
+      descobrirTaxaPorDistancia(
+        distanciaEntregaKm
+      );
+
+
+    if (
+      taxaLocalizada === null
+    ) {
+
+      alert(
+        'Não foi possível calcular a taxa de entrega.'
+      );
+
+      return;
+    }
+
+
+    taxaEntrega =
+      taxaLocalizada;
   }
 
-
-  /*
-   * =======================================================
-   * VALORES
-   * =======================================================
-   */
 
   const subtotal =
     calcularSubtotal();
 
-
   const total =
     calcularTotal();
 
-
-  /*
-   * =======================================================
-   * ITENS PARA SALVAR
-   * =======================================================
-   */
-
-  const itensPedido =
-    carrinho.map(
-      item => ({
-
-        nome:
-          item.nome,
-
-        preco:
-          Number(
-            item.preco || 0
-          ),
-
-        quantidade:
-          Number(
-            item.quantidade || 0
-          ),
-
-        observacao:
-          item.observacao || ''
-
-      })
-    );
+  const complemento =
+    byId('complementoEntrega')?.value.trim() || '';
 
 
   /*
-   * =======================================================
-   * PAYLOAD DO PEDIDO
-   * =======================================================
+   * PAYLOAD ORIGINAL DO BANCO
    */
 
   const payload = {
 
     customer_name:
-      nomeCliente,
+      nome,
 
-    delivery_type:
+    customer_phone:
+      '',
+
+    order_type:
       tipoEntrega,
 
-    delivery_address:
-      enderecoEntrega,
+    customer_address:
+      tipoEntrega === 'delivery'
+        ? endereco
+        : null,
 
-    payment_method:
-      formaPagamento,
+    customer_neighborhood:
+      tipoEntrega === 'delivery'
+        ? byId('bairroEntrega')?.value.trim() || ''
+        : null,
+
+    customer_city:
+      tipoEntrega === 'delivery'
+        ? byId('cidadeEntrega')?.value.trim() || 'Sorocaba'
+        : 'Sorocaba',
+
+    customer_notes:
+      [
+        pagamento
+          ? `Pagamento: ${pagamento}`
+          : '',
+
+        observacoes
+          ? `Observações: ${observacoes}`
+          : '',
+
+        tipoEntrega === 'delivery' &&
+        complemento
+          ? `Complemento: ${complemento}`
+          : '',
+
+        tipoEntrega === 'delivery' &&
+        tempoEntregaTexto
+          ? `Tempo estimado: ${tempoEntregaTexto}`
+          : ''
+      ]
+        .filter(Boolean)
+        .join(' | '),
 
     items:
-      itensPedido,
+      carrinho.map(
+        item => ({
+          nome:
+            item.nome,
+
+          preco:
+            Number(item.preco),
+
+          quantidade:
+            Number(item.quantidade),
+
+          observacao:
+            item.observacao || ''
+        })
+      ),
 
     subtotal:
       subtotal,
 
     delivery_fee:
-      Number(
-        taxaEntrega || 0
-      ),
+      tipoEntrega === 'delivery'
+        ? taxaEntrega
+        : 0,
 
     total:
       total,
 
-    distance_km:
-      distanciaEntregaKm,
-
-    delivery_time:
-      tempoEntregaTexto,
-
-    notes:
-      observacoes,
+    delivery_distance_km:
+      tipoEntrega === 'delivery'
+        ? distanciaEntregaKm
+        : null,
 
     status:
       'novo'
-
   };
 
 
   /*
-   * =======================================================
    * BOTÃO
-   * =======================================================
    */
 
-  const btnFinalizar =
-    byId(
-      'btnFinalizar'
-    );
+  const botao =
+    enviarWhatsapp
+      ? byId('btnFinalizarWhatsapp')
+      : byId('btnFinalizar');
 
 
   const textoAnterior =
-    btnFinalizar
-      ? btnFinalizar.innerHTML
+    botao
+      ? botao.innerHTML
       : '';
-
-
-  if (
-    btnFinalizar
-  ) {
-
-    btnFinalizar.disabled =
-      true;
-
-
-    btnFinalizar.innerHTML =
-      'Enviando pedido...';
-  }
 
 
   try {
 
+    if (botao) {
+
+      botao.disabled =
+        true;
+
+      botao.innerHTML =
+        'Salvando pedido...';
+    }
+
+
     /*
-     * =====================================================
-     * SALVAR NO BANCO
-     * =====================================================
+     * SALVA NO SUPABASE
      */
 
     const pedido =
@@ -6561,118 +6793,86 @@ async function finalizarPedido() {
 
 
     /*
-     * =====================================================
-     * MENSAGEM WHATSAPP
-     * =====================================================
+     * MONTA WHATSAPP
      */
-
-    const linhasItens =
-      carrinho
-        .map(
-          item => {
-
-            let texto =
-              `• ${item.quantidade}x ${item.nome}` +
-              ` — ${formatarPreco(
-                Number(
-                  item.preco
-                ) *
-                Number(
-                  item.quantidade
-                )
-              )}`;
-
-
-            if (
-              item.observacao
-            ) {
-
-              texto +=
-                `\n  ↳ ${item.observacao}`;
-            }
-
-
-            return texto;
-          }
-        )
-        .join(
-          '\n'
-        );
-
 
     let mensagem =
-      `🍔 *NOVO PEDIDO - ${nomeLoja.toUpperCase()}*\n\n`;
+`🍔 *Pedido - ${nomeLoja}*
 
+📦 *Pedido:* #${pedido.id}
+👤 *Cliente:* ${nome}
+🏠 *Tipo do pedido:* ${formatarTipoEntregaTexto(tipoEntrega)}`;
 
-    /*
-     * Número do pedido
-     */
 
     if (
-      pedido?.id
+      tipoEntrega === 'delivery'
     ) {
 
-      mensagem +=
-        `🧾 *Pedido:* #${pedido.id}\n`;
-    }
+      mensagem += `
+📍 *Endereço:* ${endereco}`;
 
-
-    mensagem +=
-      `👤 *Cliente:* ${nomeCliente}\n`;
-
-
-    mensagem +=
-      `🚚 *Tipo:* ${formatarTipoEntregaTexto(
-        tipoEntrega
-      )}\n`;
-
-
-    /*
-     * Endereço
-     */
-
-    if (
-      tipoEntrega ===
-      'delivery'
-    ) {
-
-      mensagem +=
-        `📍 *Endereço:* ${enderecoEntrega}\n`;
-
-
-      if (
-        distanciaEntregaKm !==
-        null
-      ) {
-
-        mensagem +=
-          `📏 *Distância:* ${
-            Number(
-              distanciaEntregaKm
-            )
-              .toFixed(
-                2
-              )
-              .replace(
-                '.',
-                ','
-              )
-          } km\n`;
-      }
-
+      mensagem += `
+📏 *Distância:* ${Number(
+        distanciaEntregaKm
+      )
+        .toFixed(2)
+        .replace('.', ',')} km`;
 
       if (
         tempoEntregaTexto
       ) {
 
-        mensagem +=
-          `⏱️ *Previsão:* ${tempoEntregaTexto}\n`;
+        mensagem += `
+⏱️ *Tempo estimado:* ${tempoEntregaTexto}`;
       }
+
+    } else {
+
+      mensagem += `
+⏱️ *Tempo estimado:* ${formatarDuracao(
+        TEMPO_PREPARO_FIXO_MINUTOS * 60
+      )}`;
     }
 
 
-    mensagem +=
-      `💳 *Pagamento:* ${formaPagamento}\n`;
+    mensagem += `
+
+🍔 *Itens do pedido:*`;
+
+
+    payload.items.forEach(
+      item => {
+
+        mensagem += `
+━━━━━━━━━━━━━━
+🍟 *${item.quantidade}x ${item.nome}*
+💰 ${formatarPreco(
+          item.preco *
+          item.quantidade
+        )}`;
+
+        if (
+          item.observacao
+        ) {
+
+          mensagem += `
+📝 ${item.observacao}`;
+        }
+      }
+    );
+
+
+    mensagem += `
+
+━━━━━━━━━━━━━━
+💵 *Subtotal:* ${formatarPreco(subtotal)}
+🚚 *Taxa de entrega:* ${
+      tipoEntrega === 'delivery'
+        ? formatarPreco(taxaEntrega)
+        : formatarPreco(0)
+    }
+💲 *Total:* ${formatarPreco(total)}
+💳 *Pagamento:* ${pagamento}`;
 
 
     /*
@@ -6680,77 +6880,26 @@ async function finalizarPedido() {
      */
 
     if (
-      formaPagamento
+      pagamento
         .trim()
-        .toLowerCase() ===
-      'pix'
+        .toLowerCase() === 'pix'
     ) {
 
-      mensagem +=
-        `🔑 *Chave PIX:* ${CHAVE_PIX}\n`;
+      mensagem += `
+🔑 *Chave PIX:* ${CHAVE_PIX}`;
     }
-
-
-    mensagem +=
-      '\n━━━━━━━━━━━━━━━━━━━━\n';
-
-
-    mensagem +=
-      '*ITENS DO PEDIDO*\n\n';
-
-
-    mensagem +=
-      linhasItens;
-
-
-    mensagem +=
-      '\n\n━━━━━━━━━━━━━━━━━━━━\n';
-
-
-    mensagem +=
-      `💰 *Subtotal:* ${formatarPreco(
-        subtotal
-      )}\n`;
-
-
-    if (
-      tipoEntrega ===
-      'delivery'
-    ) {
-
-      mensagem +=
-        `🛵 *Taxa de entrega:* ${formatarPreco(
-          taxaEntrega
-        )}\n`;
-    }
-
-
-    mensagem +=
-      `💵 *TOTAL:* ${formatarPreco(
-        total
-      )}\n`;
 
 
     if (
       observacoes
     ) {
 
-      mensagem +=
-        `\n📝 *Observações do pedido:*\n${observacoes}\n`;
+      mensagem += `
+📌 *Observações:* ${observacoes}`;
     }
 
 
-    mensagem +=
-      '\nObrigado! 🍔❤️';
-
-
-    /*
-     * =====================================================
-     * WHATSAPP
-     * =====================================================
-     */
-
-    const numero =
+    const numeroWhatsappPedido =
       somenteNumeros(
         configuracaoLoja?.whatsapp_number ||
         numeroWhatsapp
@@ -6758,66 +6907,144 @@ async function finalizarPedido() {
 
 
     const url =
-      'https://wa.me/' +
-      numero +
-      '?text=' +
+      'https://api.whatsapp.com/send?phone=' +
+      numeroWhatsappPedido +
+      '&text=' +
       encodeURIComponent(
         mensagem
       );
 
 
-    abrirWhatsapp(
-      url
-    );
-
-
     /*
-     * =====================================================
-     * LIMPAR DEPOIS DO PEDIDO
-     * =====================================================
+     * LIMPA O PEDIDO
      */
 
-    mostrarToastLeLanches(
-      'Pedido criado com sucesso!'
+    carrinho = [];
+
+    taxaEntrega = 0;
+
+    distanciaEntregaKm = null;
+
+    tempoEntregaTexto = null;
+
+    produtoPersonalizacaoAtual = null;
+
+    produtoOpcoesAtual = null;
+
+    adicionalPendente = null;
+
+
+    limparCacheCoordenadaCliente();
+
+    limparCacheEntrega();
+
+
+    [
+      'nomeCliente',
+      'cepEntrega',
+      'ruaEntrega',
+      'numeroEntrega',
+      'bairroEntrega',
+      'complementoEntrega',
+      'observacoes'
+    ].forEach(
+      id => {
+
+        const campo =
+          byId(id);
+
+        if (campo) {
+          campo.value = '';
+        }
+      }
     );
 
 
-    limparCarrinho();
+    if (
+      byId('cidadeEntrega')
+    ) {
+
+      byId('cidadeEntrega').value =
+        'Sorocaba';
+    }
+
+
+    if (
+      byId('tipoEntrega')
+    ) {
+
+      byId('tipoEntrega').value =
+        'retirada';
+    }
+
+
+    if (
+      byId('formaPagamento')
+    ) {
+
+      byId('formaPagamento').value =
+        '';
+    }
 
 
     fecharCarrinho();
 
-  } catch (
-    erro
-  ) {
+    fecharOpcoesProduto();
+
+    atualizarPagamento();
+
+    atualizarEntrega();
+
+    renderizarCarrinho();
+
+
+    /*
+     * ABRE WHATSAPP OU SOMENTE SALVA
+     */
+
+    if (
+      enviarWhatsapp
+    ) {
+
+      setTimeout(
+        () => {
+
+          abrirWhatsapp(
+            url
+          );
+
+        },
+        150
+      );
+
+    } else {
+
+      alert(
+        'Pedido salvo com sucesso!'
+      );
+    }
+
+  } catch (erro) {
 
     console.error(
       'Erro ao finalizar pedido:',
       erro
     );
 
-
     alert(
-      'Não foi possível finalizar o pedido.\n\n' +
-      'Tente novamente.'
+      'Erro ao salvar o pedido. Verifique a conexão com o Supabase.'
     );
 
   } finally {
 
-    if (
-      btnFinalizar
-    ) {
+    if (botao) {
 
-      btnFinalizar.disabled =
-        false;
-
-
-      btnFinalizar.innerHTML =
+      botao.innerHTML =
         textoAnterior;
+
+      botao.disabled =
+        !(await lojaAbertaAgora());
     }
-
-
-    atualizarStatusLoja();
   }
 }
 
@@ -6828,9 +7055,10 @@ async function finalizarPedido() {
 
 async function finalizarPedidoWhatsapp() {
 
-  await finalizarPedido();
+  await finalizarPedido(
+    true
+  );
 }
-
 
 /* =========================================================
    EVENTOS DO MODAL
@@ -6843,22 +7071,22 @@ function configurarEventosModal() {
       'modalCarrinho'
     );
 
-
   if (
     modalCarrinho
   ) {
 
     modalCarrinho.addEventListener(
       'click',
-      event => {
+      evento => {
 
         if (
-          event.target ===
+          evento.target ===
           modalCarrinho
         ) {
 
           fecharCarrinho();
         }
+
       }
     );
   }
@@ -6869,22 +7097,22 @@ function configurarEventosModal() {
       'modalOpcoesProduto'
     );
 
-
   if (
     modalOpcoes
   ) {
 
     modalOpcoes.addEventListener(
       'click',
-      event => {
+      evento => {
 
         if (
-          event.target ===
+          evento.target ===
           modalOpcoes
         ) {
 
           fecharOpcoesProduto();
         }
+
       }
     );
   }
@@ -6892,19 +7120,24 @@ function configurarEventosModal() {
 
   document.addEventListener(
     'keydown',
-    event => {
+    evento => {
 
       if (
-        event.key ===
+        evento.key !==
         'Escape'
       ) {
 
-        fecharOpcoesProduto();
-
-        fecharCarrinho();
+        return;
       }
+
+
+      fecharOpcoesProduto();
+
+      fecharCarrinho();
+
     }
   );
+
 }
 
 
@@ -6943,7 +7176,15 @@ function configurarEventosCardapio() {
 
     tipoEntrega.addEventListener(
       'change',
-      atualizarEntrega
+      () => {
+
+        limparCacheCoordenadaCliente();
+
+        limparCacheEntrega();
+
+        atualizarEntrega();
+
+      }
     );
   }
 
@@ -6963,21 +7204,21 @@ function configurarEventosCardapio() {
       atualizarPagamento
     );
   }
+
 }
 
 
 /* =========================================================
-   ATUALIZAÇÃO AUTOMÁTICA DE DISPONIBILIDADE
+   ATUALIZAÇÃO AUTOMÁTICA DA DISPONIBILIDADE
 ========================================================= */
 
 function iniciarAtualizacaoDisponibilidade() {
 
   /*
-   * Atualiza a cada 30 segundos.
+   * Atualiza periodicamente.
    *
-   * Assim, se o administrador congelar Ovo,
-   * Coca-Cola, X-Bacon etc., o cliente recebe
-   * a alteração sem precisar atualizar a página.
+   * Isso serve como segurança caso o Realtime
+   * fique temporariamente indisponível.
    */
 
   setInterval(
@@ -6992,19 +7233,21 @@ function iniciarAtualizacaoDisponibilidade() {
       ) {
 
         console.error(
-          'Erro ao atualizar disponibilidade automaticamente:',
+          'Erro ao atualizar disponibilidade:',
           erro
         );
+
       }
 
     },
     30000
   );
+
 }
 
 
 /* =========================================================
-   REALTIME SUPABASE - DISPONIBILIDADE
+   REALTIME - DISPONIBILIDADE
 ========================================================= */
 
 function iniciarRealtimeDisponibilidade() {
@@ -7021,7 +7264,7 @@ function iniciarRealtimeDisponibilidade() {
 
     supabaseClient
       .channel(
-        'product-availability-cardapio'
+        'product-availability-realtime'
       )
       .on(
         'postgres_changes',
@@ -7037,50 +7280,53 @@ function iniciarRealtimeDisponibilidade() {
             'product_availability'
 
         },
-        payload => {
+        async payload => {
 
-          const registro =
-            payload.new ||
-            payload.old;
+          console.log(
+            'Disponibilidade alterada:',
+            payload
+          );
 
 
-          if (
-            registro?.product_code
+          try {
+
+            await carregarDisponibilidadeProdutos();
+
+          } catch (
+            erro
           ) {
 
-            if (
-              payload.eventType ===
-              'DELETE'
-            ) {
+            console.error(
+              'Erro ao atualizar disponibilidade em tempo real:',
+              erro
+            );
 
-              delete disponibilidadeProdutos[
-                registro.product_code
-              ];
-
-            } else {
-
-              disponibilidadeProdutos[
-                registro.product_code
-              ] =
-                registro.available !== false;
-            }
-
-
-            aplicarDisponibilidadeNoCardapio();
           }
+
         }
       )
-      .subscribe();
+      .subscribe(
+        status => {
+
+          console.log(
+            'Realtime disponibilidade:',
+            status
+          );
+
+        }
+      );
 
   } catch (
     erro
   ) {
 
     console.error(
-      'Erro ao iniciar realtime de disponibilidade:',
+      'Erro ao iniciar Realtime de disponibilidade:',
       erro
     );
+
   }
+
 }
 
 
@@ -7090,83 +7336,146 @@ function iniciarRealtimeDisponibilidade() {
 
 async function iniciarAplicacao() {
 
+  /*
+   * Garante que o modal de opções fique
+   * diretamente no body.
+   */
+
   garantirModalOpcoesForaDoCarrinho();
 
+
+  /*
+   * Configura campos de endereço.
+   */
 
   definirBloqueioCampos();
 
 
-  aplicarMascaraCep();
+  /*
+   * Eventos.
+   */
 
+  configurarEventosModal();
+
+  configurarEventosCardapio();
+
+  aplicarMascaraCep();
 
   aplicarEventosEntrega();
 
 
-  configurarEventosModal();
-
-
-  configurarEventosCardapio();
-
-
   /*
-   * Configuração da loja
+   * Estado inicial da interface.
    */
 
-  await carregarConfiguracaoLoja();
+  atualizarPagamento();
+
+  atualizarEntrega();
+
+  renderizarCarrinho();
 
 
   /*
-   * Regras de entrega
+   * Configuração da loja.
    */
 
-  await carregarRegrasEntrega();
+  try {
+
+    await carregarConfiguracaoLoja();
+
+  } catch (
+    erro
+  ) {
+
+    console.error(
+      'Erro ao carregar configuração inicial da loja:',
+      erro
+    );
+
+  }
 
 
   /*
-   * Disponibilidade dos produtos
+   * Regras de entrega.
    */
 
-  await carregarDisponibilidadeProdutos();
+  try {
+
+    await carregarRegrasEntrega();
+
+  } catch (
+    erro
+  ) {
+
+    console.error(
+      'Erro ao carregar regras de entrega:',
+      erro
+    );
+
+  }
 
 
   /*
-   * Atualização automática
+   * Disponibilidade inicial.
+   */
+
+  try {
+
+    await carregarDisponibilidadeProdutos();
+
+  } catch (
+    erro
+  ) {
+
+    console.error(
+      'Erro ao carregar disponibilidade inicial:',
+      erro
+    );
+
+  }
+
+
+  /*
+   * Aplica bloqueios após carregar os dados.
+   */
+
+  aplicarDisponibilidadeNoCardapio();
+
+
+  /*
+   * Status da loja.
+   */
+
+  await atualizarStatusLoja();
+
+
+  /*
+   * Atualização automática.
    */
 
   iniciarAtualizacaoDisponibilidade();
 
 
   /*
-   * Realtime
+   * Supabase Realtime.
    */
 
   iniciarRealtimeDisponibilidade();
 
 
   /*
-   * Interface inicial
-   */
-
-  atualizarPagamento();
-
-
-  atualizarEntrega();
-
-
-  renderizarCarrinho();
-
-
-  atualizarStatusLoja();
-
-
-  /*
-   * Atualiza status da loja periodicamente
+   * Atualiza o status da loja periodicamente.
    */
 
   setInterval(
-    atualizarStatusLoja,
+    () => {
+
+      atualizarStatusLoja();
+
+    },
     60000
   );
+
 }
 
 
@@ -7176,90 +7485,85 @@ async function iniciarAplicacao() {
 
 document.addEventListener(
   'DOMContentLoaded',
-  iniciarAplicacao
+  () => {
+
+    iniciarAplicacao()
+      .catch(
+        erro => {
+
+          console.error(
+            'Erro ao iniciar aplicação:',
+            erro
+          );
+
+        }
+      );
+
+  }
 );
 
 
 /* =========================================================
    FUNÇÕES GLOBAIS
-   Necessárias porque o HTML usa onclick=""
+   Usadas pelos onclick do HTML
 ========================================================= */
 
 window.adicionarAoCarrinho =
   adicionarAoCarrinho;
 
-
-window.abrirOpcoesProduto =
-  abrirOpcoesProduto;
-
-
-window.confirmarOpcoesProduto =
-  confirmarOpcoesProduto;
-
-
-window.fecharOpcoesProduto =
-  fecharOpcoesProduto;
-
-
 window.abrirCarrinho =
   abrirCarrinho;
-
 
 window.fecharCarrinho =
   fecharCarrinho;
 
+window.limparCarrinho =
+  limparCarrinho;
 
 window.aumentarQuantidade =
   aumentarQuantidade;
 
-
 window.diminuirQuantidade =
   diminuirQuantidade;
-
 
 window.removerItem =
   removerItem;
 
-
-window.limparCarrinho =
-  limparCarrinho;
-
-
 window.atualizarEntrega =
   atualizarEntrega;
-
 
 window.buscarCepEntrega =
   buscarCepEntrega;
 
-
 window.buscarCepPorEndereco =
   buscarCepPorEndereco;
-
-
-window.atualizarPagamento =
-  atualizarPagamento;
-
-
-window.copiarPix =
-  copiarPix;
-
 
 window.finalizarPedido =
   finalizarPedido;
 
-
 window.finalizarPedidoWhatsapp =
   finalizarPedidoWhatsapp;
 
+window.abrirOpcoesProduto =
+  abrirOpcoesProduto;
+
+window.fecharOpcoesProduto =
+  fecharOpcoesProduto;
+
+window.confirmarOpcoesProduto =
+  confirmarOpcoesProduto;
+
+window.abrirAdicionalParaLanche =
+  abrirAdicionalParaLanche;
 
 window.filtrarCardapio =
   filtrarCardapio;
 
-
 window.limparBuscaCardapio =
   limparBuscaCardapio;
 
+window.atualizarPagamento =
+  atualizarPagamento;
 
-window.abrirAdicionalParaLanche =
-  abrirAdicionalParaLanche;
+window.copiarPix =
+  copiarPix;
