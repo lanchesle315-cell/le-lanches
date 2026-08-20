@@ -278,6 +278,12 @@ async function carregarDisponibilidadeProdutos() {
   }
 
 
+  const disponibilidadeAnterior =
+    JSON.stringify(
+      disponibilidadeProdutos
+    );
+
+
   const {
     data,
     error
@@ -305,7 +311,7 @@ async function carregarDisponibilidadeProdutos() {
   }
 
 
-  disponibilidadeProdutos =
+  const novaDisponibilidade =
     {};
 
 
@@ -314,7 +320,7 @@ async function carregarDisponibilidadeProdutos() {
     of data || []
   ) {
 
-    disponibilidadeProdutos[
+    novaDisponibilidade[
       registro.product_code
     ] =
       registro.available !== false;
@@ -322,8 +328,33 @@ async function carregarDisponibilidadeProdutos() {
   }
 
 
+  disponibilidadeProdutos =
+    novaDisponibilidade;
+
+
+  /*
+   * Atualiza os botões do cardápio.
+   */
   aplicarDisponibilidadeNoCardapio();
 
+
+  /*
+   * Atualiza também o popup caso
+   * alguma disponibilidade tenha mudado.
+   */
+  const disponibilidadeNova =
+    JSON.stringify(
+      disponibilidadeProdutos
+    );
+
+
+  if (
+    disponibilidadeAnterior !==
+    disponibilidadeNova
+  ) {
+
+    atualizarPopupDisponibilidadeAberto();
+  }
 }
 
 
@@ -7207,6 +7238,56 @@ function configurarEventosCardapio() {
 
 }
 
+/* =========================================================
+   ATUALIZAR POPUP ABERTO APÓS ALTERAÇÃO DE ESTOQUE
+========================================================= */
+
+function atualizarPopupDisponibilidadeAberto() {
+
+  const modal =
+    byId(
+      'modalOpcoesProduto'
+    );
+
+  if (
+    !modal ||
+    !modal.classList.contains(
+      'ativo'
+    )
+  ) {
+    return;
+  }
+
+
+  /*
+   * Adicional - primeira etapa
+   */
+  if (
+    produtoOpcoesAtual?.tipo ===
+      'adicional' &&
+    produtoOpcoesAtual?.id
+  ) {
+
+    abrirEscolhaOpcaoAdicional(
+      produtoOpcoesAtual.id
+    );
+
+    return;
+  }
+
+
+  /*
+   * Bebida / produto com opções
+   */
+  if (
+    produtoOpcoesAtual?.id
+  ) {
+
+    abrirOpcoesProduto(
+      produtoOpcoesAtual.id
+    );
+  }
+}
 
 /* =========================================================
    ATUALIZAÇÃO AUTOMÁTICA DA DISPONIBILIDADE
