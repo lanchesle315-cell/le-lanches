@@ -1,0 +1,388 @@
+/* =========================================================
+   MASTER LOGIN - LÊ LANCHES
+========================================================= */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(circle at top, rgba(255, 193, 7, 0.08), transparent 30%),
+    #080808;
+  color: #ffffff;
+}
+
+
+/* =========================================================
+   PÁGINA
+========================================================= */
+
+.master-login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 18px;
+}
+
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.master-login-card {
+  width: 100%;
+  max-width: 470px;
+  background: linear-gradient(
+    180deg,
+    rgba(24, 24, 27, 0.98),
+    rgba(13, 13, 15, 0.98)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 34px;
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.55),
+    0 0 40px rgba(255, 183, 0, 0.05);
+}
+
+
+/* =========================================================
+   LOGO / CABEÇALHO
+========================================================= */
+
+.master-login-logo {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.logo-circle {
+  width: 115px;
+  height: 115px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #000;
+  border: 3px solid #f7b500;
+  box-shadow:
+    0 0 0 6px rgba(247, 181, 0, 0.08),
+    0 14px 35px rgba(0, 0, 0, 0.4);
+}
+
+.logo-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.master-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  margin-bottom: 14px;
+  border-radius: 999px;
+  background: rgba(247, 181, 0, 0.12);
+  border: 1px solid rgba(247, 181, 0, 0.35);
+  color: #ffc107;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+}
+
+.master-login-logo h1 {
+  font-size: 34px;
+  line-height: 1.1;
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+
+.master-login-logo p {
+  color: #a9a9b2;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.master-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ededed;
+}
+
+.input-wrap {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #111114;
+  border: 1px solid #2b2b30;
+  border-radius: 14px;
+  padding: 0 14px;
+  transition: 0.2s ease;
+}
+
+.input-wrap:focus-within {
+  border-color: #f7b500;
+  box-shadow: 0 0 0 3px rgba(247, 181, 0, 0.1);
+}
+
+.input-icon {
+  flex: 0 0 auto;
+  font-size: 17px;
+  opacity: 0.8;
+}
+
+.input-wrap input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #ffffff;
+  font-size: 15px;
+  padding: 16px 0;
+}
+
+.input-wrap input::placeholder {
+  color: #686871;
+}
+
+.toggle-senha {
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  color: #f7b500;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.toggle-senha:hover {
+  color: #ffd45c;
+}
+
+
+/* =========================================================
+   MENSAGEM
+========================================================= */
+
+.mensagem-login {
+  min-height: 20px;
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.mensagem-login.erro {
+  color: #ff7373;
+}
+
+.mensagem-login.sucesso {
+  color: #52d980;
+}
+
+.mensagem-login.aviso {
+  color: #ffc107;
+}
+
+
+/* =========================================================
+   BOTÃO LOGIN
+========================================================= */
+
+.btn-master-login {
+  width: 100%;
+  min-height: 56px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(
+    135deg,
+    #ffc107,
+    #f2a900
+  );
+  color: #111111;
+  font-size: 16px;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    filter 0.15s ease,
+    opacity 0.15s ease;
+  box-shadow: 0 12px 28px rgba(247, 181, 0, 0.18);
+}
+
+.btn-master-login:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+}
+
+.btn-master-login:active {
+  transform: translateY(0);
+}
+
+.btn-master-login:disabled {
+  opacity: 0.6;
+  cursor: wait;
+  transform: none;
+}
+
+
+/* =========================================================
+   INFORMAÇÕES
+========================================================= */
+
+.master-login-info {
+  margin-top: 24px;
+}
+
+.security-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.security-box > span {
+  font-size: 21px;
+}
+
+.security-box div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.security-box strong {
+  font-size: 13px;
+  color: #ffffff;
+}
+
+.security-box small {
+  font-size: 12px;
+  line-height: 1.45;
+  color: #8e8e97;
+}
+
+.link-admin {
+  display: block;
+  width: fit-content;
+  margin: 18px auto 0;
+  color: #aaaab2;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.link-admin:hover {
+  color: #ffc107;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.master-login-footer {
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  text-align: center;
+  color: #777780;
+}
+
+.master-login-footer p {
+  margin-bottom: 5px;
+  font-size: 12px;
+}
+
+.master-login-footer small {
+  font-size: 11px;
+}
+
+.master-login-footer strong {
+  color: #c9c9ce;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 560px) {
+
+  .master-login-page {
+    padding: 18px 12px;
+  }
+
+  .master-login-card {
+    padding: 26px 20px;
+    border-radius: 20px;
+  }
+
+  .logo-circle {
+    width: 95px;
+    height: 95px;
+  }
+
+  .master-login-logo h1 {
+    font-size: 29px;
+  }
+
+  .master-login-logo p {
+    font-size: 14px;
+  }
+
+}
+
+
+/* =========================================================
+   TELAS PEQUENAS
+========================================================= */
+
+@media (max-width: 380px) {
+
+  .master-login-card {
+    padding: 22px 16px;
+  }
+
+  .input-wrap {
+    padding: 0 11px;
+  }
+
+  .toggle-senha {
+    font-size: 12px;
+  }
+
+}
