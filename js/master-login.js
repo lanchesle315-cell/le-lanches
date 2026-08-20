@@ -37,6 +37,11 @@ const btnMasterLoginTexto =
     'btnMasterLoginTexto'
   );
 
+const btnEsqueciSenha =
+  document.getElementById(
+    'btnEsqueciSenha'
+  );
+
 
 /* =========================================================
    SUPABASE
@@ -107,7 +112,7 @@ function limparMensagemMaster() {
 
 
 /* =========================================================
-   BOTÃO
+   BOTÃO LOGIN
 ========================================================= */
 
 function definirEstadoBotao(
@@ -234,7 +239,7 @@ async function encerrarSessaoMaster() {
 
 
 /* =========================================================
-   REDIRECIONAR
+   ABRIR PAINEL MASTER
 ========================================================= */
 
 function abrirPainelMaster() {
@@ -245,7 +250,7 @@ function abrirPainelMaster() {
 
 
 /* =========================================================
-   VERIFICAR SESSÃO EXISTENTE
+   SESSÃO EXISTENTE
 ========================================================= */
 
 async function verificarSessaoExistente() {
@@ -296,19 +301,37 @@ async function verificarSessaoExistente() {
       );
 
 
+    /*
+     * IMPORTANTE:
+     *
+     * Enquanto o master.html ainda não foi criado,
+     * NÃO redirecionamos automaticamente.
+     *
+     * Apenas avisamos que já existe uma sessão válida.
+     */
+
     if (
       perfilEhMaster(
         perfil
       )
     ) {
 
-      abrirPainelMaster();
+      mostrarMensagemMaster(
+        'Sessão Master já autenticada. Você pode entrar novamente quando o painel estiver disponível.',
+        'sucesso'
+      );
 
       return;
     }
 
 
+    /*
+     * Se existe sessão, mas não é Master,
+     * encerra por segurança.
+     */
+
     await encerrarSessaoMaster();
+
 
   } catch (
     erro
@@ -469,6 +492,7 @@ if (
             error
           );
 
+
           throw new Error(
             'E-mail ou senha inválidos.'
           );
@@ -490,7 +514,7 @@ if (
 
 
         /*
-         * CONFERE ROLE NO PROFILES
+         * CONFERE O PERFIL MASTER
          */
 
         mostrarMensagemMaster(
@@ -513,24 +537,31 @@ if (
 
           await encerrarSessaoMaster();
 
+
           mostrarMensagemMaster(
             'Este usuário não possui acesso ao Painel Master.',
             'erro'
           );
+
 
           return;
         }
 
 
         /*
-         * ACESSO LIBERADO
+         * LOGIN CORRETO
          */
 
         mostrarMensagemMaster(
-          'Acesso autorizado. Abrindo Painel Master...',
+          'Acesso autorizado.',
           'sucesso'
         );
 
+
+        /*
+         * Quando master.html existir,
+         * este redirecionamento será usado.
+         */
 
         setTimeout(
           () => {
@@ -538,8 +569,9 @@ if (
             abrirPainelMaster();
 
           },
-          600
+          700
         );
+
 
       } catch (
         erro
@@ -560,6 +592,7 @@ if (
           'erro'
         );
 
+
       } finally {
 
         definirEstadoBotao(
@@ -571,15 +604,10 @@ if (
   );
 }
 
+
 /* =========================================================
    RECUPERAÇÃO DE SENHA
 ========================================================= */
-
-const btnEsqueciSenha =
-  document.getElementById(
-    'btnEsqueciSenha'
-  );
-
 
 if (
   btnEsqueciSenha
@@ -640,6 +668,7 @@ if (
 
         btnEsqueciSenha.disabled =
           true;
+
 
         btnEsqueciSenha.textContent =
           'Enviando...';
@@ -729,6 +758,7 @@ if (
         btnEsqueciSenha.disabled =
           false;
 
+
         btnEsqueciSenha.textContent =
           'Esqueci minha senha';
       }
@@ -736,6 +766,7 @@ if (
     }
   );
 }
+
 
 /* =========================================================
    INICIALIZAÇÃO
