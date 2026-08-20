@@ -3022,13 +3022,19 @@ function gerarChaveItem(
 function adicionarItemFinalAoCarrinho(
   nome,
   preco,
-  observacao = ''
+  observacao = '',
+  codigoProdutoInformado = null
 ) {
 
   const codigoProduto =
+    codigoProdutoInformado ||
     codigoProdutoPorNome(
       nome
-    );
+    ) ||
+    encontrarProdutoComOpcoesPorNome(
+      nome
+    )?.codigoProduto ||
+    null;
 
   if (
     codigoProduto &&
@@ -3078,7 +3084,10 @@ function adicionarItemFinalAoCarrinho(
         quantidade:
           1,
 
-        observacao
+        observacao,
+
+        codigoProduto:
+          codigoProduto || null
       }
     );
   }
@@ -3790,7 +3799,8 @@ function confirmarOpcoesProduto() {
     adicionarItemFinalAoCarrinho(
       produtoOpcoesAtual.nome,
       produtoOpcoesAtual.preco,
-      observacao
+      observacao,
+      codigoProduto
     );
 
     fecharOpcoesProduto();
@@ -4279,7 +4289,17 @@ function aplicarAdicionalNoLanche(
           1,
 
         observacao:
-          novaObservacao
+          novaObservacao,
+
+        codigoProduto:
+          item.codigoProduto ||
+          codigoProdutoPorNome(
+            item.nome
+          ) ||
+          encontrarProdutoComOpcoesPorNome(
+            item.nome
+          )?.codigoProduto ||
+          null
       }
     );
 
@@ -6135,59 +6155,95 @@ async function salvarPedidoNoBanco(
     !supabaseClient
   ) {
 
-    const pedido = {
-
-      ...payload,
-
-      id:
-        Date.now(),
-
-      created_at:
-        new Date()
-          .toISOString()
-    };
-
-
-    const chave =
-      'le_lanches_pedidos';
-
-
-    let lista =
-      [];
-
-
-    try {
-
-      lista =
-        JSON.parse(
-          localStorage.getItem(
-            chave
-          ) ||
-          '[]'
-        );
-
-    } catch {
-
-      lista =
-        [];
-    }
-
-
-    lista.push(
-      pedido
+    throw new Error(
+      'Supabase não configurado. Não é possível registrar o pedido com baixa automática de estoque.'
     );
-
-
-    localStorage.setItem(
-      chave,
-      JSON.stringify(
-        lista
-      )
-    );
-
-
-    return pedido;
   }
+
+
+  const itensRpc =
+    (payload.items || []).map(
+      item => {
+
+        const codigoProduto =
+          item.codigoProduto ||
+          codigoProdutoPorNome(
+            item.nome
+          ) ||
+          encontrarProdutoComOpcoesPorNome(
+            item.nome
+          )?.codigoProduto ||
+          null;
+
+
+        if (
+          !codigoProduto
+        ) {
+
+          throw new Error(
+            `Não foi possível identificar o código do produto "${item.nome}". Verifique o cadastro do produto no Master.`
+          );
+        }
+
+
+        return {
+
+          product_code:
+            codigoProduto,
+
+          quantity:
+            Number(
+              item.quantidade || 0
+            ),
+
+          sale_unit_price:
+            Number(
+              item.preco || 0
+            ),
+
+          observation:
+            item.observacao || ''
+        };
+      }
+    );
+
+
+  const pedidoRpc = {
+
+    customer_name:
+      payload.customer_name,
+
+    customer_phone:
+      payload.customer_phone || null,
+
+    order_type:
+      payload.order_type,
+
+    customer_address:
+      payload.customer_address,
+
+    customer_neighborhood:
+      payload.customer_neighborhood,
+
+    customer_city:
+      payload.customer_city,
+
+    customer_notes:
+      payload.customer_notes || null,
+
+    delivery_fee:
+      Number(
+        payload.delivery_fee || 0
+      ),
+
+    delivery_distance_km:
+      payload.delivery_distance_km === null ||
+      payload.delivery_distance_km === undefined
+        ? null
+        : Number(
+            payload.delivery_distance_km
+          )
+  };
 
 
   const {
@@ -6195,16 +6251,16 @@ async function salvarPedidoNoBanco(
     error
   } =
     await supabaseClient
-      .from(
-        'orders'
-      )
-      .insert(
-        [
-          payload
-        ]
-      )
-      .select()
-      .single();
+      .rpc(
+        'create_order_with_stock',
+        {
+          p_order:
+            pedidoRpc,
+
+          p_items:
+            itensRpc
+        }
+      );
 
 
   if (
@@ -6212,16 +6268,32 @@ async function salvarPedidoNoBanco(
   ) {
 
     console.error(
-      'Erro ao salvar pedido:',
+      'Erro ao finalizar pedido com baixa automática:',
       error
     );
-
 
     throw error;
   }
 
 
-  return data;
+  if (
+    !data?.success ||
+    !data?.order_id
+  ) {
+
+    throw new Error(
+      'O banco não confirmou a criação do pedido.'
+    );
+  }
+
+
+  return {
+
+    ...data,
+
+    id:
+      data.order_id
+  };
 }
 
 /* =========================================================
@@ -6760,7 +6832,17 @@ async function finalizarPedido(
             Number(item.quantidade),
 
           observacao:
-            item.observacao || ''
+            item.observacao || '',
+
+          codigoProduto:
+            item.codigoProduto ||
+            codigoProdutoPorNome(
+              item.nome
+            ) ||
+            encontrarProdutoComOpcoesPorNome(
+              item.nome
+            )?.codigoProduto ||
+            null
         })
       ),
 
@@ -7062,9 +7144,36 @@ async function finalizarPedido(
       erro
     );
 
-    alert(
-      'Erro ao salvar o pedido. Verifique a conexão com o Supabase.'
-    );
+    const mensagemErro =
+      String(
+        erro?.message ||
+        'Erro ao salvar o pedido.'
+      );
+
+
+    if (
+      mensagemErro
+        .toLowerCase()
+        .includes(
+          'estoque insuficiente'
+        )
+    ) {
+
+      alert(
+        mensagemErro +
+        '\n\nO pedido não foi criado. Atualize o carrinho e tente novamente.'
+      );
+
+      try {
+        await carregarDisponibilidadeProdutos();
+      } catch (_) {}
+
+    } else {
+
+      alert(
+        mensagemErro
+      );
+    }
 
   } finally {
 
