@@ -23,7 +23,7 @@
     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
   >
 
-  <link rel="stylesheet" href="css/style.css?v=20260819-delivery-v2">
+  <link rel="stylesheet" href="css/style.css?v=20260820-cardapio-v3">
 </head>
 
 <body>
@@ -153,6 +153,11 @@
   <a href="#fritas">
     <img src="img/produtos/fritas.png" alt="Fritas">
     <span>Fritas</span>
+  </a>
+
+  <a href="#adicionais">
+    <img src="img/produtos/adicionais.png" alt="Adicionais">
+    <span>Adicionais</span>
   </a>
 
   <a href="#bebidas">
@@ -747,123 +752,238 @@
     </section>
     
 
+
+    <section class="ll-section" id="adicionais">
+      <div class="ll-section-head">
+        <div class="ll-section-icon">
+          <img src="img/produtos/adicionais.png" alt="Adicionais">
+        </div>
+        <div>
+          <span class="ll-section-kicker">PERSONALIZE</span>
+          <h2>Adicionais</h2>
+          <p>Escolha o adicional e depois em qual lanche do carrinho ele será colocado.</p>
+        </div>
+      </div>
+
+      <div class="row g-3 g-lg-4">
+
+        <div class="col-12 col-md-6 col-xl-3 ll-product-col" data-search="a03 adicionais 3 ovo mussarela salsicha">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">A03</span>
+              <span class="ll-product-category">➕ Adicionais</span>
+            </div>
+
+            <h3 class="ll-product-name">Adicionais R$ 3,00</h3>
+            <p class="ll-product-description">Ovo, mussarela ou salsicha.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 3,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="abrirGrupoAdicional('adicional-3')"
+              >
+                <span>＋</span> Escolher
+              </button>
+            </div>
+          </article>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-3 ll-product-col" data-search="a05 adicionais 5 bacon calabresa hamburguer tradicional">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">A05</span>
+              <span class="ll-product-category">➕ Adicionais</span>
+            </div>
+
+            <h3 class="ll-product-name">Adicionais R$ 5,00</h3>
+            <p class="ll-product-description">Bacon, calabresa ou hambúrguer tradicional.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 5,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="abrirGrupoAdicional('adicional-5')"
+              >
+                <span>＋</span> Escolher
+              </button>
+            </div>
+          </article>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-3 ll-product-col" data-search="a06 adicionais 6 catupiry cheddar cream cheese">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">A06</span>
+              <span class="ll-product-category">➕ Adicionais</span>
+            </div>
+
+            <h3 class="ll-product-name">Adicionais R$ 6,00</h3>
+            <p class="ll-product-description">Catupiry, cheddar ou cream cheese.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 6,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="abrirGrupoAdicional('adicional-6')"
+              >
+                <span>＋</span> Escolher
+              </button>
+            </div>
+          </article>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-3 ll-product-col" data-search="a08 adicionais 8 hamburguer smash frango costela">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">A08</span>
+              <span class="ll-product-category">➕ Adicionais</span>
+            </div>
+
+            <h3 class="ll-product-name">Adicionais R$ 8,00</h3>
+            <p class="ll-product-description">Hambúrguer Smash, frango ou costela.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 8,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="abrirGrupoAdicional('adicional-8')"
+              >
+                <span>＋</span> Escolher
+              </button>
+            </div>
+          </article>
+        </div>
+
+      </div>
+    </section>
+
+
     <section class="ll-section" id="bebidas">
       <div class="ll-section-head">
         <div class="ll-section-icon"><img src="img/produtos/bebida.png" alt="Bebidas"></div>
         <div>
           <span class="ll-section-kicker">CARDÁPIO</span>
           <h2>Bebidas</h2>
-          <p>Refrigerantes para completar seu lanche.</p>
+          <p>Escolha a bebida e selecione o tipo, sabor ou marca no popup.</p>
         </div>
       </div>
 
       <div class="row g-3 g-lg-4">
-        
-        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="r01 coca-cola 350ml lata 350ml.">
+
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="agua com gas sem gas">
           <article class="ll-product-card h-100">
             <div class="ll-product-top">
               <span class="ll-product-code">R01</span>
               <span class="ll-product-category">🥤 Bebidas</span>
             </div>
 
-            <h3 class="ll-product-name">Coca-Cola 350ml</h3>
-            <p class="ll-product-description">Lata 350ml.</p>
+            <h3 class="ll-product-name">Água</h3>
+            <p class="ll-product-description">Escolha no popup: Com gás / Sem gás.</p>
 
             <div class="ll-product-footer">
-              <strong class="ll-product-price">R$ 6,00</strong>
+              <strong class="ll-product-price">R$ 4,00</strong>
 
               <button
                 class="btn ll-btn-add"
                 type="button"
-                onclick="adicionarAoCarrinho('Coca-Cola 350ml', 6)"
+                onclick="abrirOpcoesProduto('agua')"
               >
-                <span>＋</span> Adicionar
+                <span>＋</span> Escolher
               </button>
             </div>
           </article>
         </div>
-        
-        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="r02 coca-cola 2 litros garrafa 2 litros.">
+
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="suco del valle 450ml uva laranja">
           <article class="ll-product-card h-100">
             <div class="ll-product-top">
               <span class="ll-product-code">R02</span>
               <span class="ll-product-category">🥤 Bebidas</span>
             </div>
 
-            <h3 class="ll-product-name">Coca-Cola 2 litros</h3>
-            <p class="ll-product-description">Garrafa 2 litros.</p>
+            <h3 class="ll-product-name">Suco Del Valle 450ml</h3>
+            <p class="ll-product-description">Escolha no popup: Uva / Laranja.</p>
 
             <div class="ll-product-footer">
-              <strong class="ll-product-price">R$ 16,00</strong>
+              <strong class="ll-product-price">R$ 6,00</strong>
 
               <button
                 class="btn ll-btn-add"
                 type="button"
-                onclick="adicionarAoCarrinho('Coca-Cola 2 litros', 16)"
+                onclick="abrirOpcoesProduto('del-valle-450')"
               >
-                <span>＋</span> Adicionar
+                <span>＋</span> Escolher
               </button>
             </div>
           </article>
         </div>
-        
-        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="r03 guaraná 350ml lata 350ml.">
+
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="suco bellas 500ml goiaba laranja caju maracuja acerola guarana acai">
           <article class="ll-product-card h-100">
             <div class="ll-product-top">
               <span class="ll-product-code">R03</span>
               <span class="ll-product-category">🥤 Bebidas</span>
             </div>
 
-            <h3 class="ll-product-name">Guaraná 350ml</h3>
-            <p class="ll-product-description">Lata 350ml.</p>
+            <h3 class="ll-product-name">Suco Bellas 500ml</h3>
+            <p class="ll-product-description">Escolha no popup: Goiaba / Laranja / Caju / Maracujá / Acerola / Guaraná com açaí.</p>
 
             <div class="ll-product-footer">
-              <strong class="ll-product-price">R$ 6,00</strong>
+              <strong class="ll-product-price">R$ 10,00</strong>
 
               <button
                 class="btn ll-btn-add"
                 type="button"
-                onclick="adicionarAoCarrinho('Guaraná 350ml', 6)"
+                onclick="abrirOpcoesProduto('bellas-500')"
               >
-                <span>＋</span> Adicionar
+                <span>＋</span> Escolher
               </button>
             </div>
           </article>
         </div>
-        
-        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="r04 guaraná antarctica 2 litros garrafa 2 litros.">
+
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="refrigerante lata coca cola zero fanta laranja uva sprite">
           <article class="ll-product-card h-100">
             <div class="ll-product-top">
               <span class="ll-product-code">R04</span>
               <span class="ll-product-category">🥤 Bebidas</span>
             </div>
 
-            <h3 class="ll-product-name">Guaraná Antarctica 2 litros</h3>
-            <p class="ll-product-description">Garrafa 2 litros.</p>
+            <h3 class="ll-product-name">Refrigerante Lata</h3>
+            <p class="ll-product-description">Escolha no popup: Coca-Cola / Coca-Cola Zero / Fanta Laranja / Fanta Uva / Sprite.</p>
 
             <div class="ll-product-footer">
-              <strong class="ll-product-price">R$ 16,00</strong>
+              <strong class="ll-product-price">R$ 6,00</strong>
 
               <button
                 class="btn ll-btn-add"
                 type="button"
-                onclick="adicionarAoCarrinho('Guaraná Antarctica 2 litros', 16)"
+                onclick="abrirOpcoesProduto('refrigerante-lata')"
               >
-                <span>＋</span> Adicionar
+                <span>＋</span> Escolher
               </button>
             </div>
           </article>
         </div>
-        
-        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="r05 fanta 350ml lata 350ml - sabores.">
+
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="cerveja lata brahma skol">
           <article class="ll-product-card h-100">
             <div class="ll-product-top">
               <span class="ll-product-code">R05</span>
               <span class="ll-product-category">🥤 Bebidas</span>
             </div>
 
-            <h3 class="ll-product-name">Fanta 350ml</h3>
-            <p class="ll-product-description">Lata 350ml - sabores.</p>
+            <h3 class="ll-product-name">Cerveja Lata</h3>
+            <p class="ll-product-description">Escolha no popup: Brahma / Skol.</p>
 
             <div class="ll-product-footer">
               <strong class="ll-product-price">R$ 6,00</strong>
@@ -871,95 +991,71 @@
               <button
                 class="btn ll-btn-add"
                 type="button"
-                onclick="adicionarAoCarrinho('Fanta 350ml', 6)"
+                onclick="abrirOpcoesProduto('cerveja-lata')"
               >
-                <span>＋</span> Adicionar
+                <span>＋</span> Escolher
               </button>
             </div>
           </article>
         </div>
-        
-        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="r06 fanta 2 litros garrafa 2 litros - sabores.">
+
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="cerveja long neck 330ml heineken">
           <article class="ll-product-card h-100">
             <div class="ll-product-top">
               <span class="ll-product-code">R06</span>
               <span class="ll-product-category">🥤 Bebidas</span>
             </div>
 
-            <h3 class="ll-product-name">Fanta 2 litros</h3>
-            <p class="ll-product-description">Garrafa 2 litros - sabores.</p>
+            <h3 class="ll-product-name">Cerveja Long Neck 330ml</h3>
+            <p class="ll-product-description">Escolha no popup: Heineken.</p>
 
             <div class="ll-product-footer">
-              <strong class="ll-product-price">R$ 16,00</strong>
+              <strong class="ll-product-price">R$ 12,00</strong>
 
               <button
                 class="btn ll-btn-add"
                 type="button"
-                onclick="adicionarAoCarrinho('Fanta 2 litros', 16)"
+                onclick="abrirOpcoesProduto('long-neck-330')"
               >
-                <span>＋</span> Adicionar
+                <span>＋</span> Escolher
               </button>
             </div>
           </article>
         </div>
-        
-        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="r07 sprite 350ml lata 350ml.">
+
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="refrigerante 2 litros fanta sprite">
           <article class="ll-product-card h-100">
             <div class="ll-product-top">
               <span class="ll-product-code">R07</span>
               <span class="ll-product-category">🥤 Bebidas</span>
             </div>
 
-            <h3 class="ll-product-name">Sprite 350ml</h3>
-            <p class="ll-product-description">Lata 350ml.</p>
+            <h3 class="ll-product-name">Refrigerante 2 Litros</h3>
+            <p class="ll-product-description">Escolha no popup: Fanta / Sprite.</p>
 
             <div class="ll-product-footer">
-              <strong class="ll-product-price">R$ 6,00</strong>
+              <strong class="ll-product-price">R$ 13,00</strong>
 
               <button
                 class="btn ll-btn-add"
                 type="button"
-                onclick="adicionarAoCarrinho('Sprite 350ml', 6)"
+                onclick="abrirOpcoesProduto('refrigerante-2l')"
               >
-                <span>＋</span> Adicionar
+                <span>＋</span> Escolher
               </button>
             </div>
           </article>
         </div>
-        
-        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="r08 sprite 2 litros garrafa 2 litros.">
+
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="vedete 2 litros tubaina guarana">
           <article class="ll-product-card h-100">
             <div class="ll-product-top">
               <span class="ll-product-code">R08</span>
               <span class="ll-product-category">🥤 Bebidas</span>
             </div>
 
-            <h3 class="ll-product-name">Sprite 2 litros</h3>
-            <p class="ll-product-description">Garrafa 2 litros.</p>
-
-            <div class="ll-product-footer">
-              <strong class="ll-product-price">R$ 16,00</strong>
-
-              <button
-                class="btn ll-btn-add"
-                type="button"
-                onclick="adicionarAoCarrinho('Sprite 2 litros', 16)"
-              >
-                <span>＋</span> Adicionar
-              </button>
-            </div>
-          </article>
-        </div>
-        
-        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="r09 vedete 2 litros garrafa 2 litros - sabores.">
-          <article class="ll-product-card h-100">
-            <div class="ll-product-top">
-              <span class="ll-product-code">R09</span>
-              <span class="ll-product-category">🥤 Bebidas</span>
-            </div>
-
-            <h3 class="ll-product-name">Vedete 2 litros</h3>
-            <p class="ll-product-description">Garrafa 2 litros - sabores.</p>
+            <h3 class="ll-product-name">Vedete 2 Litros</h3>
+            <p class="ll-product-description">Escolha no popup: Tubaína / Guaraná.</p>
 
             <div class="ll-product-footer">
               <strong class="ll-product-price">R$ 11,00</strong>
@@ -967,16 +1063,41 @@
               <button
                 class="btn ll-btn-add"
                 type="button"
-                onclick="adicionarAoCarrinho('Vedete 2 litros', 11)"
+                onclick="abrirOpcoesProduto('vedete-2l')"
               >
-                <span>＋</span> Adicionar
+                <span>＋</span> Escolher
               </button>
             </div>
           </article>
         </div>
-        
+
+        <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="coca cola 2 litros zero">
+          <article class="ll-product-card h-100">
+            <div class="ll-product-top">
+              <span class="ll-product-code">R09</span>
+              <span class="ll-product-category">🥤 Bebidas</span>
+            </div>
+
+            <h3 class="ll-product-name">Coca-Cola 2 Litros</h3>
+            <p class="ll-product-description">Escolha no popup: Coca-Cola / Coca-Cola Zero.</p>
+
+            <div class="ll-product-footer">
+              <strong class="ll-product-price">R$ 16,00</strong>
+
+              <button
+                class="btn ll-btn-add"
+                type="button"
+                onclick="abrirOpcoesProduto('coca-2l')"
+              >
+                <span>＋</span> Escolher
+              </button>
+            </div>
+          </article>
+        </div>
+
       </div>
     </section>
+
     
     </div>
   </main>
@@ -1209,6 +1330,7 @@
 
           <button
             class="btn btn-finalizar"
+            id="btnConfirmarOpcoesProduto"
             type="button"
             onclick="confirmarOpcoesProduto()"
           >
@@ -1282,6 +1404,6 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/config.js?v=20260819-1525"></script>
-  <script src="js/app.js?v=20260819-1525"></script>
+  <script src="js/app.js?v=20260820-cardapio-v3"></script>
 </body>
 </html>
