@@ -1,6 +1,5 @@
 /* ==========================================================
-   LE LANCHES 2.0
-   Bootstrap + identidade própria
+   LE LANCHES
 ========================================================== */
 
 :root {
@@ -2307,5 +2306,144 @@ textarea {
 
   .ll-search-control {
     min-height: 54px;
+  }
+}
+
+
+/* ==========================================================
+   OPÇÕES DE BEBIDAS E ADICIONAIS
+========================================================== */
+
+.ll-option-grid {
+  display: grid;
+  gap: 10px;
+  padding: 14px 0 4px;
+}
+
+.ll-option-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  width: 100%;
+  min-height: 58px;
+
+  padding: 13px 14px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, .025),
+      rgba(255, 255, 255, .01)
+    ),
+    #171717;
+
+  border:
+    1px solid #303030;
+
+  border-radius: 14px;
+
+  cursor: pointer;
+
+  transition:
+    border-color .2s ease,
+    background .2s ease,
+    transform .2s ease,
+    box-shadow .2s ease;
+}
+
+.ll-option-card:hover {
+  transform: translateY(-1px);
+
+  border-color:
+    rgba(255, 189, 0, .45);
+
+  background:
+    #1c1c1c;
+}
+
+.ll-option-card:has(input:checked) {
+  border-color:
+    rgba(255, 189, 0, .82);
+
+  background:
+    rgba(255, 189, 0, .07);
+
+  box-shadow:
+    0 0 0 3px rgba(255, 189, 0, .05);
+}
+
+.ll-option-card input {
+  width: 19px;
+  height: 19px;
+
+  flex:
+    0 0 19px;
+
+  accent-color:
+    var(--ll-yellow);
+}
+
+.ll-option-card > span {
+  flex: 1;
+  min-width: 0;
+}
+
+.ll-option-title {
+  display: block;
+
+  color: #fff;
+
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.ll-option-subtitle {
+  display: block;
+
+  margin-top: 3px;
+
+  color: #8f8f8f;
+
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.ll-option-price {
+  flex: 0 0 auto;
+
+  color:
+    var(--ll-yellow);
+
+  font-size: 13px;
+  font-weight: 950;
+
+  white-space: nowrap;
+}
+
+
+/* ==========================================================
+   ADICIONAIS - CARDS MAIS COMPACTOS
+========================================================== */
+
+#adicionais .ll-product-card {
+  min-height: 250px;
+}
+
+
+/* ==========================================================
+   OPÇÕES - MOBILE
+========================================================== */
+
+@media (max-width: 576px) {
+
+  .ll-option-card {
+    align-items: flex-start;
+
+    padding: 12px;
+  }
+
+  .ll-option-price {
+    font-size: 12px;
   }
 }
