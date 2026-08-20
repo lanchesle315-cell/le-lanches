@@ -844,7 +844,7 @@ function garantirModalOpcoesForaDoCarrinho() {
    PAGAMENTO
 ========================================================= */
 
-function  {
+function atualizarPagamento() {
 
   const pagamento =
     byId(
@@ -856,18 +856,37 @@ function  {
       'boxPix'
     );
 
+  const chavePixTexto =
+    byId(
+      'chavePixTexto'
+    );
+
   if (!boxPix) {
     return;
   }
 
+  const ehPix =
+    pagamento
+      .trim()
+      .toLowerCase() === 'pix';
+
   boxPix.style.display =
-    pagamento.toLowerCase() === 'pix'
+    ehPix
       ? 'block'
       : 'none';
+
+  if (
+    ehPix &&
+    chavePixTexto
+  ) {
+
+    chavePixTexto.innerText =
+      CHAVE_PIX;
+  }
 }
 
 
-function copiarPix() {
+async function copiarPix() {
 
   if (!CHAVE_PIX) {
 
@@ -878,31 +897,68 @@ function copiarPix() {
     return;
   }
 
-  if (
-    navigator.clipboard &&
-    navigator.clipboard.writeText
-  ) {
+  try {
 
-    navigator.clipboard
-      .writeText(
+    if (
+      navigator.clipboard &&
+      navigator.clipboard.writeText
+    ) {
+
+      await navigator.clipboard.writeText(
         CHAVE_PIX
-      )
-      .then(
-        () => {
-
-          alert(
-            'Chave PIX copiada!'
-          );
-        }
       );
 
-    return;
-  }
+      mostrarToastLeLanches(
+        'Chave PIX copiada!'
+      );
 
-  alert(
-    'Chave PIX: ' +
-    CHAVE_PIX
-  );
+      return;
+    }
+
+    const campoTemporario =
+      document.createElement(
+        'textarea'
+      );
+
+    campoTemporario.value =
+      CHAVE_PIX;
+
+    campoTemporario.style.position =
+      'fixed';
+
+    campoTemporario.style.opacity =
+      '0';
+
+    document.body.appendChild(
+      campoTemporario
+    );
+
+    campoTemporario.select();
+
+    document.execCommand(
+      'copy'
+    );
+
+    document.body.removeChild(
+      campoTemporario
+    );
+
+    mostrarToastLeLanches(
+      'Chave PIX copiada!'
+    );
+
+  } catch (erro) {
+
+    console.error(
+      'Erro ao copiar chave PIX:',
+      erro
+    );
+
+    alert(
+      'Chave PIX: ' +
+      CHAVE_PIX
+    );
+  }
 }
 
 
