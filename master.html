@@ -28,7 +28,7 @@
 <body>
 
   <!-- =====================================================
-       CARREGAMENTO INICIAL
+       CARREGAMENTO
   ====================================================== -->
 
   <div
@@ -57,7 +57,7 @@
 
 
   <!-- =====================================================
-       ESTRUTURA PRINCIPAL
+       APP
   ====================================================== -->
 
   <div
@@ -258,7 +258,7 @@
 
 
       <!-- =================================================
-           ÁREA DAS PÁGINAS
+           PÁGINAS
       ================================================== -->
 
       <main class="master-main">
@@ -626,7 +626,7 @@
               </h2>
 
               <p>
-                Acompanhe faturamento, custos, lucro e margem.
+                Acompanhe faturamento, custos, despesas e resultado.
               </p>
 
             </div>
@@ -646,7 +646,7 @@
 
             <p>
               Nesta área teremos faturamento, custo dos produtos,
-              lucro bruto, margem e análise por período.
+              lucro bruto, despesas e lucro líquido.
             </p>
 
           </div>
@@ -655,7 +655,7 @@
 
 
         <!-- =================================================
-             ESTOQUE COMPLETO
+             ESTOQUE
         ================================================== -->
 
         <section
@@ -688,10 +688,6 @@
 
           </div>
 
-
-          <!-- =================================================
-               RESUMO DO ESTOQUE
-          ================================================== -->
 
           <div class="stock-summary-grid">
 
@@ -781,10 +777,6 @@
           </div>
 
 
-          <!-- =================================================
-               FILTROS DO ESTOQUE
-          ================================================== -->
-
           <div class="stock-toolbar">
 
             <div class="stock-search">
@@ -850,10 +842,6 @@
           </div>
 
 
-          <!-- =================================================
-               LISTA / TABELA DO ESTOQUE
-          ================================================== -->
-
           <section class="master-panel">
 
             <div class="panel-title">
@@ -881,37 +869,14 @@
 
                   <tr>
 
-                    <th>
-                      Item
-                    </th>
-
-                    <th>
-                      Tipo
-                    </th>
-
-                    <th>
-                      Estoque
-                    </th>
-
-                    <th>
-                      Mínimo
-                    </th>
-
-                    <th>
-                      Custo médio
-                    </th>
-
-                    <th>
-                      Valor em estoque
-                    </th>
-
-                    <th>
-                      Status
-                    </th>
-
-                    <th>
-                      Ações
-                    </th>
+                    <th>Item</th>
+                    <th>Tipo</th>
+                    <th>Estoque</th>
+                    <th>Mínimo</th>
+                    <th>Custo médio</th>
+                    <th>Valor em estoque</th>
+                    <th>Status</th>
+                    <th>Ações</th>
 
                   </tr>
 
@@ -939,10 +904,6 @@
 
           </section>
 
-
-          <!-- =================================================
-               HISTÓRICO
-          ================================================== -->
 
           <section class="master-panel master-panel-full stock-history-panel">
 
@@ -1008,41 +969,15 @@
 
                   <tr>
 
-                    <th>
-                      Data
-                    </th>
-
-                    <th>
-                      Item
-                    </th>
-
-                    <th>
-                      Movimento
-                    </th>
-
-                    <th>
-                      Quantidade
-                    </th>
-
-                    <th>
-                      Antes
-                    </th>
-
-                    <th>
-                      Depois
-                    </th>
-
-                    <th>
-                      Custo unit.
-                    </th>
-
-                    <th>
-                      Valor
-                    </th>
-
-                    <th>
-                      Observação
-                    </th>
+                    <th>Data</th>
+                    <th>Item</th>
+                    <th>Movimento</th>
+                    <th>Quantidade</th>
+                    <th>Antes</th>
+                    <th>Depois</th>
+                    <th>Custo unit.</th>
+                    <th>Valor</th>
+                    <th>Observação</th>
 
                   </tr>
 
@@ -1074,7 +1009,7 @@
 
 
         <!-- =================================================
-             PRODUTOS / INSUMOS
+             PRODUTOS
         ================================================== -->
 
         <section
@@ -1091,8 +1026,7 @@
               </h2>
 
               <p>
-                Gerencie produtos do cardápio, ingredientes,
-                custos, ficha técnica e controle de estoque.
+                Gerencie produtos, ingredientes, custos e ficha técnica.
               </p>
 
             </div>
@@ -1299,7 +1233,7 @@
               </h2>
 
               <p>
-                Registre gastos operacionais da lanchonete.
+                Registre e acompanhe os gastos operacionais da lanchonete.
               </p>
 
             </div>
@@ -1316,22 +1250,286 @@
           </div>
 
 
-          <div class="master-placeholder">
+          <!-- RESUMO -->
 
-            <span>
-              💸
-            </span>
+          <div class="expenses-summary-grid">
 
-            <h3>
-              Despesas
-            </h3>
+            <article class="expenses-summary-card">
 
-            <p>
-              Futuramente teremos compras, contas, gás,
-              embalagens e outras despesas operacionais.
-            </p>
+              <span class="expenses-summary-icon">
+                💸
+              </span>
+
+              <div>
+
+                <span>
+                  Total de despesas
+                </span>
+
+                <strong id="masterDespesasTotal">
+                  R$ 0,00
+                </strong>
+
+              </div>
+
+            </article>
+
+
+            <article class="expenses-summary-card">
+
+              <span class="expenses-summary-icon">
+                🧾
+              </span>
+
+              <div>
+
+                <span>
+                  Lançamentos
+                </span>
+
+                <strong id="masterDespesasQuantidade">
+                  0
+                </strong>
+
+              </div>
+
+            </article>
+
+
+            <article class="expenses-summary-card">
+
+              <span class="expenses-summary-icon">
+                🏷️
+              </span>
+
+              <div>
+
+                <span>
+                  Maior categoria
+                </span>
+
+                <strong id="masterDespesasMaiorCategoria">
+                  -
+                </strong>
+
+              </div>
+
+            </article>
+
+
+            <article class="expenses-summary-card">
+
+              <span class="expenses-summary-icon">
+                📊
+              </span>
+
+              <div>
+
+                <span>
+                  Média por despesa
+                </span>
+
+                <strong id="masterDespesasMedia">
+                  R$ 0,00
+                </strong>
+
+              </div>
+
+            </article>
 
           </div>
+
+
+          <!-- FILTROS -->
+
+          <div class="expenses-toolbar">
+
+            <div class="expenses-search">
+
+              <span>
+                🔎
+              </span>
+
+              <input
+                type="search"
+                id="masterBuscaDespesa"
+                placeholder="Buscar despesa..."
+                autocomplete="off"
+              >
+
+            </div>
+
+
+            <div class="expenses-filters">
+
+              <select id="masterFiltroPeriodoDespesa">
+
+                <option value="all">
+                  Todo período
+                </option>
+
+                <option value="today">
+                  Hoje
+                </option>
+
+                <option value="7">
+                  Últimos 7 dias
+                </option>
+
+                <option value="30">
+                  Últimos 30 dias
+                </option>
+
+                <option value="month">
+                  Este mês
+                </option>
+
+              </select>
+
+
+              <select id="masterFiltroCategoriaDespesa">
+
+                <option value="all">
+                  Todas as categorias
+                </option>
+
+                <option value="insumos">
+                  Insumos
+                </option>
+
+                <option value="embalagens">
+                  Embalagens
+                </option>
+
+                <option value="gas">
+                  Gás
+                </option>
+
+                <option value="energia">
+                  Energia
+                </option>
+
+                <option value="agua">
+                  Água
+                </option>
+
+                <option value="internet">
+                  Internet
+                </option>
+
+                <option value="manutencao">
+                  Manutenção
+                </option>
+
+                <option value="entrega">
+                  Entrega
+                </option>
+
+                <option value="taxas">
+                  Taxas
+                </option>
+
+                <option value="marketing">
+                  Marketing
+                </option>
+
+                <option value="outros">
+                  Outros
+                </option>
+
+              </select>
+
+            </div>
+
+          </div>
+
+
+          <!-- TABELA -->
+
+          <section class="master-panel">
+
+            <div class="panel-title">
+
+              <div>
+
+                <h3>
+                  💸 Histórico de despesas
+                </h3>
+
+                <p>
+                  Gastos operacionais cadastrados no sistema.
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <div class="table-wrap">
+
+              <table class="master-table expenses-table">
+
+                <thead>
+
+                  <tr>
+
+                    <th>
+                      Data
+                    </th>
+
+                    <th>
+                      Descrição
+                    </th>
+
+                    <th>
+                      Categoria
+                    </th>
+
+                    <th>
+                      Pagamento
+                    </th>
+
+                    <th>
+                      Valor
+                    </th>
+
+                    <th>
+                      Observação
+                    </th>
+
+                    <th>
+                      Status
+                    </th>
+
+                    <th>
+                      Ações
+                    </th>
+
+                  </tr>
+
+                </thead>
+
+
+                <tbody id="masterListaDespesas">
+
+                  <tr>
+
+                    <td
+                      colspan="8"
+                      class="table-empty"
+                    >
+                      Nenhuma despesa cadastrada.
+                    </td>
+
+                  </tr>
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </section>
 
         </section>
 
@@ -1374,7 +1572,7 @@
 
             <p>
               Produtos mais vendidos, mais lucrativos,
-              períodos de maior movimento e evolução financeira.
+              evolução financeira e demais indicadores.
             </p>
 
           </div>
@@ -1407,7 +1605,7 @@
 
 
   <!-- =====================================================
-       MODAL - NOVO / EDITAR ITEM
+       MODAL PRODUTO
   ====================================================== -->
 
   <div
@@ -1452,7 +1650,6 @@
           type="button"
           class="master-modal-close"
           data-close-master-modal="produto"
-          aria-label="Fechar"
         >
           ×
         </button>
@@ -1535,7 +1732,7 @@
                 </strong>
 
                 <small>
-                  Ingrediente ou mercadoria de estoque.
+                  Ingrediente ou mercadoria.
                 </small>
 
               </span>
@@ -1549,19 +1746,6 @@
 
         <div class="master-form-section">
 
-          <div class="master-form-section-title">
-
-            <strong>
-              Informações
-            </strong>
-
-            <span>
-              Dados principais do item.
-            </span>
-
-          </div>
-
-
           <div class="master-form-grid">
 
             <div class="master-field master-field-full">
@@ -1573,8 +1757,6 @@
               <input
                 type="text"
                 id="masterProdutoNome"
-                maxlength="120"
-                placeholder="Ex.: Bacon"
                 required
               >
 
@@ -1590,8 +1772,6 @@
               <input
                 type="text"
                 id="masterProdutoCodigo"
-                maxlength="60"
-                placeholder="Ex.: BACON"
               >
 
             </div>
@@ -1606,8 +1786,6 @@
               <input
                 type="text"
                 id="masterProdutoCategoria"
-                maxlength="80"
-                placeholder="Ex.: Ingredientes"
               >
 
             </div>
@@ -1625,23 +1803,23 @@
               >
 
                 <option value="un">
-                  Unidade (un)
+                  Unidade
                 </option>
 
                 <option value="kg">
-                  Quilograma (kg)
+                  Quilograma
                 </option>
 
                 <option value="g">
-                  Grama (g)
+                  Grama
                 </option>
 
                 <option value="l">
-                  Litro (L)
+                  Litro
                 </option>
 
                 <option value="ml">
-                  Mililitro (ml)
+                  Mililitro
                 </option>
 
               </select>
@@ -1658,8 +1836,6 @@
               <input
                 type="text"
                 id="masterProdutoFornecedor"
-                maxlength="120"
-                placeholder="Opcional"
               >
 
             </div>
@@ -1670,19 +1846,6 @@
 
 
         <div class="master-form-section">
-
-          <div class="master-form-section-title">
-
-            <strong>
-              Valores
-            </strong>
-
-            <span>
-              Venda e custo médio atual.
-            </span>
-
-          </div>
-
 
           <div class="master-form-grid">
 
@@ -1706,7 +1869,6 @@
                   id="masterProdutoPrecoVenda"
                   min="0"
                   step="0.01"
-                  placeholder="0,00"
                 >
 
               </div>
@@ -1731,15 +1893,9 @@
                   id="masterProdutoCusto"
                   min="0"
                   step="0.0001"
-                  placeholder="0,00"
                 >
 
               </div>
-
-              <small>
-                Em produtos com ficha técnica, o custo será calculado
-                automaticamente pelos insumos.
-              </small>
 
             </div>
 
@@ -1749,19 +1905,6 @@
 
 
         <div class="master-form-section">
-
-          <div class="master-form-section-title">
-
-            <strong>
-              Estoque
-            </strong>
-
-            <span>
-              Quantidade disponível e alerta mínimo.
-            </span>
-
-          </div>
-
 
           <div class="master-form-grid">
 
@@ -1812,7 +1955,7 @@
                 </strong>
 
                 <span>
-                  Ativa entradas, saídas e alertas.
+                  Ativa controle e movimentações.
                 </span>
 
               </div>
@@ -1835,7 +1978,7 @@
                 </strong>
 
                 <span>
-                  Item disponível para utilização/venda.
+                  Item disponível.
                 </span>
 
               </div>
@@ -1858,7 +2001,7 @@
                 </strong>
 
                 <span>
-                  Mantém o item ativo no sistema.
+                  Mantém o cadastro ativo.
                 </span>
 
               </div>
@@ -1876,22 +2019,16 @@
         </div>
 
 
-        <div class="master-form-section">
+        <div class="master-field master-field-full">
 
-          <div class="master-field master-field-full">
+          <label for="masterProdutoObservacoes">
+            Observações
+          </label>
 
-            <label for="masterProdutoObservacoes">
-              Observações
-            </label>
-
-            <textarea
-              id="masterProdutoObservacoes"
-              rows="3"
-              maxlength="500"
-              placeholder="Informações adicionais..."
-            ></textarea>
-
-          </div>
+          <textarea
+            id="masterProdutoObservacoes"
+            rows="3"
+          ></textarea>
 
         </div>
 
@@ -1931,7 +2068,7 @@
 
 
   <!-- =====================================================
-       MODAL - FICHA TÉCNICA
+       MODAL FICHA TÉCNICA
   ====================================================== -->
 
   <div
@@ -1948,9 +2085,6 @@
 
     <div
       class="master-modal-dialog master-modal-large"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="tituloModalMasterFicha"
     >
 
       <div class="master-modal-header">
@@ -1961,7 +2095,7 @@
             🧾 FICHA TÉCNICA
           </span>
 
-          <h3 id="tituloModalMasterFicha">
+          <h3>
             Ficha Técnica
           </h3>
 
@@ -1976,7 +2110,6 @@
           type="button"
           class="master-modal-close"
           data-close-master-modal="ficha"
-          aria-label="Fechar"
         >
           ×
         </button>
@@ -2064,9 +2197,8 @@
             </strong>
 
             <p>
-              Selecione os insumos utilizados para produzir uma unidade
-              deste produto e informe a quantidade utilizada de cada um.
-              O custo será calculado automaticamente.
+              Selecione os insumos usados em uma unidade do produto
+              e informe a quantidade utilizada.
             </p>
 
           </div>
@@ -2074,46 +2206,28 @@
         </div>
 
 
-        <div class="master-form-section">
+        <div class="recipe-search">
 
-          <div class="master-form-section-title">
+          <span>
+            🔎
+          </span>
 
-            <strong>
-              Insumos utilizados
-            </strong>
-
-            <span>
-              Marque os ingredientes que fazem parte deste produto.
-            </span>
-
-          </div>
-
-
-          <div class="recipe-search">
-
-            <span>
-              🔎
-            </span>
-
-            <input
-              type="search"
-              id="masterFichaBuscaInsumo"
-              placeholder="Buscar insumo..."
-              autocomplete="off"
-            >
-
-          </div>
-
-
-          <div
-            id="masterFichaListaInsumos"
-            class="recipe-ingredients-list"
+          <input
+            type="search"
+            id="masterFichaBuscaInsumo"
+            placeholder="Buscar insumo..."
           >
 
-            <div class="master-empty">
-              Carregando insumos...
-            </div>
+        </div>
 
+
+        <div
+          id="masterFichaListaInsumos"
+          class="recipe-ingredients-list"
+        >
+
+          <div class="master-empty">
+            Carregando insumos...
           </div>
 
         </div>
@@ -2128,7 +2242,7 @@
             </span>
 
             <small>
-              Soma proporcional dos insumos selecionados.
+              Soma proporcional dos insumos.
             </small>
 
           </div>
@@ -2175,7 +2289,7 @@
 
 
   <!-- =====================================================
-       MODAL - MOVIMENTAÇÃO DE ESTOQUE
+       MODAL MOVIMENTAÇÃO ESTOQUE
   ====================================================== -->
 
   <div
@@ -2190,12 +2304,7 @@
     ></div>
 
 
-    <div
-      class="master-modal-dialog"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="tituloModalMasterMovimentoEstoque"
-    >
+    <div class="master-modal-dialog">
 
       <div class="master-modal-header">
 
@@ -2213,7 +2322,7 @@
           </h3>
 
           <p id="masterMovimentoProdutoNome">
-            Selecione o item.
+            Produto
           </p>
 
         </div>
@@ -2223,7 +2332,6 @@
           type="button"
           class="master-modal-close"
           data-close-master-modal="movimento-estoque"
-          aria-label="Fechar"
         >
           ×
         </button>
@@ -2246,8 +2354,6 @@
           id="masterMovimentoTipo"
         >
 
-
-        <!-- SITUAÇÃO ATUAL -->
 
         <div class="stock-current-box">
 
@@ -2279,8 +2385,6 @@
         </div>
 
 
-        <!-- CAMPOS -->
-
         <div class="master-form-grid">
 
           <div class="master-field">
@@ -2294,7 +2398,6 @@
               id="masterMovimentoQuantidade"
               min="0.0001"
               step="0.0001"
-              placeholder="0"
               required
             >
 
@@ -2321,7 +2424,6 @@
                 id="masterMovimentoCustoUnitario"
                 min="0"
                 step="0.0001"
-                placeholder="0,00"
               >
 
             </div>
@@ -2330,8 +2432,6 @@
 
         </div>
 
-
-        <!-- PREVISÃO -->
 
         <div class="stock-preview">
 
@@ -2385,8 +2485,6 @@
           <textarea
             id="masterMovimentoObservacao"
             rows="3"
-            maxlength="500"
-            placeholder="Informe o motivo ou detalhe da movimentação..."
           ></textarea>
 
         </div>
@@ -2427,7 +2525,7 @@
 
 
   <!-- =====================================================
-       MODAL - AJUSTE DE INVENTÁRIO
+       MODAL AJUSTE ESTOQUE
   ====================================================== -->
 
   <div
@@ -2442,12 +2540,7 @@
     ></div>
 
 
-    <div
-      class="master-modal-dialog"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="tituloModalMasterAjusteEstoque"
-    >
+    <div class="master-modal-dialog">
 
       <div class="master-modal-header">
 
@@ -2457,7 +2550,7 @@
             🧮 INVENTÁRIO
           </span>
 
-          <h3 id="tituloModalMasterAjusteEstoque">
+          <h3>
             Ajustar estoque
           </h3>
 
@@ -2472,7 +2565,6 @@
           type="button"
           class="master-modal-close"
           data-close-master-modal="ajuste-estoque"
-          aria-label="Fechar"
         >
           ×
         </button>
@@ -2521,7 +2613,7 @@
         </div>
 
 
-        <div class="master-field master-field-full">
+        <div class="master-field">
 
           <label for="masterAjusteNovoEstoque">
             Estoque contado *
@@ -2532,13 +2624,8 @@
             id="masterAjusteNovoEstoque"
             min="0"
             step="0.0001"
-            placeholder="0"
             required
           >
-
-          <small>
-            Informe a quantidade real encontrada no inventário.
-          </small>
 
         </div>
 
@@ -2573,7 +2660,7 @@
         </div>
 
 
-        <div class="master-field master-field-full">
+        <div class="master-field">
 
           <label for="masterAjusteObservacao">
             Motivo do ajuste
@@ -2582,8 +2669,6 @@
           <textarea
             id="masterAjusteObservacao"
             rows="3"
-            maxlength="500"
-            placeholder="Ex.: Inventário físico, divergência de contagem..."
           ></textarea>
 
         </div>
@@ -2624,19 +2709,18 @@
 
 
   <!-- =====================================================
-       MODAL ANTIGO DE ENTRADA
-       Mantido para compatibilidade até o JS ser trocado
+       MODAL DESPESA
   ====================================================== -->
 
   <div
-    id="modalMasterEntrada"
+    id="modalMasterDespesa"
     class="master-modal hidden"
     aria-hidden="true"
   >
 
     <div
       class="master-modal-backdrop"
-      data-close-master-modal="entrada"
+      data-close-master-modal="despesa"
     ></div>
 
 
@@ -2644,7 +2728,7 @@
       class="master-modal-dialog"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="tituloModalMasterEntrada"
+      aria-labelledby="tituloModalMasterDespesa"
     >
 
       <div class="master-modal-header">
@@ -2652,15 +2736,15 @@
         <div>
 
           <span class="master-modal-badge">
-            📦 ESTOQUE
+            💸 DESPESA
           </span>
 
-          <h3 id="tituloModalMasterEntrada">
-            Entrada de estoque
+          <h3 id="tituloModalMasterDespesa">
+            Nova despesa
           </h3>
 
-          <p id="masterEntradaProdutoNome">
-            Selecione o item.
+          <p>
+            Registre um gasto operacional da Lê Lanches.
           </p>
 
         </div>
@@ -2669,7 +2753,7 @@
         <button
           type="button"
           class="master-modal-close"
-          data-close-master-modal="entrada"
+          data-close-master-modal="despesa"
           aria-label="Fechar"
         >
           ×
@@ -2679,86 +2763,196 @@
 
 
       <form
-        id="formMasterEntrada"
+        id="formMasterDespesa"
         class="master-form"
       >
 
         <input
           type="hidden"
-          id="masterEntradaProdutoId"
+          id="masterDespesaId"
         >
 
 
-        <div class="stock-current-box">
+        <div class="master-form-section">
 
-          <div>
+          <div class="master-form-section-title">
 
-            <span>
-              Estoque atual
-            </span>
-
-            <strong id="masterEntradaEstoqueAtual">
-              0
+            <strong>
+              Informações da despesa
             </strong>
 
-          </div>
-
-
-          <div>
-
             <span>
-              Custo médio atual
+              Informe os dados do lançamento.
             </span>
 
-            <strong id="masterEntradaCustoAtual">
-              R$ 0,00
-            </strong>
-
-          </div>
-
-        </div>
-
-
-        <div class="master-form-grid">
-
-          <div class="master-field">
-
-            <label for="masterEntradaQuantidade">
-              Quantidade comprada *
-            </label>
-
-            <input
-              type="number"
-              id="masterEntradaQuantidade"
-              min="0.001"
-              step="0.001"
-              placeholder="0"
-              required
-            >
-
           </div>
 
 
-          <div class="master-field">
+          <div class="master-form-grid">
 
-            <label for="masterEntradaCustoUnitario">
-              Custo unitário *
-            </label>
+            <div class="master-field master-field-full">
 
-            <div class="money-input">
-
-              <span>
-                R$
-              </span>
+              <label for="masterDespesaDescricao">
+                Descrição *
+              </label>
 
               <input
-                type="number"
-                id="masterEntradaCustoUnitario"
-                min="0"
-                step="0.0001"
-                placeholder="0,00"
+                type="text"
+                id="masterDespesaDescricao"
+                maxlength="180"
+                placeholder="Ex.: Compra de gás"
                 required
               >
+
+            </div>
+
+
+            <div class="master-field">
+
+              <label for="masterDespesaData">
+                Data *
+              </label>
+
+              <input
+                type="date"
+                id="masterDespesaData"
+                required
+              >
+
+            </div>
+
+
+            <div class="master-field">
+
+              <label for="masterDespesaCategoria">
+                Categoria *
+              </label>
+
+              <select
+                id="masterDespesaCategoria"
+                required
+              >
+
+                <option value="">
+                  Selecione
+                </option>
+
+                <option value="insumos">
+                  Insumos
+                </option>
+
+                <option value="embalagens">
+                  Embalagens
+                </option>
+
+                <option value="gas">
+                  Gás
+                </option>
+
+                <option value="energia">
+                  Energia
+                </option>
+
+                <option value="agua">
+                  Água
+                </option>
+
+                <option value="internet">
+                  Internet
+                </option>
+
+                <option value="manutencao">
+                  Manutenção
+                </option>
+
+                <option value="entrega">
+                  Entrega
+                </option>
+
+                <option value="taxas">
+                  Taxas
+                </option>
+
+                <option value="marketing">
+                  Marketing
+                </option>
+
+                <option value="outros">
+                  Outros
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="master-field">
+
+              <label for="masterDespesaValor">
+                Valor *
+              </label>
+
+              <div class="money-input">
+
+                <span>
+                  R$
+                </span>
+
+                <input
+                  type="number"
+                  id="masterDespesaValor"
+                  min="0.01"
+                  step="0.01"
+                  placeholder="0,00"
+                  required
+                >
+
+              </div>
+
+            </div>
+
+
+            <div class="master-field">
+
+              <label for="masterDespesaPagamento">
+                Forma de pagamento
+              </label>
+
+              <select id="masterDespesaPagamento">
+
+                <option value="">
+                  Não informado
+                </option>
+
+                <option value="dinheiro">
+                  Dinheiro
+                </option>
+
+                <option value="pix">
+                  PIX
+                </option>
+
+                <option value="debito">
+                  Débito
+                </option>
+
+                <option value="credito">
+                  Crédito
+                </option>
+
+                <option value="boleto">
+                  Boleto
+                </option>
+
+                <option value="transferencia">
+                  Transferência
+                </option>
+
+                <option value="outros">
+                  Outros
+                </option>
+
+              </select>
 
             </div>
 
@@ -2767,67 +2961,51 @@
         </div>
 
 
-        <div class="stock-preview">
+        <div class="master-form-section">
 
-          <div>
+          <div class="master-field master-field-full">
 
-            <span>
-              Novo estoque
-            </span>
+            <label for="masterDespesaObservacoes">
+              Observações
+            </label>
 
-            <strong id="masterEntradaNovoEstoque">
-              0
-            </strong>
-
-          </div>
-
-
-          <div>
-
-            <span>
-              Novo custo médio
-            </span>
-
-            <strong id="masterEntradaNovoCusto">
-              R$ 0,00
-            </strong>
+            <textarea
+              id="masterDespesaObservacoes"
+              rows="3"
+              maxlength="500"
+              placeholder="Informações adicionais..."
+            ></textarea>
 
           </div>
 
 
-          <div>
+          <label class="expense-active-row">
 
-            <span>
-              Total da compra
-            </span>
+            <div>
 
-            <strong id="masterEntradaTotalCompra">
-              R$ 0,00
-            </strong>
+              <strong>
+                Despesa ativa
+              </strong>
 
-          </div>
+              <span>
+                Despesas inativas não serão consideradas nos totais.
+              </span>
 
-        </div>
+            </div>
 
+            <input
+              type="checkbox"
+              id="masterDespesaAtiva"
+              checked
+            >
 
-        <div class="master-field master-field-full">
-
-          <label for="masterEntradaObservacao">
-            Observação
           </label>
-
-          <textarea
-            id="masterEntradaObservacao"
-            rows="3"
-            maxlength="500"
-            placeholder="Ex.: Compra semanal, fornecedor..."
-          ></textarea>
 
         </div>
 
 
         <div
-          id="masterEntradaMensagem"
+          id="masterDespesaMensagem"
           class="master-form-message"
         ></div>
 
@@ -2837,7 +3015,7 @@
           <button
             type="button"
             class="btn-master btn-secondary"
-            data-close-master-modal="entrada"
+            data-close-master-modal="despesa"
           >
             Cancelar
           </button>
@@ -2845,10 +3023,10 @@
 
           <button
             type="submit"
-            id="btnSalvarMasterEntrada"
+            id="btnSalvarMasterDespesa"
             class="btn-master btn-yellow"
           >
-            Registrar entrada
+            Salvar despesa
           </button>
 
         </div>
@@ -2868,13 +3046,9 @@
     src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
   ></script>
 
-  <script
-    src="js/config.js"
-  ></script>
+  <script src="js/config.js"></script>
 
-  <script
-    src="js/master.js"
-  ></script>
+  <script src="js/master.js"></script>
 
 </body>
 
