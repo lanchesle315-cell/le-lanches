@@ -841,8 +841,6 @@ function obterLabelOrigemPedido(origem) {
 
   if (valor === "IFOOD") return "iFood";
   if (valor === "99") return "99";
-  if (valor === "BALCAO") return "Balcão";
-  if (valor === "TELEFONE") return "Telefone";
   return "Site";
 }
 
@@ -851,8 +849,6 @@ function obterClasseOrigemPedido(origem) {
 
   if (valor === "IFOOD") return "ifood";
   if (valor === "99") return "ninenine";
-  if (valor === "BALCAO") return "balcao";
-  if (valor === "TELEFONE") return "telefone";
   return "site";
 }
 
@@ -2285,8 +2281,6 @@ function obterNomeClientePadraoVendaExterna(origem) {
 
   if (valor === "IFOOD") return "Cliente iFood";
   if (valor === "99") return "Cliente 99";
-  if (valor === "BALCAO") return "Cliente Balcão";
-  if (valor === "TELEFONE") return "Cliente Telefone";
 
   return "Cliente";
 }
@@ -2463,7 +2457,7 @@ function abrirModalVendaExterna() {
 
   if (origem) origem.value = "IFOOD";
   if (referencia) referencia.value = "";
-  if (cliente) cliente.value = "Cliente iFood";
+  if (cliente) cliente.value = "";
   if (tipo) tipo.value = "retirada";
   if (busca) busca.value = "";
   if (taxaPlataforma) taxaPlataforma.value = "0";
@@ -2785,7 +2779,7 @@ function validarVendaExterna() {
     ).toUpperCase();
 
   if (
-    !["IFOOD", "99", "BALCAO", "TELEFONE"].includes(origem)
+    !["IFOOD", "99"].includes(origem)
   ) {
     throw new Error("Selecione uma origem válida.");
   }
