@@ -7464,16 +7464,33 @@ async function iniciarAplicacao() {
 
 
   /*
-   * Atualiza o status da loja periodicamente.
+   * Atualiza o status da loja rapidamente.
+   *
+   * Isso permite abrir/fechar a loja pelo painel
+   * mesmo quando o cliente já está com o
+   * carrinho aberto.
    */
 
   setInterval(
-    () => {
+    async () => {
 
-      atualizarStatusLoja();
+      try {
+
+        await atualizarStatusLoja();
+
+      } catch (
+        erro
+      ) {
+
+        console.error(
+          'Erro ao atualizar status da loja:',
+          erro
+        );
+
+      }
 
     },
-    60000
+    1500
   );
 
 }
