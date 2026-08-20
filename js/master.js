@@ -43,8 +43,10 @@ let carregandoMaster = false;
 let salvandoProdutoMaster = false;
 let salvandoEntradaMaster = false;
 let salvandoFichaMaster = false;
+let salvandoDespesaMaster = false;
 
 let masterProdutos = [];
+let masterDespesas = [];
 
 let filtroProdutoMaster = 'all';
 let buscaProdutoMaster = '';
@@ -52,6 +54,10 @@ let buscaProdutoMaster = '';
 let masterFichaProduto = null;
 let masterFichaSelecionados = new Map();
 let buscaFichaMaster = '';
+
+let buscaDespesaMaster = '';
+let filtroPeriodoDespesaMaster = 'all';
+let filtroCategoriaDespesaMaster = 'all';
 
 
 /* =========================================================
@@ -160,6 +166,63 @@ function formatarDataHora(valor) {
   return data.toLocaleString(
     'pt-BR'
   );
+}
+
+
+function formatarData(valor) {
+
+  if (!valor) {
+
+    return '-';
+  }
+
+  const partes =
+    String(valor)
+      .split('-')
+      .map(Number);
+
+  if (
+    partes.length !== 3 ||
+    !partes[0] ||
+    !partes[1] ||
+    !partes[2]
+  ) {
+
+    return '-';
+  }
+
+  const data =
+    new Date(
+      partes[0],
+      partes[1] - 1,
+      partes[2]
+    );
+
+  return data.toLocaleDateString(
+    'pt-BR'
+  );
+}
+
+
+function dataHojeISO() {
+
+  const agora =
+    new Date();
+
+  const ano =
+    agora.getFullYear();
+
+  const mes =
+    String(
+      agora.getMonth() + 1
+    ).padStart(2, '0');
+
+  const dia =
+    String(
+      agora.getDate()
+    ).padStart(2, '0');
+
+  return `${ano}-${mes}-${dia}`;
 }
 
 
@@ -616,6 +679,22 @@ function abrirPaginaMaster(pagina) {
 
           console.error(
             'Erro ao carregar Produtos:',
+            erro
+          );
+        }
+      );
+  }
+
+  if (
+    pagina === 'despesas'
+  ) {
+
+    carregarDespesasMaster()
+      .catch(
+        erro => {
+
+          console.error(
+            'Erro ao carregar Despesas:',
             erro
           );
         }
@@ -2265,6 +2344,19 @@ function fecharModalPorNome(nome) {
     fecharModalMaster(
       byId(
         'modalMasterFicha'
+      )
+    );
+
+    return;
+  }
+
+  if (
+    nome === 'despesa'
+  ) {
+
+    fecharModalMaster(
+      byId(
+        'modalMasterDespesa'
       )
     );
   }
@@ -4747,6 +4839,1408 @@ async function salvarEntradaEstoqueMaster(
 
 
 /* =========================================================
+   DESPESAS - LABELS
+========================================================= */
+
+function obterLabelCategoriaDespesa(categoria) {
+
+  const labels = {
+
+    insumos:
+      'Insumos',
+
+    embalagens:
+      'Embalagens',
+
+    gas:
+      'Gás',
+
+    energia:
+      'Energia',
+
+    agua:
+      'Água',
+
+    internet:
+      'Internet',
+
+    manutencao:
+      'Manutenção',
+
+    entrega:
+      'Entrega',
+
+    taxas:
+      'Taxas',
+
+    marketing:
+      'Marketing',
+
+    outros:
+      'Outros'
+  };
+
+  return labels[categoria] ||
+    categoria ||
+    'Outros';
+}
+
+
+function obterLabelPagamentoDespesa(pagamento) {
+
+  const labels = {
+
+    dinheiro:
+      'Dinheiro',
+
+    pix:
+      'PIX',
+
+    debito:
+      'Débito',
+
+    credito:
+      'Crédito',
+
+    boleto:
+      'Boleto',
+
+    transferencia:
+      'Transferência',
+
+    outros:
+      'Outros'
+  };
+
+  return labels[pagamento] ||
+    'Não informado';
+}
+
+
+/* =========================================================
+   DESPESAS - BUSCAR
+========================================================= */
+
+async function buscarDespesasMaster() {
+
+  if (!supabaseClient) {
+
+    return [];
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from('expenses')
+      .select(
+        `
+        id,
+        description,
+        category,
+        amount,
+        expense_date,
+        notes,
+        created_by,
+        created_at,
+        payment_method,
+        active,
+        updated_at
+        `
+      )
+      .order(
+        'expense_date',
+        {
+          ascending: false
+        }
+      )
+      .order(
+        'created_at',
+        {
+          ascending: false
+        }
+      );
+
+  if (error) {
+
+    console.error(
+      'Erro ao carregar despesas:',
+      error
+    );
+
+    throw error;
+  }
+
+  return Array.isArray(data)
+    ? data
+    : [];
+}
+
+
+/* =========================================================
+   DESPESAS - FILTRO DE PERÍODO
+========================================================= */
+
+function despesaDentroDoPeriodo(
+  despesa,
+  periodo
+) {
+
+  if (
+    !periodo ||
+    periodo === 'all'
+  ) {
+
+    return true;
+  }
+
+  const valorData =
+    String(
+      despesa?.expense_date ||
+      ''
+    );
+
+  if (!valorData) {
+
+    return false;
+  }
+
+  const partes =
+    valorData
+      .split('-')
+      .map(Number);
+
+  if (
+    partes.length !== 3
+  ) {
+
+    return false;
+  }
+
+  const dataDespesa =
+    new Date(
+      partes[0],
+      partes[1] - 1,
+      partes[2],
+      0,
+      0,
+      0,
+      0
+    );
+
+  const hoje =
+    new Date();
+
+  hoje.setHours(
+    0,
+    0,
+    0,
+    0
+  );
+
+  if (
+    periodo === 'today'
+  ) {
+
+    return (
+      dataDespesa.getTime() ===
+      hoje.getTime()
+    );
+  }
+
+  if (
+    periodo === 'month'
+  ) {
+
+    return (
+      dataDespesa.getFullYear() ===
+        hoje.getFullYear() &&
+      dataDespesa.getMonth() ===
+        hoje.getMonth()
+    );
+  }
+
+  const dias =
+    Number(periodo);
+
+  if (
+    Number.isFinite(dias) &&
+    dias > 0
+  ) {
+
+    const inicio =
+      new Date(hoje);
+
+    inicio.setDate(
+      inicio.getDate() -
+      (dias - 1)
+    );
+
+    return (
+      dataDespesa >= inicio &&
+      dataDespesa <= hoje
+    );
+  }
+
+  return true;
+}
+
+
+function obterDespesasFiltradasMaster() {
+
+  const busca =
+    normalizarTexto(
+      buscaDespesaMaster
+    );
+
+  return masterDespesas
+    .filter(
+      despesa => {
+
+        if (
+          filtroCategoriaDespesaMaster !==
+            'all' &&
+          despesa.category !==
+            filtroCategoriaDespesaMaster
+        ) {
+
+          return false;
+        }
+
+        if (
+          !despesaDentroDoPeriodo(
+            despesa,
+            filtroPeriodoDespesaMaster
+          )
+        ) {
+
+          return false;
+        }
+
+        if (!busca) {
+
+          return true;
+        }
+
+        const texto =
+          normalizarTexto(
+            [
+              despesa.description,
+              obterLabelCategoriaDespesa(
+                despesa.category
+              ),
+              obterLabelPagamentoDespesa(
+                despesa.payment_method
+              ),
+              despesa.notes
+            ].join(' ')
+          );
+
+        return texto.includes(
+          busca
+        );
+      }
+    );
+}
+
+
+/* =========================================================
+   DESPESAS - RESUMO
+========================================================= */
+
+function atualizarResumoDespesasMaster(
+  despesasFiltradas
+) {
+
+  const ativas =
+    despesasFiltradas.filter(
+      despesa =>
+        despesa.active === true
+    );
+
+  const total =
+    ativas.reduce(
+      (
+        acumulado,
+        despesa
+      ) =>
+        acumulado +
+        numeroSeguro(
+          despesa.amount
+        ),
+      0
+    );
+
+  const quantidade =
+    ativas.length;
+
+  const media =
+    quantidade > 0
+      ? total / quantidade
+      : 0;
+
+  const categorias = {};
+
+  ativas.forEach(
+    despesa => {
+
+      const categoria =
+        despesa.category ||
+        'outros';
+
+      categorias[categoria] =
+        numeroSeguro(
+          categorias[categoria]
+        ) +
+        numeroSeguro(
+          despesa.amount
+        );
+    }
+  );
+
+  const maiorCategoria =
+    Object.entries(
+      categorias
+    )
+      .sort(
+        (a, b) =>
+          b[1] - a[1]
+      )[0];
+
+  if (
+    byId(
+      'masterDespesasTotal'
+    )
+  ) {
+
+    byId(
+      'masterDespesasTotal'
+    ).textContent =
+      formatarMoeda(
+        total
+      );
+  }
+
+  if (
+    byId(
+      'masterDespesasQuantidade'
+    )
+  ) {
+
+    byId(
+      'masterDespesasQuantidade'
+    ).textContent =
+      formatarNumero(
+        quantidade
+      );
+  }
+
+  if (
+    byId(
+      'masterDespesasMaiorCategoria'
+    )
+  ) {
+
+    byId(
+      'masterDespesasMaiorCategoria'
+    ).textContent =
+      maiorCategoria
+        ? obterLabelCategoriaDespesa(
+            maiorCategoria[0]
+          )
+        : '-';
+  }
+
+  if (
+    byId(
+      'masterDespesasMedia'
+    )
+  ) {
+
+    byId(
+      'masterDespesasMedia'
+    ).textContent =
+      formatarMoeda(
+        media
+      );
+  }
+}
+
+
+/* =========================================================
+   DESPESAS - RENDERIZAR
+========================================================= */
+
+function renderizarDespesasMaster() {
+
+  const tbody =
+    byId(
+      'masterListaDespesas'
+    );
+
+  if (!tbody) {
+
+    return;
+  }
+
+  const despesas =
+    obterDespesasFiltradasMaster();
+
+  atualizarResumoDespesasMaster(
+    despesas
+  );
+
+  if (
+    despesas.length === 0
+  ) {
+
+    tbody.innerHTML =
+      `
+        <tr>
+          <td
+            colspan="8"
+            class="table-empty"
+          >
+            Nenhuma despesa encontrada.
+          </td>
+        </tr>
+      `;
+
+    return;
+  }
+
+  tbody.innerHTML =
+    despesas
+      .map(
+        despesa => `
+
+          <tr>
+
+            <td>
+              ${formatarData(
+                despesa.expense_date
+              )}
+            </td>
+
+            <td>
+
+              <div class="expense-description">
+
+                <strong>
+                  ${escaparHtml(
+                    despesa.description
+                  )}
+                </strong>
+
+              </div>
+
+            </td>
+
+            <td>
+
+              <span class="expense-category-badge">
+                ${escaparHtml(
+                  obterLabelCategoriaDespesa(
+                    despesa.category
+                  )
+                )}
+              </span>
+
+            </td>
+
+            <td>
+
+              <span class="expense-payment-badge">
+                ${escaparHtml(
+                  obterLabelPagamentoDespesa(
+                    despesa.payment_method
+                  )
+                )}
+              </span>
+
+            </td>
+
+            <td>
+
+              <strong class="expense-value">
+                ${formatarMoeda(
+                  despesa.amount
+                )}
+              </strong>
+
+            </td>
+
+            <td>
+
+              <span class="expense-note">
+                ${escaparHtml(
+                  despesa.notes ||
+                  '-'
+                )}
+              </span>
+
+            </td>
+
+            <td>
+
+              <span
+                class="
+                  expense-status-badge
+                  ${
+                    despesa.active === true
+                      ? 'active'
+                      : 'inactive'
+                  }
+                "
+              >
+                ${
+                  despesa.active === true
+                    ? 'Ativa'
+                    : 'Inativa'
+                }
+              </span>
+
+            </td>
+
+            <td>
+
+              <div class="expense-actions">
+
+                <button
+                  type="button"
+                  class="expense-action-btn edit"
+                  data-expense-edit="${despesa.id}"
+                >
+                  Editar
+                </button>
+
+                <button
+                  type="button"
+                  class="expense-action-btn toggle"
+                  data-expense-toggle="${despesa.id}"
+                >
+                  ${
+                    despesa.active === true
+                      ? 'Desativar'
+                      : 'Ativar'
+                  }
+                </button>
+
+                <button
+                  type="button"
+                  class="expense-action-btn delete"
+                  data-expense-delete="${despesa.id}"
+                >
+                  Excluir
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+        `
+      )
+      .join('');
+}
+
+
+/* =========================================================
+   DESPESAS - CARREGAR
+========================================================= */
+
+async function carregarDespesasMaster() {
+
+  const tbody =
+    byId(
+      'masterListaDespesas'
+    );
+
+  if (tbody) {
+
+    tbody.innerHTML =
+      `
+        <tr>
+          <td
+            colspan="8"
+            class="table-empty"
+          >
+            Carregando despesas...
+          </td>
+        </tr>
+      `;
+  }
+
+  try {
+
+    masterDespesas =
+      await buscarDespesasMaster();
+
+    renderizarDespesasMaster();
+
+  } catch (erro) {
+
+    console.error(
+      'Erro ao carregar Despesas:',
+      erro
+    );
+
+    if (tbody) {
+
+      tbody.innerHTML =
+        `
+          <tr>
+            <td
+              colspan="8"
+              class="table-empty"
+            >
+              Não foi possível carregar as despesas.
+            </td>
+          </tr>
+        `;
+    }
+  }
+}
+
+
+/* =========================================================
+   DESPESAS - NOVA / EDITAR
+========================================================= */
+
+function limparFormularioDespesaMaster() {
+
+  const form =
+    byId(
+      'formMasterDespesa'
+    );
+
+  form?.reset();
+
+  if (
+    byId(
+      'masterDespesaId'
+    )
+  ) {
+
+    byId(
+      'masterDespesaId'
+    ).value =
+      '';
+  }
+
+  if (
+    byId(
+      'masterDespesaData'
+    )
+  ) {
+
+    byId(
+      'masterDespesaData'
+    ).value =
+      dataHojeISO();
+  }
+
+  if (
+    byId(
+      'masterDespesaAtiva'
+    )
+  ) {
+
+    byId(
+      'masterDespesaAtiva'
+    ).checked =
+      true;
+  }
+
+  mostrarMensagemFormulario(
+    byId(
+      'masterDespesaMensagem'
+    ),
+    ''
+  );
+}
+
+
+function abrirNovaDespesaMaster() {
+
+  limparFormularioDespesaMaster();
+
+  if (
+    byId(
+      'tituloModalMasterDespesa'
+    )
+  ) {
+
+    byId(
+      'tituloModalMasterDespesa'
+    ).textContent =
+      'Nova despesa';
+  }
+
+  if (
+    byId(
+      'btnSalvarMasterDespesa'
+    )
+  ) {
+
+    byId(
+      'btnSalvarMasterDespesa'
+    ).textContent =
+      'Salvar despesa';
+  }
+
+  abrirModalMaster(
+    byId(
+      'modalMasterDespesa'
+    )
+  );
+
+  setTimeout(
+    () => {
+
+      byId(
+        'masterDespesaDescricao'
+      )?.focus();
+
+    },
+    100
+  );
+}
+
+
+function buscarDespesaLocalPorId(id) {
+
+  return masterDespesas.find(
+    despesa =>
+      String(despesa.id) ===
+      String(id)
+  ) || null;
+}
+
+
+function abrirEditarDespesaMaster(id) {
+
+  const despesa =
+    buscarDespesaLocalPorId(
+      id
+    );
+
+  if (!despesa) {
+
+    alert(
+      'Despesa não encontrada.'
+    );
+
+    return;
+  }
+
+  limparFormularioDespesaMaster();
+
+  byId(
+    'masterDespesaId'
+  ).value =
+    despesa.id;
+
+  byId(
+    'masterDespesaDescricao'
+  ).value =
+    despesa.description ||
+    '';
+
+  byId(
+    'masterDespesaData'
+  ).value =
+    despesa.expense_date ||
+    dataHojeISO();
+
+  byId(
+    'masterDespesaCategoria'
+  ).value =
+    despesa.category ||
+    'outros';
+
+  byId(
+    'masterDespesaValor'
+  ).value =
+    numeroSeguro(
+      despesa.amount
+    );
+
+  byId(
+    'masterDespesaPagamento'
+  ).value =
+    despesa.payment_method ||
+    '';
+
+  byId(
+    'masterDespesaObservacoes'
+  ).value =
+    despesa.notes ||
+    '';
+
+  byId(
+    'masterDespesaAtiva'
+  ).checked =
+    despesa.active === true;
+
+  byId(
+    'tituloModalMasterDespesa'
+  ).textContent =
+    'Editar despesa';
+
+  byId(
+    'btnSalvarMasterDespesa'
+  ).textContent =
+    'Salvar alterações';
+
+  abrirModalMaster(
+    byId(
+      'modalMasterDespesa'
+    )
+  );
+}
+
+
+/* =========================================================
+   DESPESAS - SALVAR
+========================================================= */
+
+async function salvarDespesaMaster(evento) {
+
+  evento.preventDefault();
+
+  if (
+    salvandoDespesaMaster
+  ) {
+
+    return;
+  }
+
+  const mensagem =
+    byId(
+      'masterDespesaMensagem'
+    );
+
+  mostrarMensagemFormulario(
+    mensagem,
+    ''
+  );
+
+  const id =
+    String(
+      byId(
+        'masterDespesaId'
+      )?.value ||
+      ''
+    ).trim();
+
+  const editando =
+    Boolean(id);
+
+  const descricao =
+    String(
+      byId(
+        'masterDespesaDescricao'
+      )?.value ||
+      ''
+    ).trim();
+
+  const dataDespesa =
+    String(
+      byId(
+        'masterDespesaData'
+      )?.value ||
+      ''
+    ).trim();
+
+  const categoria =
+    String(
+      byId(
+        'masterDespesaCategoria'
+      )?.value ||
+      ''
+    ).trim();
+
+  const valor =
+    numeroSeguro(
+      byId(
+        'masterDespesaValor'
+      )?.value
+    );
+
+  const pagamento =
+    String(
+      byId(
+        'masterDespesaPagamento'
+      )?.value ||
+      ''
+    ).trim();
+
+  const observacoes =
+    String(
+      byId(
+        'masterDespesaObservacoes'
+      )?.value ||
+      ''
+    ).trim();
+
+  const ativa =
+    byId(
+      'masterDespesaAtiva'
+    )?.checked === true;
+
+  if (!descricao) {
+
+    mostrarMensagemFormulario(
+      mensagem,
+      'Informe a descrição da despesa.'
+    );
+
+    return;
+  }
+
+  if (!dataDespesa) {
+
+    mostrarMensagemFormulario(
+      mensagem,
+      'Informe a data da despesa.'
+    );
+
+    return;
+  }
+
+  if (!categoria) {
+
+    mostrarMensagemFormulario(
+      mensagem,
+      'Selecione a categoria da despesa.'
+    );
+
+    return;
+  }
+
+  if (
+    valor <= 0
+  ) {
+
+    mostrarMensagemFormulario(
+      mensagem,
+      'Informe um valor maior que zero.'
+    );
+
+    return;
+  }
+
+  const payload = {
+
+    description:
+      descricao,
+
+    category:
+      categoria,
+
+    amount:
+      valor,
+
+    expense_date:
+      dataDespesa,
+
+    payment_method:
+      pagamento ||
+      null,
+
+    notes:
+      observacoes ||
+      null,
+
+    active:
+      ativa
+  };
+
+  if (!editando) {
+
+    payload.created_by =
+      masterUsuario?.id ||
+      null;
+  }
+
+  const botao =
+    byId(
+      'btnSalvarMasterDespesa'
+    );
+
+  const textoAnterior =
+    botao?.textContent ||
+    'Salvar despesa';
+
+  try {
+
+    salvandoDespesaMaster =
+      true;
+
+    if (botao) {
+
+      botao.disabled =
+        true;
+
+      botao.textContent =
+        'Salvando...';
+    }
+
+    mostrarMensagemFormulario(
+      mensagem,
+      'Salvando despesa...',
+      'warning'
+    );
+
+    if (editando) {
+
+      const {
+        error
+      } =
+        await supabaseClient
+          .from('expenses')
+          .update(
+            payload
+          )
+          .eq(
+            'id',
+            id
+          );
+
+      if (error) {
+
+        throw error;
+      }
+
+    } else {
+
+      const {
+        error
+      } =
+        await supabaseClient
+          .from('expenses')
+          .insert(
+            payload
+          );
+
+      if (error) {
+
+        throw error;
+      }
+    }
+
+    mostrarMensagemFormulario(
+      mensagem,
+      editando
+        ? 'Despesa atualizada com sucesso.'
+        : 'Despesa cadastrada com sucesso.',
+      'success'
+    );
+
+    await carregarDespesasMaster();
+
+    setTimeout(
+      () => {
+
+        fecharModalMaster(
+          byId(
+            'modalMasterDespesa'
+          )
+        );
+
+      },
+      450
+    );
+
+  } catch (erro) {
+
+    console.error(
+      'Erro ao salvar despesa:',
+      erro
+    );
+
+    mostrarMensagemFormulario(
+      mensagem,
+      erro?.message ||
+      'Não foi possível salvar a despesa.'
+    );
+
+  } finally {
+
+    salvandoDespesaMaster =
+      false;
+
+    if (botao) {
+
+      botao.disabled =
+        false;
+
+      botao.textContent =
+        textoAnterior;
+    }
+  }
+}
+
+
+/* =========================================================
+   DESPESAS - ATIVAR / DESATIVAR
+========================================================= */
+
+async function alternarStatusDespesaMaster(id) {
+
+  const despesa =
+    buscarDespesaLocalPorId(
+      id
+    );
+
+  if (!despesa) {
+
+    return;
+  }
+
+  const novoStatus =
+    despesa.active !== true;
+
+  try {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from('expenses')
+        .update(
+          {
+            active:
+              novoStatus
+          }
+        )
+        .eq(
+          'id',
+          despesa.id
+        );
+
+    if (error) {
+
+      throw error;
+    }
+
+    await carregarDespesasMaster();
+
+  } catch (erro) {
+
+    console.error(
+      'Erro ao alterar status da despesa:',
+      erro
+    );
+
+    alert(
+      erro?.message ||
+      'Não foi possível alterar o status da despesa.'
+    );
+  }
+}
+
+
+/* =========================================================
+   DESPESAS - EXCLUIR
+========================================================= */
+
+async function excluirDespesaMaster(id) {
+
+  const despesa =
+    buscarDespesaLocalPorId(
+      id
+    );
+
+  if (!despesa) {
+
+    return;
+  }
+
+  const confirmar =
+    confirm(
+      `Excluir a despesa "${despesa.description}"?\n\nEsta ação remove o lançamento definitivamente.`
+    );
+
+  if (!confirmar) {
+
+    return;
+  }
+
+  try {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from('expenses')
+        .delete()
+        .eq(
+          'id',
+          despesa.id
+        );
+
+    if (error) {
+
+      throw error;
+    }
+
+    await carregarDespesasMaster();
+
+  } catch (erro) {
+
+    console.error(
+      'Erro ao excluir despesa:',
+      erro
+    );
+
+    alert(
+      erro?.message ||
+      'Não foi possível excluir a despesa.'
+    );
+  }
+}
+
+
+/* =========================================================
+   DESPESAS - FILTROS
+========================================================= */
+
+function configurarFiltrosDespesasMaster() {
+
+  const busca =
+    byId(
+      'masterBuscaDespesa'
+    );
+
+  if (busca) {
+
+    busca.addEventListener(
+      'input',
+      () => {
+
+        buscaDespesaMaster =
+          busca.value ||
+          '';
+
+        renderizarDespesasMaster();
+      }
+    );
+  }
+
+  const periodo =
+    byId(
+      'masterFiltroPeriodoDespesa'
+    );
+
+  if (periodo) {
+
+    periodo.addEventListener(
+      'change',
+      () => {
+
+        filtroPeriodoDespesaMaster =
+          periodo.value ||
+          'all';
+
+        renderizarDespesasMaster();
+      }
+    );
+  }
+
+  const categoria =
+    byId(
+      'masterFiltroCategoriaDespesa'
+    );
+
+  if (categoria) {
+
+    categoria.addEventListener(
+      'change',
+      () => {
+
+        filtroCategoriaDespesaMaster =
+          categoria.value ||
+          'all';
+
+        renderizarDespesasMaster();
+      }
+    );
+  }
+}
+
+
+/* =========================================================
+   DESPESAS - EVENTOS DA TABELA
+========================================================= */
+
+function configurarEventosDespesasMaster() {
+
+  const tabela =
+    byId(
+      'masterListaDespesas'
+    );
+
+  if (!tabela) {
+
+    return;
+  }
+
+  tabela.addEventListener(
+    'click',
+    evento => {
+
+      const editar =
+        evento.target.closest(
+          '[data-expense-edit]'
+        );
+
+      if (editar) {
+
+        abrirEditarDespesaMaster(
+          editar.dataset
+            .expenseEdit
+        );
+
+        return;
+      }
+
+      const alternar =
+        evento.target.closest(
+          '[data-expense-toggle]'
+        );
+
+      if (alternar) {
+
+        alternarStatusDespesaMaster(
+          alternar.dataset
+            .expenseToggle
+        );
+
+        return;
+      }
+
+      const excluir =
+        evento.target.closest(
+          '[data-expense-delete]'
+        );
+
+      if (excluir) {
+
+        excluirDespesaMaster(
+          excluir.dataset
+            .expenseDelete
+        );
+      }
+    }
+  );
+}
+
+
+/* =========================================================
    FILTROS DE PRODUTOS
 ========================================================= */
 
@@ -4982,12 +6476,7 @@ function configurarBotoesMaster() {
 
     btnDespesa.addEventListener(
       'click',
-      () => {
-
-        alert(
-          'O cadastro de despesas será criado na próxima etapa.'
-        );
-      }
+      abrirNovaDespesaMaster
     );
   }
 }
@@ -5014,6 +6503,11 @@ function configurarFormulariosMaster() {
       'formMasterFicha'
     );
 
+  const formDespesa =
+    byId(
+      'formMasterDespesa'
+    );
+
   if (formProduto) {
 
     formProduto.addEventListener(
@@ -5035,6 +6529,15 @@ function configurarFormulariosMaster() {
     formFicha.addEventListener(
       'submit',
       salvarFichaTecnicaMaster
+    );
+  }
+
+
+  if (formDespesa) {
+
+    formDespesa.addEventListener(
+      'submit',
+      salvarDespesaMaster
     );
   }
 
@@ -5113,6 +6616,8 @@ function configurarEventosMaster() {
         await carregarDashboard();
 
         await carregarProdutosMaster();
+
+        await carregarDespesasMaster();
       }
     );
   }
@@ -5128,6 +6633,10 @@ function configurarEventosMaster() {
   configurarEventosListaProdutos();
 
   configurarEventosFichaMaster();
+
+  configurarFiltrosDespesasMaster();
+
+  configurarEventosDespesasMaster();
 
   configurarModaisMaster();
 
@@ -5198,7 +6707,8 @@ async function iniciarMaster() {
   await Promise.all(
     [
       carregarDashboard(),
-      carregarProdutosMaster()
+      carregarProdutosMaster(),
+      carregarDespesasMaster()
     ]
   );
 
