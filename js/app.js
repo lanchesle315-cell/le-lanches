@@ -95,6 +95,55 @@ let calculoEntregaCache = null;
 let disponibilidadeProdutos = {};
 
 
+/* =========================================================
+   CATÁLOGO DINÂMICO - SUPABASE
+========================================================= */
+
+let catalogoProdutos = [];
+let catalogoPorId = {};
+let catalogoPorCodigo = {};
+let catalogoPorNome = {};
+
+const META_CATEGORIAS_CARDAPIO = {
+  'Hot Dog': {
+    id: 'hot-dog',
+    icone: 'img/produtos/dog.png',
+    emoji: '🌭',
+    descricao: 'Prensados caprichados, do simples ao especial.'
+  },
+  'Burguer': {
+    id: 'burguer',
+    icone: 'img/produtos/burguer.png',
+    emoji: '🍔',
+    descricao: 'Hambúrgueres completos e bem recheados.'
+  },
+  'Smash': {
+    id: 'smash',
+    icone: 'img/produtos/smash.png',
+    emoji: '🍔',
+    descricao: 'Smash na chapa, queijo e muito sabor.'
+  },
+  'Fritas': {
+    id: 'fritas',
+    icone: 'img/produtos/fritas.png',
+    emoji: '🍟',
+    descricao: 'Porções para acompanhar seu pedido.'
+  },
+  'Adicionais': {
+    id: 'adicionais',
+    icone: 'img/produtos/adicionais.png',
+    emoji: '➕',
+    descricao: 'Escolha o adicional e depois em qual lanche.'
+  },
+  'Bebidas': {
+    id: 'bebidas',
+    icone: 'img/produtos/bebida.png',
+    emoji: '🥤',
+    descricao: 'Bebidas geladas para acompanhar.'
+  }
+};
+
+
 const CODIGO_POR_PRODUTO_OPCOES = {
 
   agua: 'R01',
@@ -258,6 +307,7 @@ function codigoProdutoPorNome(
 
 
   return (
+    catalogoPorNome[normalizado]?.product_code ||
     CODIGO_POR_NOME_PRODUTO[
       normalizado
     ] ||
@@ -385,6 +435,7 @@ function aplicarDisponibilidadeNoCardapio() {
 
 
         let codigo =
+          elemento.dataset?.productCode ||
           null;
 
 
@@ -1205,6 +1256,354 @@ const PRODUTOS_COM_OPCOES = {
   }
 
 };
+
+
+
+/* =========================================================
+   CARDÁPIO DINÂMICO - SUPABASE
+========================================================= */
+
+function normalizarChaveCatalogo(texto) {
+  return removerAcentos(String(texto || '').toLowerCase()).trim();
+}
+
+function produtoDinamicoPorNome(nome) {
+  return catalogoPorNome[normalizarChaveCatalogo(nome)] || null;
+}
+
+function obterMetaCategoria(categoria) {
+  return META_CATEGORIAS_CARDAPIO[categoria] || {
+    id: normalizarChaveCatalogo(categoria).replace(/\s+/g, '-'),
+    icone: 'img/produtos/burguer.png',
+    emoji: '🍽️',
+    descricao: ''
+  };
+}
+
+async function carregarCatalogoDinamico() {
+  if (!supabaseClient) {
+    throw new Error('Supabase não está configurado.');
+  }
+
+  const { data: produtos, error } = await supabaseClient
+    .from('products')
+    .select('id, product_code, name, category, sale_price, description, menu_type, selection_title, show_on_menu, allow_addons, allow_ingredient_removal, display_order, active, available')
+    .eq('active', true)
+    .eq('show_on_menu', true)
+    .order('display_order', { ascending: true })
+    .order('id', { ascending: true });
+
+  if (error) throw error;
+
+  const ids = (produtos || []).map(p => p.id);
+  let opcoes = [];
+  let removiveis = [];
+  let links = [];
+
+  if (ids.length) {
+    const [opcoesResp, removiveisResp, linksResp] = await Promise.all([
+      supabaseClient
+        .from('product_options')
+        .select('id, product_id, name, price_adjustment, available, active, display_order')
+        .in('product_id', ids)
+        .eq('active', true)
+        .order('display_order', { ascending: true }),
+
+      supabaseClient
+        .from('product_removable_ingredients')
+        .select('id, product_id, name, active, display_order')
+        .in('product_id', ids)
+        .eq('active', true)
+        .order('display_order', { ascending: true }),
+
+      supabaseClient
+        .from('product_addon_links')
+        .select('product_id, addon_product_id, active, display_order')
+        .in('product_id', ids)
+        .eq('active', true)
+        .order('display_order', { ascending: true })
+    ]);
+
+    if (opcoesResp.error) throw opcoesResp.error;
+    if (removiveisResp.error) throw removiveisResp.error;
+    if (linksResp.error) throw linksResp.error;
+
+    opcoes = opcoesResp.data || [];
+    removiveis = removiveisResp.data || [];
+    links = linksResp.data || [];
+  }
+
+  catalogoProdutos = (produtos || []).map(produto => ({
+    ...produto,
+    sale_price: Number(produto.sale_price || 0),
+    opcoes: opcoes.filter(o => Number(o.product_id) === Number(produto.id)),
+    ingredientesRemoviveis: removiveis.filter(i => Number(i.product_id) === Number(produto.id)),
+    addonProductIds: links
+      .filter(l => Number(l.product_id) === Number(produto.id))
+      .map(l => Number(l.addon_product_id))
+  }));
+
+  catalogoPorId = {};
+  catalogoPorCodigo = {};
+  catalogoPorNome = {};
+
+  catalogoProdutos.forEach(produto => {
+    catalogoPorId[Number(produto.id)] = produto;
+    catalogoPorCodigo[String(produto.product_code || '')] = produto;
+    catalogoPorNome[normalizarChaveCatalogo(produto.name)] = produto;
+  });
+
+  renderizarCardapioDinamico();
+}
+
+function renderizarCardapioDinamico() {
+  const mount = byId('cardapioDinamico');
+  if (!mount) return;
+
+  const ordemCategorias = ['Hot Dog', 'Burguer', 'Smash', 'Fritas', 'Adicionais', 'Bebidas'];
+  const extras = [...new Set(catalogoProdutos.map(p => p.category).filter(Boolean))]
+    .filter(c => !ordemCategorias.includes(c));
+
+  mount.innerHTML = [...ordemCategorias, ...extras].map(categoria => {
+    const produtos = catalogoProdutos.filter(p => p.category === categoria);
+    if (!produtos.length) return '';
+
+    const meta = obterMetaCategoria(categoria);
+
+    return `
+      <section class="ll-section" id="${escaparHtml(meta.id)}">
+        <div class="ll-section-head">
+          <div class="ll-section-icon">
+            <img src="${escaparHtml(meta.icone)}" alt="${escaparHtml(categoria)}">
+          </div>
+          <div>
+            <span class="ll-section-kicker">CARDÁPIO</span>
+            <h2>${escaparHtml(categoria)}</h2>
+            <p>${escaparHtml(meta.descricao)}</p>
+          </div>
+        </div>
+
+        <div class="row g-3 g-lg-4">
+          ${produtos.map(produto => renderizarCardProdutoDinamico(produto, meta)).join('')}
+        </div>
+      </section>
+    `;
+  }).join('');
+
+  aplicarDisponibilidadeNoCardapio();
+
+  const busca = byId('buscaCardapio');
+  if (busca && busca.value.trim()) filtrarCardapio();
+}
+
+function renderizarCardProdutoDinamico(produto, meta) {
+  const opcoesAtivas = (produto.opcoes || []).filter(o => o.active !== false);
+  const temOpcoes = opcoesAtivas.length > 0;
+  const textoBotao = temOpcoes || produto.menu_type === 'adicional' ? 'Escolher' : 'Adicionar';
+  const descricao = produto.description || '';
+  const busca = [
+    produto.product_code,
+    produto.name,
+    produto.category,
+    descricao,
+    ...opcoesAtivas.map(o => o.name)
+  ].filter(Boolean).join(' ');
+
+  return `
+    <div class="col-12 col-md-6 col-xl-4 ll-product-col" data-search="${escaparHtml(busca)}">
+      <article class="ll-product-card h-100">
+        <div class="ll-product-top">
+          <span class="ll-product-code">${escaparHtml(produto.product_code)}</span>
+          <span class="ll-product-category">${meta.emoji} ${escaparHtml(produto.category)}</span>
+        </div>
+
+        <h3 class="ll-product-name">${escaparHtml(produto.name)}</h3>
+        <p class="ll-product-description">${escaparHtml(descricao)}</p>
+
+        <div class="ll-product-footer">
+          <strong class="ll-product-price">${formatarPreco(produto.sale_price)}</strong>
+
+          <button
+            class="btn ll-btn-add"
+            type="button"
+            data-product-code="${escaparHtml(produto.product_code)}"
+            onclick="abrirProdutoDinamico(${Number(produto.id)})"
+          >
+            <span>＋</span>
+            ${textoBotao}
+          </button>
+        </div>
+      </article>
+    </div>
+  `;
+}
+
+function abrirProdutoDinamico(produtoId) {
+  const produto = catalogoPorId[Number(produtoId)];
+
+  if (!produto) {
+    mostrarToastLeLanches('Produto não encontrado.');
+    return;
+  }
+
+  if (produto.available === false || !estaDisponivelPorCodigo(produto.product_code)) {
+    mostrarToastLeLanches(`${produto.name} está esgotado no momento.`);
+    return;
+  }
+
+  const opcoesAtivas = (produto.opcoes || []).filter(o => o.active !== false);
+
+  if (produto.menu_type === 'adicional') {
+    abrirAdicionalDinamico(produto);
+    return;
+  }
+
+  if (opcoesAtivas.length) {
+    abrirOpcoesDinamicasProduto(produto);
+    return;
+  }
+
+  if (produto.menu_type === 'lanche') {
+    abrirPersonalizacaoLanche({
+      nome: produto.name,
+      preco: produto.sale_price,
+      codigoProduto: produto.product_code,
+      produtoId: produto.id,
+      ingredientesRemoviveis: produto.ingredientesRemoviveis || [],
+      observacaoBase: ''
+    });
+    return;
+  }
+
+  adicionarItemFinalAoCarrinho(produto.name, produto.sale_price, '', produto.product_code);
+}
+
+function abrirOpcoesDinamicasProduto(produto) {
+  garantirModalOpcoesForaDoCarrinho();
+
+  produtoPersonalizacaoAtual = null;
+  adicionalPendente = null;
+  produtoOpcoesAtual = {
+    id: `db-${produto.id}`,
+    produtoId: produto.id,
+    codigoProduto: produto.product_code,
+    nome: produto.name,
+    preco: produto.sale_price,
+    tipo: produto.menu_type,
+    tituloOpcao: produto.selection_title || 'Escolha uma opção',
+    dinamico: true,
+    produtoOriginal: produto
+  };
+
+  const modal = byId('modalOpcoesProduto');
+  const titulo = byId('tituloOpcoesProduto');
+  const descricao = byId('descricaoOpcoesProduto');
+  const lista = byId('listaOpcoesProduto');
+
+  if (!modal || !titulo || !descricao || !lista) return;
+
+  titulo.innerText = produto.name;
+  descricao.innerText = produto.selection_title || 'Escolha uma opção';
+
+  const opcoes = (produto.opcoes || []).filter(o => o.active !== false);
+
+  lista.innerHTML = `
+    <div class="ll-options-list">
+      ${opcoes.map((opcao, index) => {
+        const disponivel = opcao.available !== false && opcaoEstaDisponivel(produto.product_code, opcao.name);
+        const acrescimo = Number(opcao.price_adjustment || 0);
+
+        return `
+          <label class="ll-option-item ${disponivel ? '' : 'll-option-disabled'}"
+                 style="${disponivel ? '' : 'opacity:.5; cursor:not-allowed;'}">
+            <input
+              type="radio"
+              name="opcaoProduto"
+              value="${escaparHtml(opcao.name)}"
+              data-price-adjustment="${acrescimo}"
+              ${disponivel ? '' : 'disabled'}
+              ${opcoes.length === 1 && index === 0 && disponivel ? 'checked' : ''}
+            >
+            <span class="ll-option-content">
+              <strong>${escaparHtml(opcao.name)}</strong>
+              ${acrescimo > 0 ? `<small>+ ${formatarPreco(acrescimo)}</small>` : ''}
+              ${disponivel ? '' : '<small style="display:block;color:#ff7070;margin-top:3px;font-weight:800;">ESGOTADO</small>'}
+            </span>
+          </label>
+        `;
+      }).join('')}
+    </div>
+  `;
+
+  modal.style.display = 'flex';
+  modal.classList.add('ativo');
+}
+
+function abrirAdicionalDinamico(produto) {
+  garantirModalOpcoesForaDoCarrinho();
+
+  const lanches = carrinho.filter(item => ehLanche(item.nome));
+  if (!lanches.length) {
+    alert('Adicione um lanche ao carrinho antes de escolher um adicional.');
+    return;
+  }
+
+  produtoPersonalizacaoAtual = null;
+  adicionalPendente = null;
+  produtoOpcoesAtual = {
+    id: `db-${produto.id}`,
+    produtoId: produto.id,
+    codigoProduto: produto.product_code,
+    nome: produto.name,
+    preco: produto.sale_price,
+    tipo: 'adicional',
+    dinamico: true,
+    produtoOriginal: produto
+  };
+
+  const modal = byId('modalOpcoesProduto');
+  const titulo = byId('tituloOpcoesProduto');
+  const descricao = byId('descricaoOpcoesProduto');
+  const lista = byId('listaOpcoesProduto');
+
+  if (!modal || !titulo || !descricao || !lista) return;
+
+  titulo.innerText = produto.name;
+  descricao.innerText = produto.selection_title || 'Qual adicional você deseja?';
+
+  const opcoes = (produto.opcoes || []).filter(o => o.active !== false);
+
+  lista.innerHTML = `
+    <div class="ll-options-list">
+      ${opcoes.map(opcao => {
+        const disponivel = opcao.available !== false && opcaoEstaDisponivel(produto.product_code, opcao.name);
+        const acrescimo = Number(opcao.price_adjustment || 0);
+        const precoFinal = Number(produto.sale_price || 0) + acrescimo;
+
+        return `
+          <label class="ll-option-item ${disponivel ? '' : 'll-option-disabled'}"
+                 style="${disponivel ? '' : 'opacity:.5; cursor:not-allowed;'}">
+            <input
+              type="radio"
+              name="opcaoAdicional"
+              value="${escaparHtml(opcao.name)}"
+              data-price-adjustment="${acrescimo}"
+              ${disponivel ? '' : 'disabled'}
+            >
+            <span class="ll-option-content">
+              <strong>${escaparHtml(opcao.name)}</strong>
+              <small>+ ${formatarPreco(precoFinal)}</small>
+              ${disponivel ? '' : '<small style="display:block;color:#ff7070;margin-top:3px;font-weight:800;">ESGOTADO</small>'}
+            </span>
+          </label>
+        `;
+      }).join('')}
+    </div>
+  `;
+
+  modal.style.display = 'flex';
+  modal.classList.add('ativo');
+}
 
 
 /* =========================================================
@@ -2942,6 +3341,12 @@ function atualizarContadores() {
 
 function ehLanche(nome) {
 
+  const dinamico = produtoDinamicoPorNome(nome);
+
+  if (dinamico) {
+    return dinamico.menu_type === 'lanche';
+  }
+
   const n =
     removerAcentos(
       String(
@@ -2969,6 +3374,14 @@ function ehLanche(nome) {
 function obterIngredientesRemoviveisPorLanche(
   nome
 ) {
+
+  const dinamico = produtoDinamicoPorNome(nome);
+
+  if (dinamico && Array.isArray(dinamico.ingredientesRemoviveis)) {
+    return dinamico.ingredientesRemoviveis
+      .filter(item => item.active !== false)
+      .map(item => item.name);
+  }
 
   const normalizado =
     removerAcentos(
@@ -3229,9 +3642,13 @@ function abrirPersonalizacaoLanche(
   }
 
   const ingredientes =
-    obterIngredientesRemoviveisPorLanche(
-      produto.nome
-    );
+    Array.isArray(produto.ingredientesRemoviveis)
+      ? produto.ingredientesRemoviveis
+          .filter(item => item.active !== false)
+          .map(item => item.name)
+      : obterIngredientesRemoviveisPorLanche(
+          produto.nome
+        );
 
   titulo.innerText =
     produto.nome;
@@ -3618,7 +4035,9 @@ function confirmarOpcoesProduto() {
     adicionarItemFinalAoCarrinho(
       produtoPersonalizacaoAtual.nome,
       produtoPersonalizacaoAtual.preco,
-      observacoes
+      observacoes,
+      produtoPersonalizacaoAtual.codigoProduto ||
+        codigoProdutoPorNome(produtoPersonalizacaoAtual.nome)
     );
 
     fecharOpcoesProduto();
@@ -3683,10 +4102,18 @@ function confirmarOpcoesProduto() {
         Number(
           produtoOpcoesAtual.preco ||
           0
+        ) +
+        Number(
+          selecionado.dataset.priceAdjustment ||
+          0
         ),
 
       codigoProduto:
-        codigoProduto
+        codigoProduto,
+
+      addonProductId:
+        produtoOpcoesAtual.produtoId ||
+        null
     };
 
     abrirEscolhaLancheParaAdicional();
@@ -3778,6 +4205,12 @@ function confirmarOpcoesProduto() {
     const opcao =
       selecionado.value;
 
+    const acrescimoOpcao =
+      Number(
+        selecionado.dataset.priceAdjustment ||
+        0
+      );
+
     const codigoProduto =
       produtoOpcoesAtual.codigoProduto ||
       CODIGO_POR_PRODUTO_OPCOES[
@@ -3805,7 +4238,7 @@ function confirmarOpcoesProduto() {
 
     adicionarItemFinalAoCarrinho(
       produtoOpcoesAtual.nome,
-      produtoOpcoesAtual.preco,
+      Number(produtoOpcoesAtual.preco || 0) + acrescimoOpcao,
       observacao,
       codigoProduto
     );
@@ -4067,10 +4500,30 @@ function abrirEscolhaLancheParaAdicional() {
         })
       )
       .filter(
-        item =>
-          ehLanche(
-            item.nome
-          )
+        item => {
+
+          if (!ehLanche(item.nome)) {
+            return false;
+          }
+
+          if (!adicionalPendente?.addonProductId) {
+            return true;
+          }
+
+          const produtoLanche = produtoDinamicoPorNome(item.nome);
+
+          if (
+            !produtoLanche ||
+            !Array.isArray(produtoLanche.addonProductIds) ||
+            produtoLanche.addonProductIds.length === 0
+          ) {
+            return true;
+          }
+
+          return produtoLanche.addonProductIds.includes(
+            Number(adicionalPendente.addonProductId)
+          );
+        }
       );
 
   if (
@@ -7726,6 +8179,41 @@ function iniciarRealtimeDisponibilidade() {
 async function iniciarAplicacao() {
 
   /*
+   * Carrega o cardápio atual do Supabase.
+   */
+
+  try {
+
+    await carregarCatalogoDinamico();
+
+  } catch (
+    erro
+  ) {
+
+    console.error(
+      'Erro ao carregar cardápio dinâmico:',
+      erro
+    );
+
+    const mount =
+      byId(
+        'cardapioDinamico'
+      );
+
+    if (mount) {
+
+      mount.innerHTML = `
+        <div class="ll-empty-search">
+          <div>⚠️</div>
+          <strong>Não foi possível carregar o cardápio.</strong>
+          <span>Atualize a página em alguns instantes.</span>
+        </div>
+      `;
+    }
+  }
+
+
+  /*
    * Garante que o modal de opções fique
    * diretamente no body.
    */
@@ -7913,6 +8401,9 @@ document.addEventListener(
    FUNÇÕES GLOBAIS
    Usadas pelos onclick do HTML
 ========================================================= */
+
+window.abrirProdutoDinamico =
+  abrirProdutoDinamico;
 
 window.adicionarAoCarrinho =
   adicionarAoCarrinho;
