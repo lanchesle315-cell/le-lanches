@@ -928,6 +928,49 @@ async function buscarItensFinanceiros() {
   const inicio =
     inicioPeriodoSelecionado();
 
+  const inicioISO =
+    inicio.toISOString();
+
+  const {
+    data: pedidosFinalizados,
+    error: erroPedidos
+  } =
+    await supabaseClient
+      .from('orders')
+      .select('id, status, created_at')
+      .eq(
+        'status',
+        'finalizado'
+      )
+      .gte(
+        'created_at',
+        inicioISO
+      );
+
+  if (erroPedidos) {
+
+    console.error(
+      'Erro ao carregar pedidos finalizados do Dashboard:',
+      erroPedidos
+    );
+
+    return [];
+  }
+
+  const idsPedidos =
+    (
+      Array.isArray(pedidosFinalizados)
+        ? pedidosFinalizados
+        : []
+    ).map(
+      pedido => pedido.id
+    );
+
+  if (idsPedidos.length === 0) {
+
+    return [];
+  }
+
   const {
     data,
     error
@@ -950,9 +993,13 @@ async function buscarItensFinanceiros() {
         created_at
         `
       )
+      .in(
+        'order_id',
+        idsPedidos
+      )
       .gte(
         'created_at',
-        inicio.toISOString()
+        inicioISO
       )
       .order(
         'created_at',
@@ -1342,6 +1389,10 @@ async function buscarDadosFinanceirosMaster(
             status,
             created_at
             `
+          )
+          .eq(
+            'status',
+            'finalizado'
           )
           .gte(
             'created_at',
