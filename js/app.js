@@ -23,10 +23,15 @@ const CHAVE_PIX = '15996314700';
 ========================================================= */
 
 const REGRAS_ENTREGA_PADRAO = [
-  { km_min: 0, km_max: 3, fee: 5, active: true },
-  { km_min: 3.000001, km_max: 6, fee: 8, active: true },
-  { km_min: 6.000001, km_max: 8, fee: 11, active: true },
-  { km_min: 8.000001, km_max: 12, fee: 15, active: true }
+  { km_min: 0, km_max: 2, fee: 4, active: true },
+  { km_min: 2.01, km_max: 3, fee: 5, active: true },
+  { km_min: 3.01, km_max: 4, fee: 6, active: true },
+  { km_min: 4.01, km_max: 6, fee: 8, active: true },
+  { km_min: 6.01, km_max: 7, fee: 9, active: true },
+  { km_min: 7.01, km_max: 8, fee: 11, active: true },
+  { km_min: 8.01, km_max: 9, fee: 13, active: true },
+  { km_min: 9.01, km_max: 10, fee: 15, active: true },
+  { km_min: 10.01, km_max: 12, fee: 15, active: true }
 ];
 
 
@@ -4690,15 +4695,142 @@ function atualizarEntrega() {
 
 async function carregarRegrasEntrega() {
 
+  /*
+   * Fallback local.
+   * Se o Supabase estiver indisponível ou não retornar
+   * regras válidas, o cardápio continua funcionando.
+   */
   regrasEntrega = [
     ...REGRAS_ENTREGA_PADRAO
   ];
 
 
-  console.log(
-    'Regras de entrega atuais:',
-    regrasEntrega
-  );
+  if (
+    !supabaseClient
+  ) {
+
+    console.warn(
+      'Supabase não configurado. Usando regras de entrega padrão:',
+      regrasEntrega
+    );
+
+    return;
+  }
+
+
+  try {
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from(
+          'delivery_rules'
+        )
+        .select(
+          'id, km_min, km_max, fee, active'
+        )
+        .eq(
+          'active',
+          true
+        )
+        .order(
+          'km_min',
+          {
+            ascending: true
+          }
+        );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+    }
+
+
+    const regrasValidas =
+      (
+        Array.isArray(
+          data
+        )
+          ? data
+          : []
+      )
+        .map(
+          regra => ({
+
+            ...regra,
+
+            km_min:
+              Number(
+                regra.km_min
+              ),
+
+            km_max:
+              Number(
+                regra.km_max
+              ),
+
+            fee:
+              Number(
+                regra.fee
+              ),
+
+            active:
+              regra.active !== false
+
+          })
+        )
+        .filter(
+          regra =>
+            Number.isFinite(
+              regra.km_min
+            ) &&
+            Number.isFinite(
+              regra.km_max
+            ) &&
+            Number.isFinite(
+              regra.fee
+            ) &&
+            regra.km_min >= 0 &&
+            regra.km_max >=
+              regra.km_min
+        );
+
+
+    if (
+      regrasValidas.length > 0
+    ) {
+
+      regrasEntrega =
+        regrasValidas;
+
+      console.log(
+        'Regras de entrega carregadas do Supabase:',
+        regrasEntrega
+      );
+
+      return;
+    }
+
+
+    console.warn(
+      'Nenhuma regra de entrega válida encontrada no Supabase. Usando fallback local:',
+      regrasEntrega
+    );
+
+  } catch (
+    erro
+  ) {
+
+    console.error(
+      'Erro ao carregar regras de entrega do Supabase. Usando fallback local:',
+      erro
+    );
+  }
 }
 
 
@@ -4802,30 +4934,95 @@ function descobrirTaxaPorDistancia(
   }
 
 
+  const regrasAtivas =
+    (
+      Array.isArray(
+        regrasEntrega
+      )
+        ? regrasEntrega
+        : []
+    )
+      .filter(
+        regra =>
+          regra.active !== false
+      )
+      .map(
+        regra => ({
+
+          ...regra,
+
+          km_min:
+            Number(
+              regra.km_min
+            ),
+
+          km_max:
+            Number(
+              regra.km_max
+            ),
+
+          fee:
+            Number(
+              regra.fee
+            )
+
+        })
+      )
+      .filter(
+        regra =>
+          Number.isFinite(
+            regra.km_min
+          ) &&
+          Number.isFinite(
+            regra.km_max
+          ) &&
+          Number.isFinite(
+            regra.fee
+          )
+      )
+      .sort(
+        (
+          a,
+          b
+        ) =>
+          a.km_min -
+          b.km_min
+      );
+
+
+  const regraEncontrada =
+    regrasAtivas.find(
+      regra =>
+        distancia >=
+          regra.km_min &&
+        distancia <=
+          regra.km_max
+    );
+
+
   if (
-    distancia <= 3
+    regraEncontrada
   ) {
 
-    return 5;
+    return regraEncontrada.fee;
   }
 
 
-  if (
-    distancia <= 6
-  ) {
-
-    return 8;
-  }
-
-
-  if (
-    distancia <= 8
-  ) {
-
-    return 11;
-  }
-
-
+  /*
+   * REGRA ESPECIAL ACIMA DE 12 KM
+   *
+   * Até 12 km:
+   * R$ 15,00
+   *
+   * Passou de 12 km:
+   * acrescenta R$ 2,00 por km iniciado.
+   *
+   * Exemplos:
+   * 12,00 km = R$ 15,00
+   * 12,01 km = R$ 17,00
+   * 13,00 km = R$ 17,00
+   * 13,01 km = R$ 19,00
+   */
   if (
     distancia <= 12
   ) {
