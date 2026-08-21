@@ -1577,21 +1577,27 @@ function montarHtmlBaseImpressao(titulo, textoPlano, autoPrint = true) {
   }
 
   body {
-    font-family: "Courier New", monospace;
-    font-size: 11px;
-    line-height: 1.2;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 9px;
+    font-weight: 900;
+    line-height: 1.25;
     color: #000;
     white-space: pre-wrap;
   }
 
   .ticket {
-    width: 44mm;
-    max-width: 44mm;
+    width: 48mm;
+    max-width: 48mm;
     margin: 0;
     padding: 0;
+
     position: relative;
-    left: 6mm;
-    overflow: hidden;
+    left: 5mm;
+
+    color: #000;
+    font-weight: 900;
+
+    overflow: visible;
   }
 
   @media print {
@@ -1600,18 +1606,27 @@ function montarHtmlBaseImpressao(titulo, textoPlano, autoPrint = true) {
       width: 58mm !important;
       min-width: 58mm !important;
       max-width: 58mm !important;
+
       margin: 0 !important;
       padding: 0 !important;
+
+      background: #fff !important;
     }
 
     .ticket {
-      width: 44mm !important;
-      max-width: 44mm !important;
+      width: 48mm !important;
+      max-width: 48mm !important;
+
       margin: 0 !important;
       padding: 0 !important;
+
       position: relative !important;
-      left: 6mm !important;
-      overflow: hidden !important;
+      left: 5mm !important;
+
+      color: #000 !important;
+      font-weight: 900 !important;
+
+      overflow: visible !important;
     }
   }
 </style>
