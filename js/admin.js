@@ -4008,7 +4008,7 @@ async function registrarVendaExterna() {
 
     const { data, error } =
       await supabaseClient.rpc(
-        "create_order_with_stock",
+        "create_order_with_option_stock",
         {
           p_order: pOrder,
           p_items: pItems
