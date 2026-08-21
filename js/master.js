@@ -931,13 +931,24 @@ async function buscarItensFinanceiros() {
   const inicioISO =
     inicio.toISOString();
 
+
+  /* =====================================================
+     1. BUSCAR SOMENTE PEDIDOS FINALIZADOS DO PERÍODO
+  ===================================================== */
+
   const {
     data: pedidosFinalizados,
     error: erroPedidos
   } =
     await supabaseClient
       .from('orders')
-      .select('id, status, created_at')
+      .select(
+        `
+        id,
+        status,
+        created_at
+        `
+      )
       .eq(
         'status',
         'finalizado'
@@ -957,23 +968,44 @@ async function buscarItensFinanceiros() {
     return [];
   }
 
-  const idsPedidos =
+
+  /* =====================================================
+     2. EXTRAIR SOMENTE IDS VÁLIDOS
+  ===================================================== */
+
+  const idsPedidosFinalizados =
     (
-      Array.isArray(pedidosFinalizados)
+      Array.isArray(
+        pedidosFinalizados
+      )
         ? pedidosFinalizados
         : []
-    ).map(
-      pedido => pedido.id
-    );
+    )
+      .map(
+        pedido =>
+          pedido.id
+      )
+      .filter(
+        id =>
+          id !== null &&
+          id !== undefined
+      );
 
-  if (idsPedidos.length === 0) {
+  if (
+    idsPedidosFinalizados.length === 0
+  ) {
 
     return [];
   }
 
+
+  /* =====================================================
+     3. BUSCAR ITENS APENAS DOS PEDIDOS FINALIZADOS
+  ===================================================== */
+
   const {
-    data,
-    error
+    data: itens,
+    error: erroItens
   } =
     await supabaseClient
       .from('order_items')
@@ -995,11 +1027,7 @@ async function buscarItensFinanceiros() {
       )
       .in(
         'order_id',
-        idsPedidos
-      )
-      .gte(
-        'created_at',
-        inicioISO
+        idsPedidosFinalizados
       )
       .order(
         'created_at',
@@ -1008,18 +1036,18 @@ async function buscarItensFinanceiros() {
         }
       );
 
-  if (error) {
+  if (erroItens) {
 
     console.error(
-      'Erro ao carregar dados financeiros:',
-      error
+      'Erro ao carregar itens financeiros do Dashboard:',
+      erroItens
     );
 
     return [];
   }
 
-  return Array.isArray(data)
-    ? data
+  return Array.isArray(itens)
+    ? itens
     : [];
 }
 
