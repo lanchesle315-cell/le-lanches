@@ -1608,10 +1608,10 @@ function montarHtmlBaseImpressao(titulo, textoPlano, autoPrint = true) {
             }
 
             .ticket {
-              width: 46mm !important;
-              max-width: 46mm !important;
+              width: 42mm !important;
+              max-width: 42mm !important;
               margin: 0 !important;
-              padding: 1mm !important;
+              padding: 0mm !important;
             }
           }
         </style>
