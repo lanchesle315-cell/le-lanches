@@ -14,6 +14,7 @@ let salvandoEdicaoPedido = false;
 let produtosVendaExterna = [];
 let carrinhoVendaExterna = [];
 let salvandoVendaExterna = false;
+let disponibilidadeVendaExterna = {};
 
 const STORAGE_KEYS = ["le_lanches_pedidos"];
 const LOGIN_STORAGE_KEY = "le_lanches_admin_logado";
@@ -2814,13 +2815,12 @@ function obterQuantidadeNoCarrinhoVendaExternaPorCodigo(productCode) {
 }
 
 function validarEstoqueParaAdicionarVendaExterna(produto, quantidadeAdicionar = 1) {
-  if (!produto?.stock_control) return true;
-
-  const estoque = Number(produto.stock_quantity || 0);
-  const jaNoCarrinho =
-    obterQuantidadeNoCarrinhoVendaExternaPorCodigo(produto.product_code);
-
-  return (jaNoCarrinho + Number(quantidadeAdicionar || 0)) <= estoque;
+  /*
+   * A validação visual da Venda Externa usa product_availability.
+   * A validação quantitativa/insumos é feita de forma segura pela
+   * RPC create_order_with_stock no momento de registrar a venda.
+   */
+  return produtoVendaExternaPodeSerAdicionado(produto);
 }
 
 function chaveItemVendaExterna(productCode, observation = "") {
@@ -2876,21 +2876,49 @@ function abrirOpcoesSimplesVendaExterna(produto, config) {
     produto
   };
 
+  const opcoesDisponiveis =
+    config.opcoes.filter(
+      (opcao) =>
+        opcaoVendaExternaEstaDisponivel(
+          produto,
+          opcao
+        )
+    );
+
+  if (!opcoesDisponiveis.length) {
+    alert("Todas as opções deste produto estão esgotadas.");
+    return;
+  }
+
   const html = `
     <div class="ve-options-list">
-      ${config.opcoes.map((opcao, index) => `
-        <label class="ve-option-item">
-          <input
-            type="radio"
-            name="opcaoProdutoVendaExterna"
-            value="${escaparHtml(opcao)}"
-            ${config.opcoes.length === 1 && index === 0 ? "checked" : ""}
+      ${config.opcoes.map((opcao) => {
+        const disponivel =
+          opcaoVendaExternaEstaDisponivel(
+            produto,
+            opcao
+          );
+
+        return `
+          <label
+            class="ve-option-item"
+            style="${disponivel ? "" : "opacity:.48;cursor:not-allowed;"}"
           >
-          <span class="ve-option-content">
-            <strong>${escaparHtml(opcao)}</strong>
-          </span>
-        </label>
-      `).join("")}
+            <input
+              type="radio"
+              name="opcaoProdutoVendaExterna"
+              value="${escaparHtml(opcao)}"
+              ${disponivel ? "" : "disabled"}
+            >
+            <span class="ve-option-content">
+              <strong>${escaparHtml(opcao)}</strong>
+              <small>
+                ${disponivel ? "Disponível" : "Esgotado"}
+              </small>
+            </span>
+          </label>
+        `;
+      }).join("")}
     </div>
   `;
 
@@ -2959,21 +2987,53 @@ function abrirEscolhaAdicionalVendaExterna(produto, config) {
     config
   };
 
+  const opcoesDisponiveis =
+    config.opcoes.filter(
+      (opcao) =>
+        opcaoVendaExternaEstaDisponivel(
+          produto,
+          opcao
+        )
+    );
+
+  if (!opcoesDisponiveis.length) {
+    alert("Todos os adicionais deste grupo estão esgotados.");
+    return;
+  }
+
   const html = `
     <div class="ve-options-list">
-      ${config.opcoes.map((opcao) => `
-        <label class="ve-option-item">
-          <input
-            type="radio"
-            name="opcaoAdicionalVendaExterna"
-            value="${escaparHtml(opcao)}"
+      ${config.opcoes.map((opcao) => {
+        const disponivel =
+          opcaoVendaExternaEstaDisponivel(
+            produto,
+            opcao
+          );
+
+        return `
+          <label
+            class="ve-option-item"
+            style="${disponivel ? "" : "opacity:.48;cursor:not-allowed;"}"
           >
-          <span class="ve-option-content">
-            <strong>${escaparHtml(opcao)}</strong>
-            <small>+ ${formatarMoeda(produto.sale_price)}</small>
-          </span>
-        </label>
-      `).join("")}
+            <input
+              type="radio"
+              name="opcaoAdicionalVendaExterna"
+              value="${escaparHtml(opcao)}"
+              ${disponivel ? "" : "disabled"}
+            >
+            <span class="ve-option-content">
+              <strong>${escaparHtml(opcao)}</strong>
+              <small>
+                ${
+                  disponivel
+                    ? `+ ${formatarMoeda(produto.sale_price)}`
+                    : "Esgotado"
+                }
+              </small>
+            </span>
+          </label>
+        `;
+      }).join("")}
     </div>
   `;
 
@@ -3056,6 +3116,16 @@ function confirmarOpcoesVendaExterna() {
       return;
     }
 
+    if (
+      !opcaoVendaExternaEstaDisponivel(
+        estado.produto,
+        selecionado.value
+      )
+    ) {
+      alert("Esta opção está esgotada no momento.");
+      return;
+    }
+
     const adicionou = adicionarItemFinalVendaExterna(
       estado.produto,
       `Opção: ${selecionado.value}`
@@ -3102,6 +3172,16 @@ function confirmarOpcoesVendaExterna() {
       return;
     }
 
+    if (
+      !opcaoVendaExternaEstaDisponivel(
+        estado.produto,
+        selecionado.value
+      )
+    ) {
+      alert("Este adicional está esgotado no momento.");
+      return;
+    }
+
     abrirEscolhaLancheAdicionalVendaExterna(
       estado.produto,
       selecionado.value
@@ -3144,10 +3224,124 @@ function confirmarOpcoesVendaExterna() {
   fecharOpcoesVendaExterna();
 }
 
+
+function slugDisponibilidadeVendaExterna(texto) {
+  return normalizarTextoVendaExterna(texto)
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function codigoOpcaoDisponibilidadeVendaExterna(productCode, opcao) {
+  return `${String(productCode || "").toUpperCase()}::${slugDisponibilidadeVendaExterna(opcao)}`;
+}
+
+function estaDisponivelVendaExternaPorCodigo(codigo) {
+  return disponibilidadeVendaExterna[String(codigo || "")] !== false;
+}
+
+function opcaoVendaExternaEstaDisponivel(produto, opcao) {
+  return estaDisponivelVendaExternaPorCodigo(
+    codigoOpcaoDisponibilidadeVendaExterna(
+      produto?.product_code,
+      opcao
+    )
+  );
+}
+
+async function carregarDisponibilidadeVendaExterna() {
+  if (!supabaseClient) {
+    disponibilidadeVendaExterna = {};
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("product_availability")
+    .select("product_code, available");
+
+  if (error) {
+    console.error(
+      "Erro ao carregar disponibilidade da venda externa:",
+      error
+    );
+
+    /*
+     * Em caso de falha na tabela de disponibilidade, não travamos
+     * todos os produtos. O RPC continua sendo a proteção final
+     * de estoque/ficha técnica ao registrar a venda.
+     */
+    disponibilidadeVendaExterna = {};
+    return;
+  }
+
+  disponibilidadeVendaExterna = {};
+
+  for (const registro of data || []) {
+    disponibilidadeVendaExterna[registro.product_code] =
+      registro.available !== false;
+  }
+}
+
+function obterResumoDisponibilidadeVendaExterna(produto) {
+  const config = obterConfigPopupVendaExterna(produto);
+  const produtoDisponivel =
+    estaDisponivelVendaExternaPorCodigo(produto?.product_code);
+
+  if (!produtoDisponivel) {
+    return {
+      disponivel: false,
+      classe: "empty",
+      texto: "Esgotado"
+    };
+  }
+
+  if (config?.opcoes?.length) {
+    const indisponiveis = config.opcoes.filter(
+      (opcao) =>
+        !opcaoVendaExternaEstaDisponivel(
+          produto,
+          opcao
+        )
+    );
+
+    if (indisponiveis.length >= config.opcoes.length) {
+      return {
+        disponivel: false,
+        classe: "empty",
+        texto: "Todas as opções esgotadas"
+      };
+    }
+
+    if (indisponiveis.length > 0) {
+      return {
+        disponivel: true,
+        classe: "low",
+        texto:
+          `${indisponiveis.length} opção` +
+          `${indisponiveis.length > 1 ? "ões" : ""} esgotada` +
+          `${indisponiveis.length > 1 ? "s" : ""}`
+      };
+    }
+
+    return {
+      disponivel: true,
+      classe: "ok",
+      texto: "Disponível"
+    };
+  }
+
+  return {
+    disponivel: true,
+    classe: "ok",
+    texto: "Disponível"
+  };
+}
+
 async function buscarProdutosVendaExterna() {
   if (!supabaseClient) {
     throw new Error("Supabase não configurado.");
   }
+
+  await carregarDisponibilidadeVendaExterna();
 
   const { data, error } = await supabaseClient
     .from("products")
@@ -3187,16 +3381,21 @@ async function buscarProdutosVendaExterna() {
 function produtoVendaExternaPodeSerAdicionado(produto) {
   if (!produto) return false;
   if (produto.active !== true) return false;
-  if (produto.available === false) return false;
 
-  if (
-    produto.stock_control === true &&
-    Number(produto.stock_quantity || 0) <= 0
-  ) {
-    return false;
-  }
+  /*
+   * IMPORTANTE:
+   * Na venda externa, a disponibilidade do cardápio segue
+   * product_availability, igual ao pedido normal.
+   *
+   * stock_quantity da tabela products não representa,
+   * necessariamente, a disponibilidade direta do lanche/bebida.
+   * A baixa real de estoque/ficha técnica continua protegida
+   * pela RPC create_order_with_stock ao registrar a venda.
+   */
+  const resumo =
+    obterResumoDisponibilidadeVendaExterna(produto);
 
-  return true;
+  return resumo.disponivel === true;
 }
 
 function renderizarProdutosVendaExterna() {
@@ -3235,26 +3434,17 @@ function renderizarProdutosVendaExterna() {
 
   container.innerHTML = lista
     .map((produto) => {
-      const controlado = produto.stock_control === true;
-      const estoque = Number(produto.stock_quantity || 0);
-      const minimo = Number(produto.minimum_stock || 0);
-      const disponivel = produtoVendaExternaPodeSerAdicionado(produto);
+      const resumoDisponibilidade =
+        obterResumoDisponibilidadeVendaExterna(produto);
 
-      let estoqueClasse = "ok";
-      let estoqueTexto = "Sem controle de estoque";
+      const disponivel =
+        resumoDisponibilidade.disponivel;
 
-      if (controlado) {
-        if (estoque <= 0) {
-          estoqueClasse = "empty";
-          estoqueTexto = "Esgotado";
-        } else if (estoque <= minimo) {
-          estoqueClasse = "low";
-          estoqueTexto = `Estoque baixo: ${estoque}`;
-        } else {
-          estoqueClasse = "ok";
-          estoqueTexto = `Estoque: ${estoque}`;
-        }
-      }
+      const estoqueClasse =
+        resumoDisponibilidade.classe;
+
+      const estoqueTexto =
+        resumoDisponibilidade.texto;
 
       return `
         <div class="external-product-item">
@@ -3426,32 +3616,6 @@ function alterarQuantidadeVendaExterna(index, alteracao) {
   if (novaQuantidade <= 0) {
     removerItemVendaExterna(index);
     return;
-  }
-
-  if (item.stock_control === true) {
-    const totalOutros = carrinhoVendaExterna.reduce(
-      (total, outro, outroIndex) => {
-        if (
-          outroIndex === index ||
-          String(outro.product_code) !== String(item.product_code)
-        ) {
-          return total;
-        }
-
-        return total + Number(outro.quantity || 0);
-      },
-      0
-    );
-
-    if (
-      totalOutros + novaQuantidade >
-      Number(item.stock_quantity || 0)
-    ) {
-      alert(
-        `Estoque insuficiente de "${item.product_name}".`
-      );
-      return;
-    }
   }
 
   item.quantity = novaQuantidade;
