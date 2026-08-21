@@ -415,8 +415,23 @@ function normalizarPedido(pedido, index) {
   );
 
   const totalCalculadoItens = itensOriginais.reduce((acc, item) => {
-    const quantidade = Number(item.quantidade || item.quantity || 1);
-    const preco = Number(item.preco || item.valor || item.price || 0);
+    const quantidade = Number(
+      item.quantidade ??
+      item.quantity ??
+      item.qty ??
+      1
+    );
+
+    const preco = Number(
+      item.preco ??
+      item.valor ??
+      item.price ??
+      item.sale_unit_price ??
+      item.unit_price ??
+      item.unitPrice ??
+      0
+    );
+
     return acc + quantidade * preco;
   }, 0);
 
@@ -448,13 +463,44 @@ function normalizarPedido(pedido, index) {
   ]);
 
   const itens = itensOriginais.map((item) => ({
-    nome: item.nome || item.titulo || item.name || "Item",
-    quantidade: Number(item.quantidade || item.quantity || 1),
-    preco: Number(item.preco || item.valor || item.price || 0),
+    /*
+     * Compatibilidade com os formatos usados pelo cardápio,
+     * Supabase/RPC e venda externa.
+     */
+    nome:
+      item.nome ||
+      item.titulo ||
+      item.name ||
+      item.product_name ||
+      item.productName ||
+      item.description ||
+      item.descricao ||
+      item.product_code ||
+      item.productCode ||
+      "Item",
+
+    quantidade: Number(
+      item.quantidade ??
+      item.quantity ??
+      item.qty ??
+      1
+    ),
+
+    preco: Number(
+      item.preco ??
+      item.valor ??
+      item.price ??
+      item.sale_unit_price ??
+      item.unit_price ??
+      item.unitPrice ??
+      0
+    ),
+
     observacao:
       item.observacao ||
       item.observacoes ||
       item.observation ||
+      item.notes ||
       ""
   }));
 
