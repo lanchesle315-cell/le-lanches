@@ -4594,23 +4594,46 @@ button:disabled {
 
 .master-dynamic-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 120px 80px 42px;
-  gap: 8px;
-  align-items: center;
+  grid-template-columns: minmax(220px, 1fr) 130px 90px 42px;
+  gap: 10px;
+  align-items: end;
+  width: 100%;
 }
 
 .master-dynamic-row.master-removable-row {
-  grid-template-columns: minmax(0, 1fr) 80px 42px;
+  grid-template-columns: minmax(220px, 1fr) 90px 42px;
+}
+
+.master-dynamic-field {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.master-dynamic-field > span {
+  color: var(--master-muted, #9ca3af);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .master-dynamic-row input {
   width: 100%;
-  min-height: 40px;
+  min-width: 0;
+  min-height: 42px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 9px;
   background: rgba(0, 0, 0, 0.18);
   color: var(--master-text, #fff);
   padding: 8px 10px;
+  box-sizing: border-box;
+}
+
+.master-dynamic-row input[data-option-name],
+.master-dynamic-row input[data-removable-name] {
+  font-weight: 600;
 }
 
 .master-dynamic-remove {
@@ -4656,6 +4679,20 @@ button:disabled {
   margin-top: 3px;
 }
 
+
+.master-config-hidden,
+[hidden].master-config-hidden {
+  display: none !important;
+}
+
+.master-dynamic-config-grid.master-dynamic-config-grid-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.master-dynamic-config-grid.master-dynamic-config-grid-single #masterBlocoOpcoesProduto {
+  width: 100%;
+}
+
 #masterSecaoCardapio.master-cardapio-hidden {
   display: none;
 }
@@ -4666,12 +4703,22 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 
-  .master-dynamic-row {
-    grid-template-columns: 1fr 1fr;
+  .master-dynamic-row,
+  .master-dynamic-row.master-removable-row {
+    grid-template-columns: minmax(0, 1fr) 88px 42px;
   }
 
-  .master-dynamic-row.master-removable-row {
-    grid-template-columns: 1fr 80px 42px;
+  .master-option-row {
+    grid-template-columns: minmax(0, 1fr) 110px 42px;
+  }
+
+  .master-option-row .master-dynamic-field-order {
+    grid-column: 1 / 2;
+  }
+
+  .master-option-row .master-dynamic-remove {
+    grid-column: 3;
+    grid-row: 1;
   }
 
   .master-dynamic-box-header {
@@ -4679,3 +4726,6 @@ button:disabled {
     flex-direction: column;
   }
 }
+
+/* Etapa 2.1 - campos condicionais do cardápio */
+#masterCampoTipoCardapio small { display:block; margin-top:6px; }
