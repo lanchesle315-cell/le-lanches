@@ -25,21 +25,6 @@
   >
 
 
-  <script>
-
-    if (
-      localStorage.getItem(
-        "le_lanches_admin_logado"
-      ) !== "true"
-    ) {
-
-      window.location.href =
-        "login.html";
-
-    }
-
-  </script>
-
 </head>
 
 
@@ -1490,7 +1475,208 @@
 
   <script src="js/config.js"></script>
 
-  <script src="js/admin.js"></script>
+  <script>
+  /* =========================================================
+     PROTEÇÃO DO PAINEL ADMIN
+     Supabase Auth + profiles
+  ========================================================= */
+
+  (async function protegerPainelAdmin() {
+
+    try {
+
+      if (
+        !window.supabase ||
+        !window.APP_CONFIG ||
+        !window.APP_CONFIG.supabaseUrl ||
+        !window.APP_CONFIG.supabaseAnonKey
+      ) {
+
+        console.error(
+          "Supabase não configurado."
+        );
+
+        window.location.replace(
+          "login.html"
+        );
+
+        return;
+
+      }
+
+
+      const authClient =
+        window.supabase.createClient(
+          window.APP_CONFIG.supabaseUrl,
+          window.APP_CONFIG.supabaseAnonKey
+        );
+
+
+      const {
+        data: sessionData,
+        error: sessionError
+      } =
+        await authClient.auth.getSession();
+
+
+      if (
+        sessionError
+      ) {
+
+        console.error(
+          "Erro ao consultar sessão:",
+          sessionError
+        );
+
+        window.location.replace(
+          "login.html"
+        );
+
+        return;
+
+      }
+
+
+      const usuario =
+        sessionData?.session?.user;
+
+
+      if (
+        !usuario
+      ) {
+
+        window.location.replace(
+          "login.html"
+        );
+
+        return;
+
+      }
+
+
+      const {
+        data: perfil,
+        error: perfilError
+      } =
+        await authClient
+          .from(
+            "profiles"
+          )
+          .select(
+            "id, full_name, role, active"
+          )
+          .eq(
+            "id",
+            usuario.id
+          )
+          .single();
+
+
+      if (
+        perfilError ||
+        !perfil
+      ) {
+
+        console.error(
+          "Erro ao consultar perfil:",
+          perfilError
+        );
+
+        await authClient.auth.signOut();
+
+        window.location.replace(
+          "login.html"
+        );
+
+        return;
+
+      }
+
+
+      if (
+        perfil.active !== true
+      ) {
+
+        console.warn(
+          "Usuário desativado."
+        );
+
+        await authClient.auth.signOut();
+
+        window.location.replace(
+          "login.html"
+        );
+
+        return;
+
+      }
+
+
+      const role =
+        String(
+          perfil.role || ""
+        )
+          .trim()
+          .toLowerCase();
+
+
+      if (
+        role !== "admin" &&
+        role !== "master"
+      ) {
+
+        console.warn(
+          "Usuário sem permissão para acessar o Admin."
+        );
+
+        await authClient.auth.signOut();
+
+        window.location.replace(
+          "login.html"
+        );
+
+        return;
+
+      }
+
+
+      console.log(
+        "Painel Admin autorizado:",
+        perfil.full_name,
+        `(${role})`
+      );
+
+
+      const scriptAdmin =
+        document.createElement(
+          "script"
+        );
+
+      scriptAdmin.src =
+        "js/admin.js";
+
+      document.body.appendChild(
+        scriptAdmin
+      );
+
+
+    } catch (
+      erro
+    ) {
+
+      console.error(
+        "Erro ao proteger Painel Admin:",
+        erro
+      );
+
+      window.location.replace(
+        "login.html"
+      );
+
+    }
+
+  })();
+  </script>
 
 
 </body>
