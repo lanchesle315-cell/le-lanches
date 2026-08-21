@@ -3259,6 +3259,198 @@
         </div>
 
 
+        <div
+          id="masterSecaoCardapio"
+          class="master-form-section"
+        >
+
+          <div class="master-form-section-title">
+
+            <strong>
+              Cardápio
+            </strong>
+
+            <span>
+              Configure como este produto aparece e se comporta no cardápio.
+            </span>
+
+          </div>
+
+
+          <div class="master-form-grid">
+
+            <div class="master-field master-field-full">
+
+              <label for="masterProdutoDescricao">
+                Descrição / ingredientes
+              </label>
+
+              <textarea
+                id="masterProdutoDescricao"
+                rows="3"
+                placeholder="Ex.: Pão, hambúrguer, queijo, alface, tomate e molho da casa."
+              ></textarea>
+
+              <small>
+                Este texto será mostrado abaixo do nome do produto no cardápio.
+              </small>
+
+            </div>
+
+
+            <div class="master-field">
+
+              <label for="masterProdutoOrdem">
+                Ordem no cardápio
+              </label>
+
+              <input
+                type="number"
+                id="masterProdutoOrdem"
+                min="0"
+                step="1"
+                value="0"
+              >
+
+            </div>
+
+
+            <div class="master-field">
+
+              <label for="masterProdutoTituloSelecao">
+                Título das opções
+              </label>
+
+              <input
+                type="text"
+                id="masterProdutoTituloSelecao"
+                placeholder="Ex.: Escolha o sabor"
+              >
+
+            </div>
+
+          </div>
+
+
+          <div class="master-switch-grid">
+
+            <label class="master-switch-row">
+
+              <div>
+                <strong>Mostrar no cardápio</strong>
+                <span>Exibe este produto para os clientes.</span>
+              </div>
+
+              <input
+                type="checkbox"
+                id="masterProdutoMostrarCardapio"
+                checked
+              >
+
+            </label>
+
+
+            <label class="master-switch-row">
+
+              <div>
+                <strong>Permitir adicionais</strong>
+                <span>Libera adicionais vinculados a este produto.</span>
+              </div>
+
+              <input
+                type="checkbox"
+                id="masterProdutoPermitirAdicionais"
+              >
+
+            </label>
+
+
+            <label class="master-switch-row">
+
+              <div>
+                <strong>Permitir remover ingredientes</strong>
+                <span>Mostra opções como “Sem tomate” no pedido.</span>
+              </div>
+
+              <input
+                type="checkbox"
+                id="masterProdutoPermitirRemocoes"
+              >
+
+            </label>
+
+          </div>
+
+
+          <div class="master-dynamic-config-grid">
+
+            <div class="master-dynamic-box">
+
+              <div class="master-dynamic-box-header">
+                <div>
+                  <strong>Sabores / opções</strong>
+                  <span>Ex.: Goiaba, Laranja, Coca-Cola Zero.</span>
+                </div>
+
+                <button
+                  type="button"
+                  id="btnAdicionarOpcaoProduto"
+                  class="btn-master btn-secondary btn-master-small"
+                >
+                  + Adicionar opção
+                </button>
+              </div>
+
+              <div id="masterProdutoOpcoesLista" class="master-dynamic-list"></div>
+
+            </div>
+
+
+            <div class="master-dynamic-box">
+
+              <div class="master-dynamic-box-header">
+                <div>
+                  <strong>Ingredientes removíveis</strong>
+                  <span>Cadastre somente o que o cliente pode retirar.</span>
+                </div>
+
+                <button
+                  type="button"
+                  id="btnAdicionarIngredienteRemovivel"
+                  class="btn-master btn-secondary btn-master-small"
+                >
+                  + Adicionar ingrediente
+                </button>
+              </div>
+
+              <div id="masterProdutoRemoviveisLista" class="master-dynamic-list"></div>
+
+            </div>
+
+          </div>
+
+
+          <div class="master-dynamic-box master-dynamic-box-full">
+
+            <div class="master-dynamic-box-header">
+              <div>
+                <strong>Adicionais permitidos</strong>
+                <span>Marque quais adicionais poderão ser escolhidos neste produto.</span>
+              </div>
+            </div>
+
+            <div
+              id="masterProdutoAdicionaisLista"
+              class="master-addon-checklist"
+            >
+              <span class="master-empty-inline">Nenhum adicional cadastrado.</span>
+            </div>
+
+          </div>
+
+        </div>
+
+
         <div class="master-form-section">
 
           <div class="master-form-grid">
