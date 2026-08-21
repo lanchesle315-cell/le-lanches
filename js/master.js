@@ -47,6 +47,11 @@ let salvandoDespesaMaster = false;
 
 let masterProdutos = [];
 let masterDespesas = [];
+let masterMovimentacoesEstoque = [];
+
+let filtroEstoqueMaster = 'all';
+let buscaEstoqueMaster = '';
+let filtroMovimentacaoEstoqueMaster = 'all';
 
 let filtroProdutoMaster = 'all';
 let buscaProdutoMaster = '';
@@ -689,6 +694,22 @@ function abrirPaginaMaster(pagina) {
 
           console.error(
             'Erro ao carregar Financeiro:',
+            erro
+          );
+        }
+      );
+  }
+
+  if (
+    pagina === 'estoque'
+  ) {
+
+    carregarEstoqueMaster()
+      .catch(
+        erro => {
+
+          console.error(
+            'Erro ao carregar Estoque:',
             erro
           );
         }
@@ -4140,6 +4161,987 @@ function renderizarMovimentacoes(
 
 
 /* =========================================================
+   ESTOQUE - PÁGINA COMPLETA
+========================================================= */
+
+async function buscarMovimentacoesEstoqueMaster(
+  limite = 250
+) {
+
+  if (!supabaseClient) {
+
+    return [];
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from('stock_movements')
+      .select(
+        `
+        id,
+        product_id,
+        movement_type,
+        quantity,
+        unit_cost,
+        total_cost,
+        stock_before,
+        stock_after,
+        average_cost_before,
+        average_cost_after,
+        order_id,
+        notes,
+        created_at,
+        products (
+          id,
+          name,
+          product_code,
+          item_type,
+          unit
+        )
+        `
+      )
+      .order(
+        'created_at',
+        {
+          ascending: false
+        }
+      )
+      .limit(limite);
+
+  if (error) {
+
+    console.error(
+      'Erro ao buscar histórico de estoque:',
+      error
+    );
+
+    throw error;
+  }
+
+  return Array.isArray(data)
+    ? data
+    : [];
+}
+
+
+function obterClasseMovimentoEstoqueMaster(tipo) {
+
+  const classes = {
+
+    entrada:
+      'entry',
+
+    venda:
+      'sale',
+
+    ajuste_entrada:
+      'adjust-in',
+
+    ajuste_saida:
+      'adjust-out',
+
+    perda:
+      'loss',
+
+    cancelamento:
+      'cancel'
+  };
+
+  return classes[tipo] || '';
+}
+
+
+function obterProdutosEstoqueFiltradosMaster() {
+
+  const termo =
+    normalizarTexto(
+      buscaEstoqueMaster
+    );
+
+  return masterProdutos
+    .filter(
+      produto =>
+        produto.stock_control === true
+    )
+    .filter(
+      produto => {
+
+        const estoque =
+          numeroSeguro(
+            produto.stock_quantity
+          );
+
+        const minimo =
+          numeroSeguro(
+            produto.minimum_stock
+          );
+
+        if (
+          filtroEstoqueMaster === 'product' &&
+          produto.item_type === 'ingredient'
+        ) {
+
+          return false;
+        }
+
+        if (
+          filtroEstoqueMaster === 'ingredient' &&
+          produto.item_type !== 'ingredient'
+        ) {
+
+          return false;
+        }
+
+        if (
+          filtroEstoqueMaster === 'low' &&
+          !(
+            estoque > 0 &&
+            estoque <= minimo
+          )
+        ) {
+
+          return false;
+        }
+
+        if (
+          filtroEstoqueMaster === 'empty' &&
+          estoque > 0
+        ) {
+
+          return false;
+        }
+
+        if (!termo) {
+
+          return true;
+        }
+
+        const texto =
+          normalizarTexto(
+            [
+              produto.name,
+              produto.product_code,
+              produto.category,
+              produto.supplier,
+              produto.item_type === 'ingredient'
+                ? 'insumo ingrediente'
+                : 'produto'
+            ].join(' ')
+          );
+
+        return texto.includes(termo);
+      }
+    )
+    .sort(
+      (a, b) =>
+        String(a.name || '')
+          .localeCompare(
+            String(b.name || ''),
+            'pt-BR'
+          )
+    );
+}
+
+
+function atualizarResumoEstoqueMaster() {
+
+  const controlados =
+    masterProdutos.filter(
+      produto =>
+        produto.stock_control === true
+    );
+
+  const estoqueBaixo =
+    controlados.filter(
+      produto => {
+
+        const estoque =
+          numeroSeguro(
+            produto.stock_quantity
+          );
+
+        const minimo =
+          numeroSeguro(
+            produto.minimum_stock
+          );
+
+        return (
+          estoque > 0 &&
+          estoque <= minimo
+        );
+      }
+    );
+
+  const esgotados =
+    controlados.filter(
+      produto =>
+        numeroSeguro(
+          produto.stock_quantity
+        ) <= 0
+    );
+
+  const valorTotal =
+    controlados.reduce(
+      (
+        total,
+        produto
+      ) =>
+        total +
+        Math.max(
+          0,
+          numeroSeguro(
+            produto.stock_quantity
+          )
+        ) *
+        Math.max(
+          0,
+          numeroSeguro(
+            produto.average_cost
+          )
+        ),
+      0
+    );
+
+  const definir = (
+    id,
+    valor
+  ) => {
+
+    const elemento =
+      byId(id);
+
+    if (elemento) {
+
+      elemento.textContent = valor;
+    }
+  };
+
+  definir(
+    'masterEstoqueItensControlados',
+    formatarNumero(
+      controlados.length
+    )
+  );
+
+  definir(
+    'masterEstoqueQuantidadeBaixo',
+    formatarNumero(
+      estoqueBaixo.length
+    )
+  );
+
+  definir(
+    'masterEstoqueQuantidadeEsgotado',
+    formatarNumero(
+      esgotados.length
+    )
+  );
+
+  definir(
+    'masterEstoqueValorTotal',
+    formatarMoeda(
+      valorTotal
+    )
+  );
+}
+
+
+function renderizarEstoqueMaster() {
+
+  const tbody =
+    byId(
+      'masterListaEstoque'
+    );
+
+  if (!tbody) {
+
+    return;
+  }
+
+  atualizarResumoEstoqueMaster();
+
+  const produtos =
+    obterProdutosEstoqueFiltradosMaster();
+
+  if (
+    produtos.length === 0
+  ) {
+
+    tbody.innerHTML =
+      `
+        <tr>
+          <td
+            colspan="8"
+            class="table-empty"
+          >
+            Nenhum item encontrado com os filtros atuais.
+          </td>
+        </tr>
+      `;
+
+    return;
+  }
+
+  tbody.innerHTML =
+    produtos
+      .map(
+        produto => {
+
+          const tipoInsumo =
+            produto.item_type ===
+            'ingredient';
+
+          const estoque =
+            numeroSeguro(
+              produto.stock_quantity
+            );
+
+          const minimo =
+            numeroSeguro(
+              produto.minimum_stock
+            );
+
+          const custo =
+            numeroSeguro(
+              produto.average_cost
+            );
+
+          const valorEstoque =
+            Math.max(0, estoque) *
+            Math.max(0, custo);
+
+          const unidade =
+            formatarUnidade(
+              produto.unit
+            );
+
+          const esgotado =
+            estoque <= 0;
+
+          const baixo =
+            !esgotado &&
+            estoque <= minimo;
+
+          const classeQuantidade =
+            esgotado
+              ? 'empty'
+              : baixo
+                ? 'low'
+                : '';
+
+          const classeStatus =
+            esgotado
+              ? 'empty'
+              : baixo
+                ? 'low'
+                : 'ok';
+
+          const textoStatus =
+            esgotado
+              ? 'Esgotado'
+              : baixo
+                ? 'Estoque baixo'
+                : 'Normal';
+
+          return `
+
+            <tr>
+
+              <td>
+
+                <div class="stock-item-main">
+
+                  <div class="stock-item-icon">
+                    ${
+                      tipoInsumo
+                        ? '🥩'
+                        : '🍔'
+                    }
+                  </div>
+
+                  <div class="stock-item-info">
+
+                    <strong>
+                      ${escaparHtml(
+                        produto.name
+                      )}
+                    </strong>
+
+                    <span>
+                      ${
+                        produto.product_code
+                          ? `#${escaparHtml(
+                              produto.product_code
+                            )}`
+                          : 'Sem código'
+                      }
+                    </span>
+
+                  </div>
+
+                </div>
+
+              </td>
+
+              <td>
+                <span
+                  class="stock-type-badge ${
+                    tipoInsumo
+                      ? 'ingredient'
+                      : ''
+                  }"
+                >
+                  ${
+                    tipoInsumo
+                      ? 'Insumo'
+                      : 'Produto'
+                  }
+                </span>
+              </td>
+
+              <td>
+                <span
+                  class="stock-quantity-value ${classeQuantidade}"
+                >
+                  ${formatarQuantidade(
+                    estoque
+                  )}
+                  ${escaparHtml(
+                    unidade
+                  )}
+                </span>
+              </td>
+
+              <td>
+                ${formatarQuantidade(
+                  minimo
+                )}
+                ${escaparHtml(
+                  unidade
+                )}
+              </td>
+
+              <td>
+                ${formatarMoeda(
+                  custo
+                )}
+              </td>
+
+              <td>
+                ${formatarMoeda(
+                  valorEstoque
+                )}
+              </td>
+
+              <td>
+                <span
+                  class="stock-status-badge ${classeStatus}"
+                >
+                  ${textoStatus}
+                </span>
+              </td>
+
+              <td>
+
+                <div class="stock-actions">
+
+                  <button
+                    type="button"
+                    class="stock-action-btn entry"
+                    data-master-stock-entry="${produto.id}"
+                  >
+                    + Entrada
+                  </button>
+
+                  <button
+                    type="button"
+                    class="stock-action-btn adjust"
+                    data-master-edit-product="${produto.id}"
+                  >
+                    Editar item
+                  </button>
+
+                </div>
+
+              </td>
+
+            </tr>
+
+          `;
+        }
+      )
+      .join('');
+}
+
+
+function renderizarHistoricoEstoqueMaster() {
+
+  const tbody =
+    byId(
+      'masterHistoricoEstoque'
+    );
+
+  if (!tbody) {
+
+    return;
+  }
+
+  const movimentacoes =
+    masterMovimentacoesEstoque
+      .filter(
+        movimento =>
+          filtroMovimentacaoEstoqueMaster === 'all' ||
+          movimento.movement_type ===
+            filtroMovimentacaoEstoqueMaster
+      );
+
+  if (
+    movimentacoes.length === 0
+  ) {
+
+    tbody.innerHTML =
+      `
+        <tr>
+          <td
+            colspan="9"
+            class="table-empty"
+          >
+            Nenhuma movimentação encontrada.
+          </td>
+        </tr>
+      `;
+
+    return;
+  }
+
+  tbody.innerHTML =
+    movimentacoes
+      .map(
+        movimento => {
+
+          const unidade =
+            formatarUnidade(
+              movimento.products?.unit
+            );
+
+          const quantidade =
+            numeroSeguro(
+              movimento.quantity
+            );
+
+          const custoUnitario =
+            numeroSeguro(
+              movimento.unit_cost
+            );
+
+          const valorMovimento =
+            numeroSeguro(
+              movimento.total_cost
+            ) ||
+            Math.abs(
+              quantidade *
+              custoUnitario
+            );
+
+          const classe =
+            obterClasseMovimentoEstoqueMaster(
+              movimento.movement_type
+            );
+
+          return `
+
+            <tr>
+
+              <td>
+                ${formatarDataHora(
+                  movimento.created_at
+                )}
+              </td>
+
+              <td>
+                ${escaparHtml(
+                  movimento.products?.name ||
+                  'Item removido'
+                )}
+              </td>
+
+              <td>
+                <span
+                  class="stock-movement-badge ${classe}"
+                >
+                  ${escaparHtml(
+                    obterLabelMovimento(
+                      movimento.movement_type
+                    )
+                  )}
+                </span>
+              </td>
+
+              <td>
+                ${formatarQuantidade(
+                  quantidade
+                )}
+                ${escaparHtml(
+                  unidade
+                )}
+              </td>
+
+              <td>
+                ${formatarQuantidade(
+                  movimento.stock_before
+                )}
+                ${escaparHtml(
+                  unidade
+                )}
+              </td>
+
+              <td>
+                ${formatarQuantidade(
+                  movimento.stock_after
+                )}
+                ${escaparHtml(
+                  unidade
+                )}
+              </td>
+
+              <td>
+                ${formatarMoeda(
+                  custoUnitario
+                )}
+              </td>
+
+              <td>
+                ${formatarMoeda(
+                  valorMovimento
+                )}
+              </td>
+
+              <td>
+                <span class="stock-note">
+                  ${escaparHtml(
+                    movimento.notes ||
+                    '-'
+                  )}
+                </span>
+              </td>
+
+            </tr>
+
+          `;
+        }
+      )
+      .join('');
+}
+
+
+async function carregarEstoqueMaster() {
+
+  if (!supabaseClient) {
+
+    return;
+  }
+
+  const lista =
+    byId(
+      'masterListaEstoque'
+    );
+
+  const historico =
+    byId(
+      'masterHistoricoEstoque'
+    );
+
+  if (lista) {
+
+    lista.innerHTML =
+      `
+        <tr>
+          <td
+            colspan="8"
+            class="table-empty"
+          >
+            Carregando estoque...
+          </td>
+        </tr>
+      `;
+  }
+
+  if (historico) {
+
+    historico.innerHTML =
+      `
+        <tr>
+          <td
+            colspan="9"
+            class="table-empty"
+          >
+            Carregando movimentações...
+          </td>
+        </tr>
+      `;
+  }
+
+  try {
+
+    const [
+      produtos,
+      movimentacoes
+    ] =
+      await Promise.all(
+        [
+          buscarProdutos(false),
+          buscarMovimentacoesEstoqueMaster()
+        ]
+      );
+
+    masterProdutos = produtos;
+
+    masterMovimentacoesEstoque =
+      movimentacoes;
+
+    renderizarEstoqueMaster();
+
+    renderizarHistoricoEstoqueMaster();
+
+  } catch (erro) {
+
+    console.error(
+      'Erro ao carregar página de Estoque:',
+      erro
+    );
+
+    if (lista) {
+
+      lista.innerHTML =
+        `
+          <tr>
+            <td
+              colspan="8"
+              class="table-empty"
+            >
+              Não foi possível carregar o estoque.
+            </td>
+          </tr>
+        `;
+    }
+
+    if (historico) {
+
+      historico.innerHTML =
+        `
+          <tr>
+            <td
+              colspan="9"
+              class="table-empty"
+            >
+              Não foi possível carregar as movimentações.
+            </td>
+          </tr>
+        `;
+    }
+  }
+}
+
+
+function configurarFiltrosEstoqueMaster() {
+
+  const busca =
+    byId(
+      'masterBuscaEstoque'
+    );
+
+  if (busca) {
+
+    busca.addEventListener(
+      'input',
+      () => {
+
+        buscaEstoqueMaster =
+          busca.value || '';
+
+        renderizarEstoqueMaster();
+      }
+    );
+  }
+
+  document
+    .querySelectorAll(
+      '.stock-filter-btn'
+    )
+    .forEach(
+      botao => {
+
+        botao.addEventListener(
+          'click',
+          () => {
+
+            document
+              .querySelectorAll(
+                '.stock-filter-btn'
+              )
+              .forEach(
+                item =>
+                  item.classList.remove(
+                    'active'
+                  )
+              );
+
+            botao.classList.add(
+              'active'
+            );
+
+            filtroEstoqueMaster =
+              botao.dataset
+                .stockFilter ||
+              'all';
+
+            renderizarEstoqueMaster();
+          }
+        );
+      }
+    );
+
+  const filtroMovimento =
+    byId(
+      'masterFiltroMovimentacaoEstoque'
+    );
+
+  if (filtroMovimento) {
+
+    filtroMovimento.addEventListener(
+      'change',
+      () => {
+
+        filtroMovimentacaoEstoqueMaster =
+          filtroMovimento.value ||
+          'all';
+
+        renderizarHistoricoEstoqueMaster();
+      }
+    );
+  }
+}
+
+
+function configurarEventosEstoqueMaster() {
+
+  const lista =
+    byId(
+      'masterListaEstoque'
+    );
+
+  if (!lista) {
+
+    return;
+  }
+
+  lista.addEventListener(
+    'click',
+    evento => {
+
+      const botaoEntrada =
+        evento.target.closest(
+          '[data-master-stock-entry]'
+        );
+
+      if (botaoEntrada) {
+
+        abrirEntradaEstoqueMaster(
+          botaoEntrada.dataset
+            .masterStockEntry
+        );
+
+        return;
+      }
+
+      const botaoEditar =
+        evento.target.closest(
+          '[data-master-edit-product]'
+        );
+
+      if (botaoEditar) {
+
+        abrirEditarProdutoMaster(
+          botaoEditar.dataset
+            .masterEditProduct
+        );
+      }
+    }
+  );
+}
+
+
+function iniciarNovaEntradaPelaPaginaEstoqueMaster() {
+
+  const controlados =
+    masterProdutos.filter(
+      produto =>
+        produto.stock_control === true
+    );
+
+  if (
+    controlados.length === 0
+  ) {
+
+    alert(
+      'Nenhum item possui controle de estoque ativo.'
+    );
+
+    return;
+  }
+
+  buscaEstoqueMaster = '';
+  filtroEstoqueMaster = 'all';
+
+  const busca =
+    byId(
+      'masterBuscaEstoque'
+    );
+
+  if (busca) {
+
+    busca.value = '';
+  }
+
+  document
+    .querySelectorAll(
+      '.stock-filter-btn'
+    )
+    .forEach(
+      botao => {
+
+        botao.classList.toggle(
+          'active',
+          botao.dataset.stockFilter ===
+            'all'
+        );
+      }
+    );
+
+  renderizarEstoqueMaster();
+
+  if (busca) {
+
+    busca.focus();
+
+    busca.scrollIntoView(
+      {
+        behavior: 'smooth',
+        block: 'center'
+      }
+    );
+  }
+
+  alert(
+    'Busque o item desejado e clique em “+ Entrada” na linha dele.'
+  );
+}
+
+
+/* =========================================================
    DASHBOARD
 ========================================================= */
 
@@ -7350,6 +8352,8 @@ async function salvarEntradaEstoqueMaster(
 
     await carregarProdutosMaster();
 
+    await carregarEstoqueMaster();
+
     await carregarDashboard();
 
     setTimeout(
@@ -9019,14 +10023,7 @@ function configurarBotoesMaster() {
 
     btnEntrada.addEventListener(
       'click',
-      async () => {
-
-        abrirPaginaMaster(
-          'produtos'
-        );
-
-        await carregarProdutosMaster();
-      }
+      iniciarNovaEntradaPelaPaginaEstoqueMaster
     );
   }
 
@@ -9171,11 +10168,16 @@ function configurarEventosMaster() {
       'click',
       async () => {
 
-        await carregarDashboard();
-
-        await carregarProdutosMaster();
-
-        await carregarDespesasMaster();
+        await Promise.all(
+          [
+            carregarDashboard(),
+            carregarFinanceiroMaster(),
+            carregarEstoqueMaster(),
+            carregarProdutosMaster(),
+            carregarDespesasMaster(),
+            carregarRelatoriosMaster()
+          ]
+        );
       }
     );
   }
@@ -9189,6 +10191,10 @@ function configurarEventosMaster() {
   configurarRelatoriosMaster();
 
   configurarBotoesMaster();
+
+  configurarFiltrosEstoqueMaster();
+
+  configurarEventosEstoqueMaster();
 
   configurarFiltrosProdutosMaster();
 
@@ -9270,6 +10276,7 @@ async function iniciarMaster() {
     [
       carregarDashboard(),
       carregarFinanceiroMaster(),
+      carregarEstoqueMaster(),
       carregarProdutosMaster(),
       carregarDespesasMaster(),
       carregarRelatoriosMaster()
