@@ -1566,37 +1566,52 @@ function montarHtmlBaseImpressao(titulo, textoPlano, autoPrint = true) {
             margin: 0;
           }
 
-          html, body {
+          html,
+          body {
             width: 48mm;
             min-width: 48mm;
             max-width: 48mm;
             margin: 0;
             padding: 0;
             background: #fff;
-            overflow-x: hidden;
+            overflow: hidden;
           }
 
           body {
-            font-family: monospace;
+            font-family: "Courier New", Courier, monospace;
             color: #000;
             font-size: 11px;
-            line-height: 1.25;
-            padding: 3mm;
+            font-weight: 600;
+            line-height: 1.2;
             white-space: pre-wrap;
-            word-break: break-word;
+            word-break: normal;
+            overflow-wrap: break-word;
           }
 
           .ticket {
-            width: 42mm;
+            display: block;
+            width: 46mm;
+            max-width: 46mm;
+            margin: 0;
+            padding: 1mm;
           }
 
           @media print {
-            html, body {
+            html,
+            body {
               width: 48mm !important;
               min-width: 48mm !important;
               max-width: 48mm !important;
               margin: 0 !important;
               padding: 0 !important;
+              overflow: hidden !important;
+            }
+
+            .ticket {
+              width: 46mm !important;
+              max-width: 46mm !important;
+              margin: 0 !important;
+              padding: 1mm !important;
             }
           }
         </style>
