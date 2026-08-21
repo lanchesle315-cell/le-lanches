@@ -4118,7 +4118,7 @@ function obterConfiguracaoLojaPadrao() {
   return {
     id: STORE_SETTINGS_ID,
     open_time: "19:00:00",
-    close_time: "22:30:00",
+    close_time: "23:00:00",
     auto_open: true,
     manual_force_open: false,
     manual_force_closed: false
@@ -4143,7 +4143,7 @@ function obterStatusAutomaticoLoja(config = null) {
   const diasPermitidos = [0, 3, 4, 5, 6];
   const abertura = converterHorarioParaMinutos(config?.open_time) ?? 19 * 60;
   const fechamento =
-    converterHorarioParaMinutos(config?.close_time) ?? (22 * 60 + 30);
+    converterHorarioParaMinutos(config?.close_time) ?? (23 * 60);
 
   return (
     diasPermitidos.includes(diaSemana) &&
