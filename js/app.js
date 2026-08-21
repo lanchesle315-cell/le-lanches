@@ -385,6 +385,55 @@ async function carregarDisponibilidadeProdutos() {
   }
 
 
+  /*
+   * Estoque por opção / sabor.
+   * Mescla o status de estoque individual com os congelamentos já existentes.
+   */
+  if (catalogoProdutos.length) {
+    const idsProdutos = catalogoProdutos.map(produto => produto.id);
+
+    const { data: opcoesEstoque, error: erroOpcoesEstoque } =
+      await supabaseClient
+        .from('product_options')
+        .select('id, product_id, name, available, active, stock_quantity, stock_control')
+        .in('product_id', idsProdutos)
+        .eq('active', true);
+
+    if (!erroOpcoesEstoque) {
+      for (const opcaoBanco of opcoesEstoque || []) {
+        const produto = catalogoPorId[Number(opcaoBanco.product_id)];
+        if (!produto) continue;
+
+        const chave = chaveOpcaoDisponibilidade(
+          produto.product_code,
+          opcaoBanco.name
+        );
+
+        const estoqueOk =
+          opcaoBanco.available !== false &&
+          (
+            opcaoBanco.stock_control !== true ||
+            Number(opcaoBanco.stock_quantity || 0) > 0
+          );
+
+        novaDisponibilidade[chave] =
+          novaDisponibilidade[chave] !== false && estoqueOk;
+
+        const opcaoLocal = (produto.opcoes || []).find(
+          item => Number(item.id) === Number(opcaoBanco.id)
+        );
+
+        if (opcaoLocal) {
+          opcaoLocal.available = opcaoBanco.available;
+          opcaoLocal.stock_control = opcaoBanco.stock_control;
+          opcaoLocal.stock_quantity = Number(opcaoBanco.stock_quantity || 0);
+        }
+      }
+    } else {
+      console.error('Erro ao carregar estoque das opções:', erroOpcoesEstoque);
+    }
+  }
+
   disponibilidadeProdutos =
     novaDisponibilidade;
 
@@ -1304,7 +1353,7 @@ async function carregarCatalogoDinamico() {
     const [opcoesResp, removiveisResp, linksResp] = await Promise.all([
       supabaseClient
         .from('product_options')
-        .select('id, product_id, name, price_adjustment, available, active, display_order')
+        .select('id, product_id, name, price_adjustment, available, active, display_order, stock_quantity, minimum_stock, stock_control')
         .in('product_id', ids)
         .eq('active', true)
         .order('display_order', { ascending: true }),
@@ -6904,7 +6953,7 @@ async function salvarPedidoNoBanco(
   } =
     await supabaseClient
       .rpc(
-        'create_order_with_stock',
+        'create_order_with_option_stock',
         {
           p_order:
             pedidoRpc,
@@ -7037,6 +7086,16 @@ function encontrarCodigoAdicionalPorOpcao(nomeOpcao) {
     removerAcentos(
       String(nomeOpcao || '').toLowerCase()
     ).trim();
+
+  for (const produto of catalogoProdutos) {
+    if (produto.menu_type !== 'adicional') continue;
+    const encontrou = (produto.opcoes || []).find(opcao =>
+      removerAcentos(String(opcao.name || '').toLowerCase()).trim() === opcaoNormalizada
+    );
+    if (encontrou) {
+      return { codigoProduto: produto.product_code, opcao: encontrou.name };
+    }
+  }
 
   for (
     const [produtoId, produto]
