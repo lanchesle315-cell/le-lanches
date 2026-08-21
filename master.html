@@ -3146,6 +3146,29 @@
             </div>
 
 
+            <div
+              id="masterCampoTipoCardapio"
+              class="master-field"
+            >
+
+              <label for="masterProdutoTipoCardapio">
+                Tipo no cardápio *
+              </label>
+
+              <select id="masterProdutoTipoCardapio">
+                <option value="lanche">Lanche</option>
+                <option value="bebida">Bebida</option>
+                <option value="porcao">Porção</option>
+                <option value="adicional">Adicional</option>
+              </select>
+
+              <small>
+                Controla automaticamente quais configurações aparecem abaixo.
+              </small>
+
+            </div>
+
+
             <div class="master-field">
 
               <label for="masterProdutoUnidade">
@@ -3350,7 +3373,7 @@
             </label>
 
 
-            <label class="master-switch-row">
+            <label id="masterBlocoPermitirAdicionais" class="master-switch-row">
 
               <div>
                 <strong>Permitir adicionais</strong>
@@ -3365,7 +3388,7 @@
             </label>
 
 
-            <label class="master-switch-row">
+            <label id="masterBlocoPermitirRemocoes" class="master-switch-row">
 
               <div>
                 <strong>Permitir remover ingredientes</strong>
@@ -3384,12 +3407,12 @@
 
           <div class="master-dynamic-config-grid">
 
-            <div class="master-dynamic-box">
+            <div id="masterBlocoOpcoesProduto" class="master-dynamic-box">
 
               <div class="master-dynamic-box-header">
                 <div>
-                  <strong>Sabores / opções</strong>
-                  <span>Ex.: Goiaba, Laranja, Coca-Cola Zero.</span>
+                  <strong>Variações / opções</strong>
+                  <span>Cadastre somente se este produto tiver opções de escolha.</span>
                 </div>
 
                 <button
@@ -3406,7 +3429,7 @@
             </div>
 
 
-            <div class="master-dynamic-box">
+            <div id="masterBlocoIngredientesRemoviveis" class="master-dynamic-box">
 
               <div class="master-dynamic-box-header">
                 <div>
@@ -3430,7 +3453,7 @@
           </div>
 
 
-          <div class="master-dynamic-box master-dynamic-box-full">
+          <div id="masterBlocoAdicionaisPermitidos" class="master-dynamic-box master-dynamic-box-full">
 
             <div class="master-dynamic-box-header">
               <div>
