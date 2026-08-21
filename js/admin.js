@@ -1624,9 +1624,10 @@ function montarHtmlBaseImpressao(titulo, textoPlano, autoPrint = true) {
 
   body {
     font-family: "Courier New", Courier, monospace;
-    font-size: 9px;
+    font-size: 10.5px;
     font-weight: 900;
-    line-height: 1.25;
+    line-height: 1.22;
+    letter-spacing: -0.45px;
     color: #000;
     white-space: pre-wrap;
   }
@@ -1641,7 +1642,10 @@ function montarHtmlBaseImpressao(titulo, textoPlano, autoPrint = true) {
     left: 5mm;
 
     color: #000;
+    font-size: 10.5px;
     font-weight: 900;
+    line-height: 1.22;
+    letter-spacing: -0.45px;
 
     overflow: visible;
   }
@@ -1670,7 +1674,10 @@ function montarHtmlBaseImpressao(titulo, textoPlano, autoPrint = true) {
       left: 5mm !important;
 
       color: #000 !important;
+      font-size: 10.5px !important;
       font-weight: 900 !important;
+      line-height: 1.22 !important;
+      letter-spacing: -0.45px !important;
 
       overflow: visible !important;
     }
