@@ -3450,7 +3450,7 @@
             🧾 FICHA TÉCNICA
           </span>
 
-          <h3>
+          <h3 id="tituloModalMasterFicha">
             Ficha Técnica
           </h3>
 
@@ -3644,39 +3644,41 @@
 
 
   <!-- =====================================================
-       MODAL MOVIMENTAÇÃO ESTOQUE
+       MODAL ENTRADA DE ESTOQUE
   ====================================================== -->
 
   <div
-    id="modalMasterMovimentoEstoque"
+    id="modalMasterEntrada"
     class="master-modal hidden"
     aria-hidden="true"
   >
 
     <div
       class="master-modal-backdrop"
-      data-close-master-modal="movimento-estoque"
+      data-close-master-modal="entrada"
     ></div>
 
 
-    <div class="master-modal-dialog">
+    <div
+      class="master-modal-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tituloModalMasterEntrada"
+    >
 
       <div class="master-modal-header">
 
         <div>
 
-          <span
-            id="masterMovimentoBadge"
-            class="master-modal-badge"
-          >
-            📦 ESTOQUE
+          <span class="master-modal-badge">
+            📦 ENTRADA DE ESTOQUE
           </span>
 
-          <h3 id="tituloModalMasterMovimentoEstoque">
-            Movimentação de estoque
+          <h3 id="tituloModalMasterEntrada">
+            Nova entrada de estoque
           </h3>
 
-          <p id="masterMovimentoProdutoNome">
+          <p id="masterEntradaProdutoNome">
             Produto
           </p>
 
@@ -3686,7 +3688,8 @@
         <button
           type="button"
           class="master-modal-close"
-          data-close-master-modal="movimento-estoque"
+          data-close-master-modal="entrada"
+          aria-label="Fechar"
         >
           ×
         </button>
@@ -3695,18 +3698,13 @@
 
 
       <form
-        id="formMasterMovimentoEstoque"
+        id="formMasterEntrada"
         class="master-form"
       >
 
         <input
           type="hidden"
-          id="masterMovimentoProdutoId"
-        >
-
-        <input
-          type="hidden"
-          id="masterMovimentoTipo"
+          id="masterEntradaProdutoId"
         >
 
 
@@ -3718,7 +3716,7 @@
               Estoque atual
             </span>
 
-            <strong id="masterMovimentoEstoqueAtual">
+            <strong id="masterEntradaEstoqueAtual">
               0
             </strong>
 
@@ -3731,7 +3729,7 @@
               Custo médio atual
             </span>
 
-            <strong id="masterMovimentoCustoAtual">
+            <strong id="masterEntradaCustoAtual">
               R$ 0,00
             </strong>
 
@@ -3744,13 +3742,13 @@
 
           <div class="master-field">
 
-            <label for="masterMovimentoQuantidade">
-              Quantidade *
+            <label for="masterEntradaQuantidade">
+              Quantidade da entrada *
             </label>
 
             <input
               type="number"
-              id="masterMovimentoQuantidade"
+              id="masterEntradaQuantidade"
               min="0.0001"
               step="0.0001"
               required
@@ -3759,12 +3757,9 @@
           </div>
 
 
-          <div
-            id="masterMovimentoCampoCusto"
-            class="master-field"
-          >
+          <div class="master-field">
 
-            <label for="masterMovimentoCustoUnitario">
+            <label for="masterEntradaCustoUnitario">
               Custo unitário
             </label>
 
@@ -3776,7 +3771,7 @@
 
               <input
                 type="number"
-                id="masterMovimentoCustoUnitario"
+                id="masterEntradaCustoUnitario"
                 min="0"
                 step="0.0001"
               >
@@ -3793,23 +3788,10 @@
           <div>
 
             <span>
-              Estoque anterior
-            </span>
-
-            <strong id="masterMovimentoPreviewAntes">
-              0
-            </strong>
-
-          </div>
-
-
-          <div>
-
-            <span>
               Novo estoque
             </span>
 
-            <strong id="masterMovimentoPreviewDepois">
+            <strong id="masterEntradaNovoEstoque">
               0
             </strong>
 
@@ -3819,10 +3801,23 @@
           <div>
 
             <span>
-              Valor movimentado
+              Novo custo médio
             </span>
 
-            <strong id="masterMovimentoPreviewValor">
+            <strong id="masterEntradaNovoCusto">
+              R$ 0,00
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Total da compra
+            </span>
+
+            <strong id="masterEntradaTotalCompra">
               R$ 0,00
             </strong>
 
@@ -3833,20 +3828,21 @@
 
         <div class="master-field master-field-full">
 
-          <label for="masterMovimentoObservacao">
+          <label for="masterEntradaObservacao">
             Observação
           </label>
 
           <textarea
-            id="masterMovimentoObservacao"
+            id="masterEntradaObservacao"
             rows="3"
+            placeholder="Ex.: Compra de fornecedor, reposição semanal..."
           ></textarea>
 
         </div>
 
 
         <div
-          id="masterMovimentoMensagem"
+          id="masterEntradaMensagem"
           class="master-form-message"
         ></div>
 
@@ -3856,7 +3852,7 @@
           <button
             type="button"
             class="btn-master btn-secondary"
-            data-close-master-modal="movimento-estoque"
+            data-close-master-modal="entrada"
           >
             Cancelar
           </button>
@@ -3864,194 +3860,10 @@
 
           <button
             type="submit"
-            id="btnSalvarMasterMovimento"
+            id="btnSalvarMasterEntrada"
             class="btn-master btn-yellow"
           >
-            Confirmar movimentação
-          </button>
-
-        </div>
-
-      </form>
-
-    </div>
-
-  </div>
-
-
-  <!-- =====================================================
-       MODAL AJUSTE ESTOQUE
-  ====================================================== -->
-
-  <div
-    id="modalMasterAjusteEstoque"
-    class="master-modal hidden"
-    aria-hidden="true"
-  >
-
-    <div
-      class="master-modal-backdrop"
-      data-close-master-modal="ajuste-estoque"
-    ></div>
-
-
-    <div class="master-modal-dialog">
-
-      <div class="master-modal-header">
-
-        <div>
-
-          <span class="master-modal-badge">
-            🧮 INVENTÁRIO
-          </span>
-
-          <h3>
-            Ajustar estoque
-          </h3>
-
-          <p id="masterAjusteProdutoNome">
-            Produto
-          </p>
-
-        </div>
-
-
-        <button
-          type="button"
-          class="master-modal-close"
-          data-close-master-modal="ajuste-estoque"
-        >
-          ×
-        </button>
-
-      </div>
-
-
-      <form
-        id="formMasterAjusteEstoque"
-        class="master-form"
-      >
-
-        <input
-          type="hidden"
-          id="masterAjusteProdutoId"
-        >
-
-
-        <div class="stock-current-box">
-
-          <div>
-
-            <span>
-              Estoque atual
-            </span>
-
-            <strong id="masterAjusteEstoqueAtual">
-              0
-            </strong>
-
-          </div>
-
-
-          <div>
-
-            <span>
-              Custo médio
-            </span>
-
-            <strong id="masterAjusteCustoAtual">
-              R$ 0,00
-            </strong>
-
-          </div>
-
-        </div>
-
-
-        <div class="master-field">
-
-          <label for="masterAjusteNovoEstoque">
-            Estoque contado *
-          </label>
-
-          <input
-            type="number"
-            id="masterAjusteNovoEstoque"
-            min="0"
-            step="0.0001"
-            required
-          >
-
-        </div>
-
-
-        <div class="stock-adjust-preview">
-
-          <div>
-
-            <span>
-              Diferença
-            </span>
-
-            <strong id="masterAjusteDiferenca">
-              0
-            </strong>
-
-          </div>
-
-
-          <div>
-
-            <span>
-              Movimento
-            </span>
-
-            <strong id="masterAjusteTipoPreview">
-              Sem alteração
-            </strong>
-
-          </div>
-
-        </div>
-
-
-        <div class="master-field">
-
-          <label for="masterAjusteObservacao">
-            Motivo do ajuste
-          </label>
-
-          <textarea
-            id="masterAjusteObservacao"
-            rows="3"
-          ></textarea>
-
-        </div>
-
-
-        <div
-          id="masterAjusteMensagem"
-          class="master-form-message"
-        ></div>
-
-
-        <div class="master-modal-actions">
-
-          <button
-            type="button"
-            class="btn-master btn-secondary"
-            data-close-master-modal="ajuste-estoque"
-          >
-            Cancelar
-          </button>
-
-
-          <button
-            type="submit"
-            id="btnSalvarMasterAjuste"
-            class="btn-master btn-yellow"
-          >
-            Salvar ajuste
+            Registrar entrada
           </button>
 
         </div>
