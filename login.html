@@ -1,47 +1,178 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login Admin - Lê Lanches</title>
-  <link rel="icon" href="img/le-lanches-logo.png">
-  <link rel="stylesheet" href="css/login.css">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>
+    Login Admin - Lê Lanches
+  </title>
+
+  <link
+    rel="icon"
+    href="img/le-lanches-logo.png"
+  >
+
+  <link
+    rel="stylesheet"
+    href="css/login.css"
+  >
+
 </head>
+
 <body>
 
   <main class="login-page">
+
     <section class="login-card">
+
       <div class="login-logo">
-        <img src="img/le-lanches-logo.png" alt="Logo Lê Lanches">
-        <h1>Painel Admin</h1>
-        <p>Faça login para acessar o controle de pedidos</p>
+
+        <img
+          src="img/le-lanches-logo.png"
+          alt="Logo Lê Lanches"
+        >
+
+        <h1>
+          Painel Admin
+        </h1>
+
+        <p>
+          Faça login para acessar o controle de pedidos
+        </p>
+
       </div>
 
-      <form id="loginForm" class="login-form" autocomplete="off">
-        <div class="form-group">
-          <label for="usuario">Usuário</label>
-          <input type="text" id="usuario" name="usuario" placeholder="Digite o usuário" required>
-        </div>
+
+      <form
+        id="loginForm"
+        class="login-form"
+        autocomplete="on"
+      >
+
+        <!-- =================================================
+             E-MAIL
+        ================================================== -->
 
         <div class="form-group">
-          <label for="senha">Senha</label>
+
+          <label for="usuario">
+            E-mail
+          </label>
+
+          <input
+            type="email"
+            id="usuario"
+            name="email"
+            placeholder="Digite seu e-mail"
+            autocomplete="email"
+            inputmode="email"
+            required
+          >
+
+        </div>
+
+
+        <!-- =================================================
+             SENHA
+        ================================================== -->
+
+        <div class="form-group">
+
+          <label for="senha">
+            Senha
+          </label>
+
           <div class="senha-wrap">
-            <input type="password" id="senha" name="senha" placeholder="Digite a senha" required>
-            <button type="button" id="toggleSenha" class="toggle-senha">Mostrar</button>
+
+            <input
+              type="password"
+              id="senha"
+              name="senha"
+              placeholder="Digite sua senha"
+              autocomplete="current-password"
+              required
+            >
+
+            <button
+              type="button"
+              id="toggleSenha"
+              class="toggle-senha"
+            >
+              Mostrar
+            </button>
+
           </div>
+
         </div>
 
-        <div id="mensagemLogin" class="mensagem-login"></div>
 
-        <button type="submit" class="btn-login">Entrar</button>
+        <!-- =================================================
+             MENSAGEM
+        ================================================== -->
+
+        <div
+          id="mensagemLogin"
+          class="mensagem-login"
+        ></div>
+
+
+        <!-- =================================================
+             ENTRAR
+        ================================================== -->
+
+        <button
+          type="submit"
+          class="btn-login"
+        >
+          Entrar
+        </button>
+
       </form>
 
+
       <div class="login-info">
-        <small>Acesso restrito ao administrador</small>
+
+        <small>
+          Acesso restrito a usuários autorizados
+        </small>
+
       </div>
+
     </section>
+
   </main>
 
+
+  <!-- =====================================================
+       SUPABASE
+  ====================================================== -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+
+  <!-- =====================================================
+       CONFIGURAÇÃO DO PROJETO
+  ====================================================== -->
+
+  <script src="js/config.js"></script>
+
+
+  <!-- =====================================================
+       LOGIN ADMIN
+  ====================================================== -->
+
   <script src="js/login.js"></script>
+
+
 </body>
+
 </html>
