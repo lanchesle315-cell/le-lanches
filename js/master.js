@@ -3873,6 +3873,12 @@ async function buscarProdutos(
         unit,
         supplier,
         notes,
+        description,
+        show_on_menu,
+        allow_addons,
+        allow_ingredient_removal,
+        selection_title,
+        display_order,
         created_at,
         updated_at
         `
@@ -6035,6 +6041,11 @@ function atualizarFormularioPorTipo() {
       'masterProdutoPrecoVenda'
     );
 
+  const secaoCardapio =
+    byId(
+      'masterSecaoCardapio'
+    );
+
   if (
     tipo === 'ingredient'
   ) {
@@ -6051,6 +6062,10 @@ function atualizarFormularioPorTipo() {
         '0';
     }
 
+    secaoCardapio?.classList.add(
+      'master-cardapio-hidden'
+    );
+
   } else {
 
     if (campoPreco) {
@@ -6058,6 +6073,289 @@ function atualizarFormularioPorTipo() {
       campoPreco.style.display =
         '';
     }
+
+    secaoCardapio?.classList.remove(
+      'master-cardapio-hidden'
+    );
+  }
+}
+
+
+/* =========================================================
+   CARDÁPIO DINÂMICO - CAMPOS AUXILIARES
+========================================================= */
+
+function criarLinhaOpcaoProduto(opcao = {}) {
+
+  const container = byId('masterProdutoOpcoesLista');
+
+  if (!container) return;
+
+  const linha = document.createElement('div');
+  linha.className = 'master-dynamic-row';
+  linha.dataset.optionId = opcao.id || '';
+
+  linha.innerHTML = `
+    <input
+      type="text"
+      data-option-name
+      placeholder="Nome da opção"
+      value="${escaparHtml(opcao.name || '')}"
+    >
+    <input
+      type="number"
+      data-option-price
+      min="0"
+      step="0.01"
+      placeholder="Acréscimo"
+      value="${numeroSeguro(opcao.price_adjustment)}"
+      title="Acréscimo no preço"
+    >
+    <input
+      type="number"
+      data-option-order
+      min="0"
+      step="1"
+      placeholder="Ordem"
+      value="${Number(opcao.display_order || 0)}"
+      title="Ordem"
+    >
+    <button
+      type="button"
+      class="master-dynamic-remove"
+      data-remove-dynamic-row
+      title="Remover opção"
+    >×</button>
+  `;
+
+  container.appendChild(linha);
+}
+
+
+function criarLinhaIngredienteRemovivel(item = {}) {
+
+  const container = byId('masterProdutoRemoviveisLista');
+
+  if (!container) return;
+
+  const linha = document.createElement('div');
+  linha.className = 'master-dynamic-row master-removable-row';
+  linha.dataset.removableId = item.id || '';
+
+  linha.innerHTML = `
+    <input
+      type="text"
+      data-removable-name
+      placeholder="Ex.: Tomate"
+      value="${escaparHtml(item.name || '')}"
+    >
+    <input
+      type="number"
+      data-removable-order
+      min="0"
+      step="1"
+      placeholder="Ordem"
+      value="${Number(item.display_order || 0)}"
+      title="Ordem"
+    >
+    <button
+      type="button"
+      class="master-dynamic-remove"
+      data-remove-dynamic-row
+      title="Remover ingrediente"
+    >×</button>
+  `;
+
+  container.appendChild(linha);
+}
+
+
+function renderizarAdicionaisProdutoMaster(idsSelecionados = []) {
+
+  const container = byId('masterProdutoAdicionaisLista');
+
+  if (!container) return;
+
+  const selecionados = new Set(
+    idsSelecionados.map(id => String(id))
+  );
+
+  const adicionais = masterProdutos
+    .filter(produto =>
+      produto.item_type === 'product' &&
+      String(produto.category || '').trim().toLowerCase() === 'adicionais' &&
+      produto.active === true
+    )
+    .sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR'));
+
+  if (!adicionais.length) {
+    container.innerHTML = '<span class="master-empty-inline">Nenhum adicional cadastrado.</span>';
+    return;
+  }
+
+  container.innerHTML = adicionais
+    .map(adicional => `
+      <label class="master-addon-option">
+        <input
+          type="checkbox"
+          data-addon-product-id="${adicional.id}"
+          ${selecionados.has(String(adicional.id)) ? 'checked' : ''}
+        >
+        <span>
+          <strong>${escaparHtml(adicional.name || 'Adicional')}</strong>
+          <small>${formatarMoeda(numeroSeguro(adicional.sale_price))}</small>
+        </span>
+      </label>
+    `)
+    .join('');
+}
+
+
+function coletarOpcoesProdutoMaster() {
+
+  return Array.from(
+    document.querySelectorAll('#masterProdutoOpcoesLista .master-dynamic-row')
+  )
+    .map((linha, index) => ({
+      id: linha.dataset.optionId || null,
+      name: String(linha.querySelector('[data-option-name]')?.value || '').trim(),
+      price_adjustment: numeroSeguro(linha.querySelector('[data-option-price]')?.value),
+      display_order: Number(linha.querySelector('[data-option-order]')?.value || index)
+    }))
+    .filter(item => item.name);
+}
+
+
+function coletarRemoviveisProdutoMaster() {
+
+  return Array.from(
+    document.querySelectorAll('#masterProdutoRemoviveisLista .master-dynamic-row')
+  )
+    .map((linha, index) => ({
+      id: linha.dataset.removableId || null,
+      name: String(linha.querySelector('[data-removable-name]')?.value || '').trim(),
+      display_order: Number(linha.querySelector('[data-removable-order]')?.value || index)
+    }))
+    .filter(item => item.name);
+}
+
+
+function coletarAdicionaisProdutoMaster() {
+
+  return Array.from(
+    document.querySelectorAll('#masterProdutoAdicionaisLista [data-addon-product-id]:checked')
+  ).map(input => Number(input.dataset.addonProductId));
+}
+
+
+async function carregarConfiguracaoDinamicaProdutoMaster(produtoId) {
+
+  const [opcoesResp, removiveisResp, adicionaisResp] = await Promise.all([
+    supabaseClient
+      .from('product_options')
+      .select('id, name, price_adjustment, available, active, display_order')
+      .eq('product_id', produtoId)
+      .eq('active', true)
+      .order('display_order', { ascending: true })
+      .order('name', { ascending: true }),
+
+    supabaseClient
+      .from('product_removable_ingredients')
+      .select('id, name, active, display_order')
+      .eq('product_id', produtoId)
+      .eq('active', true)
+      .order('display_order', { ascending: true })
+      .order('name', { ascending: true }),
+
+    supabaseClient
+      .from('product_addon_links')
+      .select('addon_product_id')
+      .eq('product_id', produtoId)
+      .eq('active', true)
+  ]);
+
+  if (opcoesResp.error) throw opcoesResp.error;
+  if (removiveisResp.error) throw removiveisResp.error;
+  if (adicionaisResp.error) throw adicionaisResp.error;
+
+  const listaOpcoes = byId('masterProdutoOpcoesLista');
+  const listaRemoviveis = byId('masterProdutoRemoviveisLista');
+
+  if (listaOpcoes) listaOpcoes.innerHTML = '';
+  if (listaRemoviveis) listaRemoviveis.innerHTML = '';
+
+  (opcoesResp.data || []).forEach(criarLinhaOpcaoProduto);
+  (removiveisResp.data || []).forEach(criarLinhaIngredienteRemovivel);
+
+  renderizarAdicionaisProdutoMaster(
+    (adicionaisResp.data || []).map(item => item.addon_product_id)
+  );
+}
+
+
+async function sincronizarConfiguracaoDinamicaProdutoMaster(produtoId) {
+
+  const opcoes = coletarOpcoesProdutoMaster();
+  const removiveis = coletarRemoviveisProdutoMaster();
+  const adicionais = coletarAdicionaisProdutoMaster();
+
+  const { error: erroExcluirOpcoes } = await supabaseClient
+    .from('product_options')
+    .delete()
+    .eq('product_id', produtoId);
+
+  if (erroExcluirOpcoes) throw erroExcluirOpcoes;
+
+  if (opcoes.length) {
+    const { error } = await supabaseClient
+      .from('product_options')
+      .insert(opcoes.map((item, index) => ({
+        product_id: produtoId,
+        name: item.name,
+        price_adjustment: item.price_adjustment,
+        available: true,
+        active: true,
+        display_order: Number.isFinite(item.display_order) ? item.display_order : index
+      })));
+    if (error) throw error;
+  }
+
+  const { error: erroExcluirRemoviveis } = await supabaseClient
+    .from('product_removable_ingredients')
+    .delete()
+    .eq('product_id', produtoId);
+
+  if (erroExcluirRemoviveis) throw erroExcluirRemoviveis;
+
+  if (removiveis.length) {
+    const { error } = await supabaseClient
+      .from('product_removable_ingredients')
+      .insert(removiveis.map((item, index) => ({
+        product_id: produtoId,
+        name: item.name,
+        active: true,
+        display_order: Number.isFinite(item.display_order) ? item.display_order : index
+      })));
+    if (error) throw error;
+  }
+
+  const { error: erroExcluirAdicionais } = await supabaseClient
+    .from('product_addon_links')
+    .delete()
+    .eq('product_id', produtoId);
+
+  if (erroExcluirAdicionais) throw erroExcluirAdicionais;
+
+  if (adicionais.length) {
+    const { error } = await supabaseClient
+      .from('product_addon_links')
+      .insert(adicionais.map((addonId, index) => ({
+        product_id: produtoId,
+        addon_product_id: addonId,
+        active: true,
+        display_order: index
+      })));
+    if (error) throw error;
   }
 }
 
@@ -6160,6 +6458,16 @@ function limparFormularioProdutoMaster() {
     ).checked =
       true;
   }
+
+  if (byId('masterProdutoDescricao')) byId('masterProdutoDescricao').value = '';
+  if (byId('masterProdutoOrdem')) byId('masterProdutoOrdem').value = '0';
+  if (byId('masterProdutoTituloSelecao')) byId('masterProdutoTituloSelecao').value = '';
+  if (byId('masterProdutoMostrarCardapio')) byId('masterProdutoMostrarCardapio').checked = true;
+  if (byId('masterProdutoPermitirAdicionais')) byId('masterProdutoPermitirAdicionais').checked = false;
+  if (byId('masterProdutoPermitirRemocoes')) byId('masterProdutoPermitirRemocoes').checked = false;
+  if (byId('masterProdutoOpcoesLista')) byId('masterProdutoOpcoesLista').innerHTML = '';
+  if (byId('masterProdutoRemoviveisLista')) byId('masterProdutoRemoviveisLista').innerHTML = '';
+  renderizarAdicionaisProdutoMaster([]);
 
   mostrarMensagemFormulario(
     byId(
@@ -6341,6 +6649,41 @@ function abrirEditarProdutoMaster(id) {
   ).value =
     produto.notes || '';
 
+  if (byId('masterProdutoDescricao')) {
+    byId('masterProdutoDescricao').value = produto.description || '';
+  }
+
+  if (byId('masterProdutoOrdem')) {
+    byId('masterProdutoOrdem').value = Number(produto.display_order || 0);
+  }
+
+  if (byId('masterProdutoTituloSelecao')) {
+    byId('masterProdutoTituloSelecao').value = produto.selection_title || '';
+  }
+
+  if (byId('masterProdutoMostrarCardapio')) {
+    byId('masterProdutoMostrarCardapio').checked = produto.show_on_menu !== false;
+  }
+
+  if (byId('masterProdutoPermitirAdicionais')) {
+    byId('masterProdutoPermitirAdicionais').checked = produto.allow_addons === true;
+  }
+
+  if (byId('masterProdutoPermitirRemocoes')) {
+    byId('masterProdutoPermitirRemocoes').checked = produto.allow_ingredient_removal === true;
+  }
+
+  if (produto.item_type !== 'ingredient') {
+    carregarConfiguracaoDinamicaProdutoMaster(produto.id)
+      .catch(erro => {
+        console.error('Erro ao carregar configuração dinâmica do produto:', erro);
+        mostrarMensagemFormulario(
+          byId('masterProdutoMensagem'),
+          'Produto carregado, mas não foi possível carregar opções/adicionais.'
+        );
+      });
+  }
+
   const titulo =
     byId(
       'tituloModalMasterProduto'
@@ -6500,6 +6843,13 @@ async function salvarProdutoMaster(evento) {
       )?.value || ''
     ).trim();
 
+  const descricao = String(byId('masterProdutoDescricao')?.value || '').trim();
+  const mostrarCardapio = tipo === 'product' && byId('masterProdutoMostrarCardapio')?.checked === true;
+  const permitirAdicionais = tipo === 'product' && byId('masterProdutoPermitirAdicionais')?.checked === true;
+  const permitirRemocoes = tipo === 'product' && byId('masterProdutoPermitirRemocoes')?.checked === true;
+  const tituloSelecao = String(byId('masterProdutoTituloSelecao')?.value || '').trim();
+  const ordemCardapio = Math.max(0, parseInt(byId('masterProdutoOrdem')?.value || '0', 10) || 0);
+
   if (!nome) {
 
     mostrarMensagemFormulario(
@@ -6578,6 +6928,24 @@ async function salvarProdutoMaster(evento) {
 
     notes:
       observacoes || null,
+
+    description:
+      tipo === 'product' ? (descricao || null) : null,
+
+    show_on_menu:
+      tipo === 'product' ? mostrarCardapio : false,
+
+    allow_addons:
+      tipo === 'product' ? permitirAdicionais : false,
+
+    allow_ingredient_removal:
+      tipo === 'product' ? permitirRemocoes : false,
+
+    selection_title:
+      tipo === 'product' ? (tituloSelecao || null) : null,
+
+    display_order:
+      tipo === 'product' ? ordemCardapio : 0,
 
     updated_at:
       new Date().toISOString()
@@ -6810,6 +7178,13 @@ async function salvarProdutoMaster(evento) {
           );
         }
       }
+    }
+
+    if (resultado?.id && tipo === 'product') {
+
+      await sincronizarConfiguracaoDinamicaProdutoMaster(
+        resultado.id
+      );
     }
 
     mostrarMensagemFormulario(
@@ -10188,6 +10563,32 @@ function configurarFormulariosMaster() {
         );
       }
     );
+
+  byId('btnAdicionarOpcaoProduto')?.addEventListener(
+    'click',
+    () => criarLinhaOpcaoProduto()
+  );
+
+  byId('btnAdicionarIngredienteRemovivel')?.addEventListener(
+    'click',
+    () => criarLinhaIngredienteRemovivel()
+  );
+
+  byId('masterProdutoOpcoesLista')?.addEventListener(
+    'click',
+    evento => {
+      const botao = evento.target.closest('[data-remove-dynamic-row]');
+      if (botao) botao.closest('.master-dynamic-row')?.remove();
+    }
+  );
+
+  byId('masterProdutoRemoviveisLista')?.addEventListener(
+    'click',
+    evento => {
+      const botao = evento.target.closest('[data-remove-dynamic-row]');
+      if (botao) botao.closest('.master-dynamic-row')?.remove();
+    }
+  );
 
   const quantidadeEntrada =
     byId(
