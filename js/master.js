@@ -3870,6 +3870,7 @@ async function buscarProdutos(
         available,
         active,
         item_type,
+        menu_type,
         unit,
         supplier,
         notes,
@@ -6077,6 +6078,127 @@ function atualizarFormularioPorTipo() {
     secaoCardapio?.classList.remove(
       'master-cardapio-hidden'
     );
+
+    atualizarFormularioPorTipoCardapio();
+  }
+}
+
+
+function inferirTipoCardapioPorCategoria(categoria = '') {
+
+  const valor = removerAcentos(
+    String(categoria || '').trim().toLowerCase()
+  );
+
+  if (valor.includes('bebida')) return 'bebida';
+  if (valor.includes('adicion')) return 'adicional';
+  if (valor.includes('frita') || valor.includes('porcao')) return 'porcao';
+
+  return 'lanche';
+}
+
+
+function obterTipoCardapioSelecionado() {
+
+  const campo = byId('masterProdutoTipoCardapio');
+
+  return String(
+    campo?.value || inferirTipoCardapioPorCategoria(byId('masterProdutoCategoria')?.value)
+  ).trim();
+}
+
+
+function atualizarFormularioPorTipoCardapio() {
+
+  if (obterTipoItemSelecionado() !== 'product') return;
+
+  const campoTipo = byId('masterProdutoTipoCardapio');
+  const categoria = String(byId('masterProdutoCategoria')?.value || '').trim();
+
+  // O select é a fonte principal. Se vier vazio por qualquer motivo,
+  // inferimos pela categoria para o formulário nunca ficar incoerente.
+  const tipo = String(
+    campoTipo?.value || inferirTipoCardapioPorCategoria(categoria)
+  ).trim().toLowerCase();
+
+  const ehLanche = tipo === 'lanche';
+  const ehBebida = tipo === 'bebida';
+  const ehPorcao = tipo === 'porcao';
+  const ehAdicional = tipo === 'adicional';
+
+  const alternar = (id, visivel) => {
+    const el = byId(id);
+    if (!el) return;
+
+    el.hidden = !visivel;
+    el.classList.toggle('master-config-hidden', !visivel);
+    el.style.display = visivel ? '' : 'none';
+  };
+
+  // Regras de negócio do formulário:
+  // LANCHES   -> adicionais + ingredientes removíveis + variações opcionais.
+  // BEBIDAS   -> somente sabores/opções.
+  // PORÇÕES   -> somente variações/opções, quando houver.
+  // ADICIONAL -> somente opções que compõem aquele grupo de adicional.
+  alternar('masterBlocoPermitirAdicionais', ehLanche);
+  alternar('masterBlocoPermitirRemocoes', ehLanche);
+  alternar('masterBlocoIngredientesRemoviveis', ehLanche);
+  alternar('masterBlocoAdicionaisPermitidos', ehLanche);
+  alternar('masterBlocoOpcoesProduto', ehLanche || ehBebida || ehPorcao || ehAdicional);
+
+  // Campos que não se aplicam ao tipo atual são zerados para evitar
+  // salvar configurações invisíveis por engano.
+  if (!ehLanche) {
+    const permitirAdicionais = byId('masterProdutoPermitirAdicionais');
+    const permitirRemocoes = byId('masterProdutoPermitirRemocoes');
+
+    if (permitirAdicionais) permitirAdicionais.checked = false;
+    if (permitirRemocoes) permitirRemocoes.checked = false;
+  }
+
+  const grid = document.querySelector('#masterSecaoCardapio .master-dynamic-config-grid');
+  if (grid) {
+    // Bebida/porção/adicional usam a largura toda para os nomes não ficarem cortados.
+    grid.classList.toggle('master-dynamic-config-grid-single', !ehLanche);
+  }
+
+  const titulo = byId('masterProdutoTituloSelecao');
+  const labelTitulo = document.querySelector('label[for="masterProdutoTituloSelecao"]');
+
+  if (labelTitulo) {
+    labelTitulo.textContent = ehBebida
+      ? 'Título da seleção'
+      : ehAdicional
+        ? 'Título da seleção'
+        : 'Título das opções';
+  }
+
+  if (titulo) {
+    if (ehBebida) titulo.placeholder = 'Ex.: Escolha o sabor';
+    else if (ehAdicional) titulo.placeholder = 'Ex.: Escolha o adicional';
+    else if (ehPorcao) titulo.placeholder = 'Ex.: Escolha o tamanho';
+    else titulo.placeholder = 'Ex.: Escolha uma opção';
+  }
+
+  const tituloBox = document.querySelector('#masterBlocoOpcoesProduto .master-dynamic-box-header strong');
+  const subtituloBox = document.querySelector('#masterBlocoOpcoesProduto .master-dynamic-box-header span');
+
+  if (tituloBox) {
+    tituloBox.textContent = ehBebida
+      ? 'Sabores / opções'
+      : ehAdicional
+        ? 'Opções do adicional'
+        : ehPorcao
+          ? 'Variações / opções'
+          : 'Variações / opções';
+  }
+
+  if (subtituloBox) {
+    subtituloBox.textContent = ehBebida
+      ? 'Cadastre cada sabor ou versão que o cliente poderá escolher.'
+      : ehAdicional
+        ? 'Cadastre os itens que fazem parte deste grupo de adicional.'
+        : 'Opcional. Use somente se este produto tiver alguma variação.';
   }
 }
 
@@ -6092,39 +6214,53 @@ function criarLinhaOpcaoProduto(opcao = {}) {
   if (!container) return;
 
   const linha = document.createElement('div');
-  linha.className = 'master-dynamic-row';
+  linha.className = 'master-dynamic-row master-option-row';
   linha.dataset.optionId = opcao.id || '';
 
   linha.innerHTML = `
-    <input
-      type="text"
-      data-option-name
-      placeholder="Nome da opção"
-      value="${escaparHtml(opcao.name || '')}"
-    >
-    <input
-      type="number"
-      data-option-price
-      min="0"
-      step="0.01"
-      placeholder="Acréscimo"
-      value="${numeroSeguro(opcao.price_adjustment)}"
-      title="Acréscimo no preço"
-    >
-    <input
-      type="number"
-      data-option-order
-      min="0"
-      step="1"
-      placeholder="Ordem"
-      value="${Number(opcao.display_order || 0)}"
-      title="Ordem"
-    >
+    <label class="master-dynamic-field master-dynamic-field-name">
+      <span>Nome</span>
+      <input
+        type="text"
+        data-option-name
+        placeholder="Nome da opção"
+        value="${escaparHtml(opcao.name || '')}"
+        autocomplete="off"
+      >
+    </label>
+
+    <label class="master-dynamic-field">
+      <span>Acréscimo</span>
+      <input
+        type="number"
+        data-option-price
+        min="0"
+        step="0.01"
+        placeholder="0,00"
+        value="${numeroSeguro(opcao.price_adjustment)}"
+        title="Acréscimo no preço"
+      >
+    </label>
+
+    <label class="master-dynamic-field master-dynamic-field-order">
+      <span>Ordem</span>
+      <input
+        type="number"
+        data-option-order
+        min="0"
+        step="1"
+        placeholder="0"
+        value="${Number(opcao.display_order || 0)}"
+        title="Ordem"
+      >
+    </label>
+
     <button
       type="button"
       class="master-dynamic-remove"
       data-remove-dynamic-row
       title="Remover opção"
+      aria-label="Remover opção"
     >×</button>
   `;
 
@@ -6143,26 +6279,36 @@ function criarLinhaIngredienteRemovivel(item = {}) {
   linha.dataset.removableId = item.id || '';
 
   linha.innerHTML = `
-    <input
-      type="text"
-      data-removable-name
-      placeholder="Ex.: Tomate"
-      value="${escaparHtml(item.name || '')}"
-    >
-    <input
-      type="number"
-      data-removable-order
-      min="0"
-      step="1"
-      placeholder="Ordem"
-      value="${Number(item.display_order || 0)}"
-      title="Ordem"
-    >
+    <label class="master-dynamic-field master-dynamic-field-name">
+      <span>Ingrediente</span>
+      <input
+        type="text"
+        data-removable-name
+        placeholder="Ex.: Tomate"
+        value="${escaparHtml(item.name || '')}"
+        autocomplete="off"
+      >
+    </label>
+
+    <label class="master-dynamic-field master-dynamic-field-order">
+      <span>Ordem</span>
+      <input
+        type="number"
+        data-removable-order
+        min="0"
+        step="1"
+        placeholder="0"
+        value="${Number(item.display_order || 0)}"
+        title="Ordem"
+      >
+    </label>
+
     <button
       type="button"
       class="master-dynamic-remove"
       data-remove-dynamic-row
       title="Remover ingrediente"
+      aria-label="Remover ingrediente"
     >×</button>
   `;
 
@@ -6290,6 +6436,10 @@ async function carregarConfiguracaoDinamicaProdutoMaster(produtoId) {
   renderizarAdicionaisProdutoMaster(
     (adicionaisResp.data || []).map(item => item.addon_product_id)
   );
+
+  // Reaplica as regras visuais depois do carregamento assíncrono.
+  // Isso evita que blocos de lanche reapareçam ao editar bebidas.
+  atualizarFormularioPorTipoCardapio();
 }
 
 
@@ -6653,6 +6803,10 @@ function abrirEditarProdutoMaster(id) {
     byId('masterProdutoDescricao').value = produto.description || '';
   }
 
+  if (byId('masterProdutoTipoCardapio')) {
+    byId('masterProdutoTipoCardapio').value = produto.menu_type || inferirTipoCardapioPorCategoria(produto.category);
+  }
+
   if (byId('masterProdutoOrdem')) {
     byId('masterProdutoOrdem').value = Number(produto.display_order || 0);
   }
@@ -6776,6 +6930,11 @@ async function salvarProdutoMaster(evento) {
         'masterProdutoCategoria'
       )?.value || ''
     ).trim();
+
+  const tipoCardapio =
+    tipo === 'product'
+      ? obterTipoCardapioSelecionado()
+      : null;
 
   const unidade =
     String(
@@ -6920,6 +7079,9 @@ async function salvarProdutoMaster(evento) {
     item_type:
       tipo,
 
+    menu_type:
+      tipo === 'product' ? tipoCardapio : null,
+
     unit:
       unidade,
 
@@ -6936,10 +7098,10 @@ async function salvarProdutoMaster(evento) {
       tipo === 'product' ? mostrarCardapio : false,
 
     allow_addons:
-      tipo === 'product' ? permitirAdicionais : false,
+      tipo === 'product' && tipoCardapio === 'lanche' ? permitirAdicionais : false,
 
     allow_ingredient_removal:
-      tipo === 'product' ? permitirRemocoes : false,
+      tipo === 'product' && tipoCardapio === 'lanche' ? permitirRemocoes : false,
 
     selection_title:
       tipo === 'product' ? (tituloSelecao || null) : null,
@@ -10563,6 +10725,22 @@ function configurarFormulariosMaster() {
         );
       }
     );
+
+  byId('masterProdutoTipoCardapio')?.addEventListener(
+    'change',
+    atualizarFormularioPorTipoCardapio
+  );
+
+  byId('masterProdutoCategoria')?.addEventListener(
+    'change',
+    () => {
+      const campoTipo = byId('masterProdutoTipoCardapio');
+      if (campoTipo && !byId('masterProdutoId')?.value) {
+        campoTipo.value = inferirTipoCardapioPorCategoria(byId('masterProdutoCategoria')?.value);
+      }
+      atualizarFormularioPorTipoCardapio();
+    }
+  );
 
   byId('btnAdicionarOpcaoProduto')?.addEventListener(
     'click',
