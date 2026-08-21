@@ -1555,66 +1555,66 @@ function montarHtmlBaseImpressao(titulo, textoPlano, autoPrint = true) {
         <meta charset="UTF-8">
         <title>${escaparHtml(titulo)}</title>
         <style>
-          * {
-            box-sizing: border-box;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-          }
+  * {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 
-          @page {
-            size: 48mm auto;
-            margin: 0;
-          }
+  @page {
+    size: 58mm auto;
+    margin: 0;
+  }
 
-          html,
-          body {
-            width: 48mm;
-            min-width: 48mm;
-            max-width: 48mm;
-            margin: 0;
-            padding: 0;
-            background: #fff;
-            overflow: hidden;
-          }
+  html,
+  body {
+    width: 58mm !important;
+    min-width: 58mm !important;
+    max-width: 58mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff;
+  }
 
-          body {
-            font-family: "Courier New", Courier, monospace;
-            color: #000;
-            font-size: 11px;
-            font-weight: 600;
-            line-height: 1.2;
-            white-space: pre-wrap;
-            word-break: normal;
-            overflow-wrap: break-word;
-          }
+  body {
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+    line-height: 1.2;
+    color: #000;
+    white-space: pre-wrap;
+  }
 
-          .ticket {
-            display: block;
-            width: 44mm;
-            max-width: 44mm;
-            margin: 0;
-            padding: 1mm;
-          }
+  .ticket {
+    width: 44mm;
+    max-width: 44mm;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    left: 6mm;
+    overflow: hidden;
+  }
 
-          @media print {
-            html,
-            body {
-              width: 48mm !important;
-              min-width: 48mm !important;
-              max-width: 48mm !important;
-              margin: 0 !important;
-              padding: 0 !important;
-              overflow: hidden !important;
-            }
+  @media print {
+    html,
+    body {
+      width: 58mm !important;
+      min-width: 58mm !important;
+      max-width: 58mm !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
 
-            .ticket {
-              width: 42mm !important;
-              max-width: 42mm !important;
-              margin: 0 !important;
-              padding: 0mm !important;
-            }
-          }
-        </style>
+    .ticket {
+      width: 44mm !important;
+      max-width: 44mm !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      position: relative !important;
+      left: 6mm !important;
+      overflow: hidden !important;
+    }
+  }
+</style>
       </head>
       <body>
         <div class="ticket">${textoSeguro}</div>
