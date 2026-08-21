@@ -6399,7 +6399,7 @@ async function carregarConfiguracaoDinamicaProdutoMaster(produtoId) {
   const [opcoesResp, removiveisResp, adicionaisResp] = await Promise.all([
     supabaseClient
       .from('product_options')
-      .select('id, name, price_adjustment, available, active, display_order')
+      .select('id, name, price_adjustment, available, active, display_order, stock_quantity, minimum_stock, stock_control')
       .eq('product_id', produtoId)
       .eq('active', true)
       .order('display_order', { ascending: true })
@@ -8424,6 +8424,93 @@ async function salvarFichaTecnicaMaster(
 }
 
 
+
+/* =========================================================
+   ESTOQUE POR OPÇÃO
+========================================================= */
+
+function entradasOpcoesVisiveisMaster() {
+  const box = byId('masterEntradaOpcoesBox');
+  return !!box && !box.classList.contains('hidden');
+}
+
+function coletarEntradasOpcoesMaster() {
+  return Array.from(
+    document.querySelectorAll('#masterEntradaOpcoesLista [data-option-stock-entry]')
+  )
+    .map(input => ({
+      option_id: Number(input.dataset.optionId || 0),
+      quantity: numeroSeguro(input.value)
+    }))
+    .filter(item => item.option_id > 0 && item.quantity > 0);
+}
+
+async function carregarOpcoesEntradaEstoqueMaster(produtoId) {
+  const box = byId('masterEntradaOpcoesBox');
+  const lista = byId('masterEntradaOpcoesLista');
+  const blocoQuantidade = byId('masterEntradaQuantidadeBloco');
+  const quantidade = byId('masterEntradaQuantidade');
+
+  if (!box || !lista) return [];
+
+  box.classList.add('hidden');
+  lista.innerHTML = '';
+  if (blocoQuantidade) blocoQuantidade.classList.remove('hidden');
+  if (quantidade) quantidade.required = true;
+
+  const { data, error } = await supabaseClient
+    .from('product_options')
+    .select('id, name, display_order, stock_quantity, minimum_stock, stock_control, available, active')
+    .eq('product_id', produtoId)
+    .eq('active', true)
+    .order('display_order', { ascending: true })
+    .order('name', { ascending: true });
+
+  if (error) throw error;
+
+  const opcoes = Array.isArray(data) ? data : [];
+  if (!opcoes.length) return [];
+
+  lista.innerHTML = opcoes.map(opcao => `
+    <div class="master-option-stock-row">
+      <div class="master-option-stock-name">
+        <span>Opção</span>
+        <strong>${escaparHtml(opcao.name || 'Opção')}</strong>
+      </div>
+      <div>
+        <span class="master-option-stock-field"><span>Atual</span></span>
+        <strong class="master-option-stock-current">${formatarQuantidade(numeroSeguro(opcao.stock_quantity))} un</strong>
+      </div>
+      <label class="master-option-stock-field">
+        <span>Entrada</span>
+        <input
+          type="number"
+          min="0"
+          step="1"
+          value="0"
+          data-option-stock-entry
+          data-option-id="${opcao.id}"
+          data-option-current="${numeroSeguro(opcao.stock_quantity)}"
+          data-option-name="${escaparHtml(opcao.name || '')}"
+        >
+      </label>
+    </div>
+  `).join('');
+
+  box.classList.remove('hidden');
+  if (blocoQuantidade) blocoQuantidade.classList.add('hidden');
+  if (quantidade) {
+    quantidade.required = false;
+    quantidade.value = '';
+  }
+
+  lista.querySelectorAll('[data-option-stock-entry]').forEach(input => {
+    input.addEventListener('input', calcularPrevisaoEntradaMaster);
+  });
+
+  return opcoes;
+}
+
 /* =========================================================
    ENTRADA DE ESTOQUE
 ========================================================= */
@@ -8456,11 +8543,13 @@ function calcularPrevisaoEntradaMaster() {
     );
 
   const quantidade =
-    numeroSeguro(
-      byId(
-        'masterEntradaQuantidade'
-      )?.value
-    );
+    entradasOpcoesVisiveisMaster()
+      ? coletarEntradasOpcoesMaster().reduce((total, item) => total + numeroSeguro(item.quantity), 0)
+      : numeroSeguro(
+          byId(
+            'masterEntradaQuantidade'
+          )?.value
+        );
 
   const custoUnitario =
     numeroSeguro(
@@ -8548,7 +8637,7 @@ function calcularPrevisaoEntradaMaster() {
 }
 
 
-function abrirEntradaEstoqueMaster(id) {
+async function abrirEntradaEstoqueMaster(id) {
 
   const produto =
     buscarProdutoLocalPorId(id);
@@ -8639,6 +8728,12 @@ function abrirEntradaEstoqueMaster(id) {
     ''
   );
 
+  try {
+    await carregarOpcoesEntradaEstoqueMaster(produto.id);
+  } catch (erro) {
+    console.error('Erro ao carregar estoque das opções:', erro);
+  }
+
   calcularPrevisaoEntradaMaster();
 
   abrirModalMaster(
@@ -8650,9 +8745,13 @@ function abrirEntradaEstoqueMaster(id) {
   setTimeout(
     () => {
 
-      byId(
-        'masterEntradaQuantidade'
-      )?.focus();
+      if (entradasOpcoesVisiveisMaster()) {
+        document.querySelector('#masterEntradaOpcoesLista [data-option-stock-entry]')?.focus();
+      } else {
+        byId(
+          'masterEntradaQuantidade'
+        )?.focus();
+      }
 
     },
     100
@@ -8694,12 +8793,19 @@ async function salvarEntradaEstoqueMaster(
       )?.value || ''
     ).trim();
 
+  const entradasOpcoes =
+    entradasOpcoesVisiveisMaster()
+      ? coletarEntradasOpcoesMaster()
+      : [];
+
   const quantidade =
-    numeroSeguro(
-      byId(
-        'masterEntradaQuantidade'
-      )?.value
-    );
+    entradasOpcoesVisiveisMaster()
+      ? entradasOpcoes.reduce((total, item) => total + numeroSeguro(item.quantity), 0)
+      : numeroSeguro(
+          byId(
+            'masterEntradaQuantidade'
+          )?.value
+        );
 
   const custoUnitario =
     numeroSeguro(
@@ -8776,6 +8882,39 @@ async function salvarEntradaEstoqueMaster(
       'Registrando entrada...',
       'warning'
     );
+
+    if (entradasOpcoesVisiveisMaster()) {
+
+      if (!entradasOpcoes.length) {
+        throw new Error('Informe a quantidade de pelo menos uma opção.');
+      }
+
+      const { data, error } = await supabaseClient.rpc(
+        'register_option_stock_entry',
+        {
+          p_product_id: Number(produtoId),
+          p_entries: entradasOpcoes,
+          p_unit_cost: custoUnitario,
+          p_notes: observacao || 'Entrada de estoque por opção pelo Painel Master.'
+        }
+      );
+
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.message || 'Não foi possível registrar a entrada por opção.');
+
+      mostrarMensagemFormulario(
+        mensagem,
+        `Entrada registrada: ${formatarQuantidade(quantidade)} unidade(s) distribuída(s) entre as opções.`,
+        'success'
+      );
+
+      await carregarProdutosMaster();
+      await carregarEstoqueMaster();
+      await carregarDashboard();
+
+      setTimeout(() => fecharModalMaster(byId('modalMasterEntrada')), 650);
+      return;
+    }
 
     const {
       data:
