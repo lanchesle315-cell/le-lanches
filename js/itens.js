@@ -2082,7 +2082,15 @@ btnAtualizarItens
    START
 ========================================================= */
 
-document.addEventListener(
-  'DOMContentLoaded',
-  iniciarPainelItens
-);
+if (document.readyState === 'loading') {
+
+  document.addEventListener(
+    'DOMContentLoaded',
+    iniciarPainelItens
+  );
+
+} else {
+
+  iniciarPainelItens();
+
+}
