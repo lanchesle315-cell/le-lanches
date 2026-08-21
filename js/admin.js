@@ -17,7 +17,6 @@ let salvandoVendaExterna = false;
 let disponibilidadeVendaExterna = {};
 
 const STORAGE_KEYS = ["le_lanches_pedidos"];
-const LOGIN_STORAGE_KEY = "le_lanches_admin_logado";
 const TABELA_PEDIDOS = "orders";
 const TABELA_CONFIG_LOJA = "store_settings";
 const STORE_SETTINGS_ID = 1;
@@ -4472,12 +4471,52 @@ async function removerOverrideLoja() {
   await definirModoLoja("automatico");
 }
 
-function sairDoPainel() {
+async function sairDoPainel() {
   const confirmar = confirm("Deseja sair do painel admin?");
   if (!confirmar) return;
 
-  localStorage.removeItem(LOGIN_STORAGE_KEY);
-  window.location.href = "login.html";
+  try {
+    if (supabaseClient) {
+      const { error } = await supabaseClient.auth.signOut();
+
+      if (error) {
+        console.error(
+          "Erro ao encerrar sessão do Supabase:",
+          error
+        );
+
+        alert(
+          "Não foi possível encerrar a sessão. Tente novamente."
+        );
+
+        return;
+      }
+    }
+
+    /*
+     * Remove apenas a flag antiga da autenticação legada,
+     * caso ainda exista no navegador.
+     *
+     * Ela não é mais usada para liberar acesso ao painel.
+     */
+    localStorage.removeItem(
+      "le_lanches_admin_logado"
+    );
+
+    window.location.replace(
+      "login.html"
+    );
+
+  } catch (erro) {
+    console.error(
+      "Falha ao sair do painel:",
+      erro
+    );
+
+    alert(
+      "Não foi possível sair do painel. Tente novamente."
+    );
+  }
 }
 
 function esconderBotaoApagarTudo() {
