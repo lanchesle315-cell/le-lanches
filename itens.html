@@ -26,16 +26,8 @@
 
   <link
     rel="stylesheet"
-    href="css/itens.css?v=20260819-1"
+    href="css/itens.css?v=20260820-2"
   >
-
-  <script>
-    if (
-      localStorage.getItem("le_lanches_admin_logado") !== "true"
-    ) {
-      window.location.href = "login.html";
-    }
-  </script>
 
 </head>
 
@@ -322,13 +314,216 @@
   </div>
 
 
+  <!-- =====================================================
+       SCRIPTS
+  ====================================================== -->
+
   <script
     src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
   ></script>
 
   <script src="js/config.js"></script>
 
-  <script src="js/itens.js?v=20260819-1"></script>
+  <script>
+  /* =========================================================
+     PROTEÇÃO DO PAINEL DE ITENS
+     Supabase Auth + profiles
+  ========================================================= */
+
+  (async function protegerPainelItens() {
+
+    try {
+
+      if (
+        !window.supabase ||
+        !window.APP_CONFIG ||
+        !window.APP_CONFIG.supabaseUrl ||
+        !window.APP_CONFIG.supabaseAnonKey
+      ) {
+
+        console.error(
+          "Supabase não configurado."
+        );
+
+        window.location.replace(
+          "login.html"
+        );
+
+        return;
+
+      }
+
+
+      const authClient =
+        window.supabase.createClient(
+          window.APP_CONFIG.supabaseUrl,
+          window.APP_CONFIG.supabaseAnonKey
+        );
+
+
+      const {
+        data: sessionData,
+        error: sessionError
+      } =
+        await authClient.auth.getSession();
+
+
+      if (sessionError) {
+
+        console.error(
+          "Erro ao consultar sessão:",
+          sessionError
+        );
+
+        window.location.replace(
+          "login.html"
+        );
+
+        return;
+
+      }
+
+
+      const usuario =
+        sessionData?.session?.user;
+
+
+      if (!usuario) {
+
+        window.location.replace(
+          "login.html"
+        );
+
+        return;
+
+      }
+
+
+      const {
+        data: perfil,
+        error: perfilError
+      } =
+        await authClient
+          .from(
+            "profiles"
+          )
+          .select(
+            "id, full_name, role, active"
+          )
+          .eq(
+            "id",
+            usuario.id
+          )
+          .single();
+
+
+      if (
+        perfilError ||
+        !perfil
+      ) {
+
+        console.error(
+          "Erro ao consultar perfil:",
+          perfilError
+        );
+
+        await authClient.auth.signOut();
+
+        window.location.replace(
+          "login.html"
+        );
+
+        return;
+
+      }
+
+
+      if (
+        perfil.active !== true
+      ) {
+
+        console.warn(
+          "Usuário desativado."
+        );
+
+        await authClient.auth.signOut();
+
+        window.location.replace(
+          "login.html"
+        );
+
+        return;
+
+      }
+
+
+      const role =
+        String(
+          perfil.role || ""
+        )
+          .trim()
+          .toLowerCase();
+
+
+      if (
+        role !== "admin" &&
+        role !== "master"
+      ) {
+
+        console.warn(
+          "Usuário sem permissão para acessar o Painel de Itens."
+        );
+
+        await authClient.auth.signOut();
+
+        window.location.replace(
+          "login.html"
+        );
+
+        return;
+
+      }
+
+
+      console.log(
+        "Painel de Itens autorizado:",
+        perfil.full_name,
+        `(${role})`
+      );
+
+
+      /*
+       * Somente depois de validar a sessão,
+       * carregamos o JS do Painel de Itens.
+       */
+      const scriptItens =
+        document.createElement(
+          "script"
+        );
+
+      scriptItens.src =
+        "js/itens.js?v=20260820-2";
+
+      document.body.appendChild(
+        scriptItens
+      );
+
+
+    } catch (erro) {
+
+      console.error(
+        "Erro ao proteger Painel de Itens:",
+        erro
+      );
+
+      window.location.replace(
+        "login.html"
+      );
+
+    }
+
+  })();
+  </script>
 
 </body>
 
