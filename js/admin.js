@@ -2269,6 +2269,192 @@ async function salvarEdicaoPedido() {
    VENDA EXTERNA
 ========================================================= */
 
+/*
+ * A Venda Externa usa um popup próprio, criado pelo JS.
+ * Assim não precisamos duplicar os modais do cardápio no admin.html.
+ *
+ * Fluxos suportados:
+ * - Lanches: personalização (remover ingredientes / observação)
+ * - Bebidas com opções: escolher sabor/tipo
+ * - Adicionais: escolher adicional e depois em qual lanche aplicar
+ */
+
+let vendaExternaPopupEstado = null;
+
+const VENDA_EXTERNA_OPCOES = {
+  R01: {
+    tipo: "opcao",
+    titulo: "Água",
+    descricao: "Escolha a água",
+    opcoes: ["Com gás", "Sem gás"]
+  },
+  R02: {
+    tipo: "opcao",
+    titulo: "Suco Del Valle 450ml",
+    descricao: "Escolha o sabor",
+    opcoes: ["Uva", "Laranja"]
+  },
+  R03: {
+    tipo: "opcao",
+    titulo: "Suco Bellas 500ml",
+    descricao: "Escolha o sabor",
+    opcoes: [
+      "Goiaba",
+      "Laranja",
+      "Caju",
+      "Maracujá",
+      "Acerola",
+      "Guaraná com açaí"
+    ]
+  },
+  R04: {
+    tipo: "opcao",
+    titulo: "Refrigerante Lata",
+    descricao: "Escolha o refrigerante",
+    opcoes: [
+      "Coca-Cola",
+      "Coca-Cola Zero",
+      "Fanta Laranja",
+      "Fanta Uva",
+      "Sprite"
+    ]
+  },
+  R05: {
+    tipo: "opcao",
+    titulo: "Cerveja Lata",
+    descricao: "Escolha a cerveja",
+    opcoes: ["Brahma", "Skol"]
+  },
+  R06: {
+    tipo: "opcao",
+    titulo: "Cerveja Long Neck 330ml",
+    descricao: "Escolha a cerveja",
+    opcoes: ["Heineken"]
+  },
+  R07: {
+    tipo: "opcao",
+    titulo: "Refrigerante 2 Litros",
+    descricao: "Escolha o refrigerante",
+    opcoes: ["Fanta", "Sprite"]
+  },
+  R08: {
+    tipo: "opcao",
+    titulo: "Vedete 2 Litros",
+    descricao: "Escolha o sabor",
+    opcoes: ["Tubaína", "Guaraná"]
+  },
+  R09: {
+    tipo: "opcao",
+    titulo: "Coca-Cola 2 Litros",
+    descricao: "Escolha a Coca-Cola",
+    opcoes: ["Coca-Cola", "Coca-Cola Zero"]
+  },
+
+  A01: {
+    tipo: "adicional",
+    titulo: "Adicionais R$ 3,00",
+    descricao: "Qual adicional você deseja?",
+    opcoes: ["Ovo", "Mussarela", "Salsicha"]
+  },
+  A02: {
+    tipo: "adicional",
+    titulo: "Adicionais R$ 5,00",
+    descricao: "Qual adicional você deseja?",
+    opcoes: ["Bacon", "Calabresa", "Hambúrguer tradicional"]
+  },
+  A03: {
+    tipo: "adicional",
+    titulo: "Adicionais R$ 6,00",
+    descricao: "Qual adicional você deseja?",
+    opcoes: ["Catupiry", "Cheddar", "Cream Cheese"]
+  },
+  A04: {
+    tipo: "adicional",
+    titulo: "Adicionais R$ 8,00",
+    descricao: "Qual adicional você deseja?",
+    opcoes: ["Hambúrguer Smash", "Frango", "Costela"]
+  }
+};
+
+const VENDA_EXTERNA_INGREDIENTES_PADRAO = [
+  "Tomate",
+  "Cebola",
+  "Alface",
+  "Milho",
+  "Ketchup",
+  "Maionese temperada",
+  "Mostarda",
+  "Batata palha"
+];
+
+const VENDA_EXTERNA_INGREDIENTES_POR_LANCHE = {
+  "simples": [
+    "Batata palha", "Purê de batata", "Tomate", "Cebola",
+    "Alface", "Milho", "Ketchup", "Maionese temperada", "Mostarda"
+  ],
+  "duplo": [
+    "Batata palha", "Purê de batata", "Tomate", "Cebola",
+    "Alface", "Milho", "Ketchup", "Maionese temperada", "Mostarda"
+  ],
+  "especial": [
+    "Batata palha", "Purê de batata", "Tomate", "Cebola",
+    "Alface", "Milho", "Ketchup", "Maionese temperada", "Mostarda"
+  ],
+  "x-burguer": [
+    "Batata palha", "Tomate", "Cebola", "Ketchup",
+    "Maionese temperada", "Mostarda"
+  ],
+  "x-salada": [
+    "Batata palha", "Tomate", "Cebola", "Alface", "Milho",
+    "Ketchup", "Maionese temperada", "Mostarda"
+  ],
+  "x-egg": [
+    "Batata palha", "Tomate", "Cebola", "Alface", "Milho",
+    "Ketchup", "Maionese temperada", "Mostarda"
+  ],
+  "x-bacon": [
+    "Batata palha", "Tomate", "Cebola", "Alface", "Milho",
+    "Ketchup", "Maionese temperada", "Mostarda"
+  ],
+  "x-calabresa": [
+    "Batata palha", "Tomate", "Cebola", "Alface", "Milho",
+    "Ketchup", "Maionese temperada", "Mostarda"
+  ],
+  "x-frango": [
+    "Tomate", "Cebola", "Alface", "Milho",
+    "Ketchup", "Maionese temperada", "Mostarda"
+  ],
+  "x-tudo": [
+    "Batata palha", "Tomate", "Cebola", "Alface", "Milho",
+    "Ketchup", "Maionese temperada", "Mostarda"
+  ],
+  "calabacon": [
+    "Batata palha", "Tomate", "Cebola", "Alface", "Milho",
+    "Ketchup", "Maionese temperada", "Mostarda"
+  ],
+  "franbacon": [
+    "Tomate", "Cebola", "Alface", "Milho",
+    "Ketchup", "Maionese temperada", "Mostarda"
+  ],
+  "calafrango": [
+    "Tomate", "Cebola", "Alface", "Milho",
+    "Ketchup", "Maionese temperada", "Mostarda"
+  ],
+  "x-costela": [
+    "Batata palha", "Tomate", "Cebola", "Ketchup",
+    "Maionese temperada", "Mostarda"
+  ],
+  "smash salada": [
+    "Alface", "Tomate", "Picles", "Cebola", "Maionese temperada"
+  ],
+  "smash oklahoma": [
+    "Cebola", "Picles", "Maionese temperada"
+  ],
+  "smash bacon": [
+    "Maionese temperada"
+  ]
+};
+
 function normalizarTextoVendaExterna(texto) {
   return String(texto || "")
     .normalize("NFD")
@@ -2284,6 +2470,678 @@ function obterNomeClientePadraoVendaExterna(origem) {
   if (valor === "99") return "";
 
   return "Cliente";
+}
+
+function codigoVendaExterna(produto) {
+  return String(produto?.product_code || "").toUpperCase().trim();
+}
+
+function ehLancheVendaExterna(produtoOuItem) {
+  const codigo = String(
+    produtoOuItem?.product_code ||
+    produtoOuItem?.productCode ||
+    ""
+  ).toUpperCase();
+
+  const categoria = normalizarTextoVendaExterna(
+    produtoOuItem?.category || ""
+  );
+
+  const nome = normalizarTextoVendaExterna(
+    produtoOuItem?.name ||
+    produtoOuItem?.product_name ||
+    ""
+  );
+
+  if (/^(HD|B|S)\d+/.test(codigo)) return true;
+
+  return (
+    categoria.includes("hot dog") ||
+    categoria.includes("hotdog") ||
+    categoria.includes("burguer") ||
+    categoria.includes("burger") ||
+    categoria.includes("smash") ||
+    nome.startsWith("x-") ||
+    nome.includes("smash") ||
+    ["simples", "duplo", "especial", "calabacon", "franbacon", "calafrango"]
+      .includes(nome)
+  );
+}
+
+function ingredientesVendaExternaPorLanche(nome) {
+  const normalizado = normalizarTextoVendaExterna(nome);
+
+  const chaves = Object.keys(VENDA_EXTERNA_INGREDIENTES_POR_LANCHE)
+    .sort((a, b) => b.length - a.length);
+
+  for (const chave of chaves) {
+    if (normalizado.includes(normalizarTextoVendaExterna(chave))) {
+      return VENDA_EXTERNA_INGREDIENTES_POR_LANCHE[chave];
+    }
+  }
+
+  return VENDA_EXTERNA_INGREDIENTES_PADRAO;
+}
+
+function obterConfigPopupVendaExterna(produto) {
+  if (!produto) return null;
+
+  const codigo = codigoVendaExterna(produto);
+
+  if (VENDA_EXTERNA_OPCOES[codigo]) {
+    return VENDA_EXTERNA_OPCOES[codigo];
+  }
+
+  /*
+   * Fallback por nome para funcionar mesmo se algum código
+   * for alterado no cadastro, mantendo os nomes atuais.
+   */
+  const nome = normalizarTextoVendaExterna(produto.name);
+
+  if (nome.includes("del valle")) return VENDA_EXTERNA_OPCOES.R02;
+  if (nome.includes("bellas")) return VENDA_EXTERNA_OPCOES.R03;
+  if (nome.includes("refrigerante lata")) return VENDA_EXTERNA_OPCOES.R04;
+  if (nome.includes("cerveja lata")) return VENDA_EXTERNA_OPCOES.R05;
+  if (nome.includes("long neck")) return VENDA_EXTERNA_OPCOES.R06;
+  if (nome.includes("refrigerante 2")) return VENDA_EXTERNA_OPCOES.R07;
+  if (nome.includes("vedete")) return VENDA_EXTERNA_OPCOES.R08;
+  if (nome.includes("coca-cola 2") || nome.includes("coca cola 2")) {
+    return VENDA_EXTERNA_OPCOES.R09;
+  }
+  if (nome === "agua" || nome.startsWith("agua ")) {
+    return VENDA_EXTERNA_OPCOES.R01;
+  }
+
+  if (nome.includes("adicionais r$ 3") || nome.includes("adicional r$ 3")) {
+    return VENDA_EXTERNA_OPCOES.A01;
+  }
+  if (nome.includes("adicionais r$ 5") || nome.includes("adicional r$ 5")) {
+    return VENDA_EXTERNA_OPCOES.A02;
+  }
+  if (nome.includes("adicionais r$ 6") || nome.includes("adicional r$ 6")) {
+    return VENDA_EXTERNA_OPCOES.A03;
+  }
+  if (nome.includes("adicionais r$ 8") || nome.includes("adicional r$ 8")) {
+    return VENDA_EXTERNA_OPCOES.A04;
+  }
+
+  return null;
+}
+
+function garantirPopupVendaExterna() {
+  let modal = byId("modalOpcoesVendaExterna");
+
+  if (modal) return modal;
+
+  const style = document.createElement("style");
+  style.id = "styleOpcoesVendaExterna";
+  style.textContent = `
+    #modalOpcoesVendaExterna {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(0,0,0,.72);
+      backdrop-filter: blur(4px);
+    }
+
+    #modalOpcoesVendaExterna.ativo {
+      display: flex;
+    }
+
+    #modalOpcoesVendaExterna .ve-popup-card {
+      width: min(520px, 100%);
+      max-height: 88vh;
+      overflow: auto;
+      background: #171717;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.55);
+    }
+
+    #modalOpcoesVendaExterna .ve-popup-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 20px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+    }
+
+    #modalOpcoesVendaExterna .ve-popup-top h3 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    #modalOpcoesVendaExterna .ve-popup-close {
+      width: 38px;
+      height: 38px;
+      border: 0;
+      border-radius: 10px;
+      background: rgba(255,255,255,.08);
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    #modalOpcoesVendaExterna .ve-popup-body {
+      padding: 20px;
+    }
+
+    #modalOpcoesVendaExterna .ve-popup-description {
+      margin-bottom: 14px;
+      color: #d6d6d6;
+    }
+
+    #modalOpcoesVendaExterna .ve-options-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    #modalOpcoesVendaExterna .ve-option-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      padding: 13px 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 12px;
+      background: rgba(255,255,255,.035);
+      cursor: pointer;
+    }
+
+    #modalOpcoesVendaExterna .ve-option-item:hover {
+      background: rgba(255,255,255,.07);
+    }
+
+    #modalOpcoesVendaExterna .ve-option-item input {
+      margin-top: 3px;
+    }
+
+    #modalOpcoesVendaExterna .ve-option-content {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    #modalOpcoesVendaExterna .ve-option-content small {
+      color: #aaa;
+    }
+
+    #modalOpcoesVendaExterna .ve-observacao {
+      margin-top: 14px;
+    }
+
+    #modalOpcoesVendaExterna .ve-observacao label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: 700;
+    }
+
+    #modalOpcoesVendaExterna .ve-observacao textarea {
+      width: 100%;
+      min-height: 82px;
+      resize: vertical;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 10px;
+      padding: 11px;
+      background: #0e0e0e;
+      color: #fff;
+      box-sizing: border-box;
+    }
+
+    #modalOpcoesVendaExterna .ve-popup-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 16px 20px 20px;
+    }
+
+    #modalOpcoesVendaExterna .ve-popup-actions button {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 16px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    #modalOpcoesVendaExterna .ve-btn-cancelar {
+      background: #353535;
+      color: #fff;
+    }
+
+    #modalOpcoesVendaExterna .ve-btn-confirmar {
+      background: #f2b705;
+      color: #111;
+    }
+  `;
+
+  document.head.appendChild(style);
+
+  modal = document.createElement("div");
+  modal.id = "modalOpcoesVendaExterna";
+  modal.innerHTML = `
+    <div class="ve-popup-card" role="dialog" aria-modal="true">
+      <div class="ve-popup-top">
+        <h3 id="tituloOpcoesVendaExterna">Escolha uma opção</h3>
+        <button
+          type="button"
+          class="ve-popup-close"
+          onclick="fecharOpcoesVendaExterna()"
+          aria-label="Fechar"
+        >×</button>
+      </div>
+
+      <div class="ve-popup-body">
+        <div
+          id="descricaoOpcoesVendaExterna"
+          class="ve-popup-description"
+        ></div>
+
+        <div id="listaOpcoesVendaExterna"></div>
+      </div>
+
+      <div class="ve-popup-actions">
+        <button
+          type="button"
+          class="ve-btn-cancelar"
+          onclick="fecharOpcoesVendaExterna()"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          class="ve-btn-confirmar"
+          id="btnConfirmarOpcoesVendaExterna"
+          onclick="confirmarOpcoesVendaExterna()"
+        >
+          Adicionar
+        </button>
+      </div>
+    </div>
+  `;
+
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal) {
+      fecharOpcoesVendaExterna();
+    }
+  });
+
+  document.body.appendChild(modal);
+
+  return modal;
+}
+
+function abrirPopupVendaExterna(titulo, descricao, htmlLista, textoBotao = "Adicionar") {
+  const modal = garantirPopupVendaExterna();
+
+  const tituloEl = byId("tituloOpcoesVendaExterna");
+  const descricaoEl = byId("descricaoOpcoesVendaExterna");
+  const listaEl = byId("listaOpcoesVendaExterna");
+  const botao = byId("btnConfirmarOpcoesVendaExterna");
+
+  if (tituloEl) tituloEl.textContent = titulo || "Escolha uma opção";
+  if (descricaoEl) descricaoEl.textContent = descricao || "";
+  if (listaEl) listaEl.innerHTML = htmlLista || "";
+  if (botao) botao.textContent = textoBotao || "Adicionar";
+
+  modal.classList.add("ativo");
+}
+
+function fecharOpcoesVendaExterna() {
+  const modal = byId("modalOpcoesVendaExterna");
+
+  if (modal) {
+    modal.classList.remove("ativo");
+  }
+
+  vendaExternaPopupEstado = null;
+}
+
+function obterQuantidadeNoCarrinhoVendaExternaPorCodigo(productCode) {
+  return carrinhoVendaExterna.reduce((total, item) => {
+    if (String(item.product_code) !== String(productCode)) {
+      return total;
+    }
+
+    return total + Number(item.quantity || 0);
+  }, 0);
+}
+
+function validarEstoqueParaAdicionarVendaExterna(produto, quantidadeAdicionar = 1) {
+  if (!produto?.stock_control) return true;
+
+  const estoque = Number(produto.stock_quantity || 0);
+  const jaNoCarrinho =
+    obterQuantidadeNoCarrinhoVendaExternaPorCodigo(produto.product_code);
+
+  return (jaNoCarrinho + Number(quantidadeAdicionar || 0)) <= estoque;
+}
+
+function chaveItemVendaExterna(productCode, observation = "") {
+  return `${String(productCode)}||${String(observation || "").trim()}`;
+}
+
+function adicionarItemFinalVendaExterna(produto, observation = "") {
+  if (!produtoVendaExternaPodeSerAdicionado(produto)) {
+    alert("Este produto está indisponível ou sem estoque.");
+    return false;
+  }
+
+  if (!validarEstoqueParaAdicionarVendaExterna(produto, 1)) {
+    alert(`Estoque insuficiente de "${produto.name}".`);
+    return false;
+  }
+
+  const chave = chaveItemVendaExterna(
+    produto.product_code,
+    observation
+  );
+
+  const existente = carrinhoVendaExterna.find(
+    (item) => item.cart_key === chave
+  );
+
+  if (existente) {
+    existente.quantity += 1;
+  } else {
+    carrinhoVendaExterna.push({
+      cart_key: chave,
+      product_id: produto.id,
+      product_code: produto.product_code,
+      product_name: produto.name,
+      category: produto.category || "",
+      sale_unit_price: Number(produto.sale_price || 0),
+      quantity: 1,
+      observation: String(observation || ""),
+      stock_control: produto.stock_control === true,
+      stock_quantity: Number(produto.stock_quantity || 0)
+    });
+  }
+
+  renderizarCarrinhoVendaExterna();
+  atualizarResumoVendaExterna();
+
+  return true;
+}
+
+function abrirOpcoesSimplesVendaExterna(produto, config) {
+  vendaExternaPopupEstado = {
+    etapa: "opcao-produto",
+    produto
+  };
+
+  const html = `
+    <div class="ve-options-list">
+      ${config.opcoes.map((opcao, index) => `
+        <label class="ve-option-item">
+          <input
+            type="radio"
+            name="opcaoProdutoVendaExterna"
+            value="${escaparHtml(opcao)}"
+            ${config.opcoes.length === 1 && index === 0 ? "checked" : ""}
+          >
+          <span class="ve-option-content">
+            <strong>${escaparHtml(opcao)}</strong>
+          </span>
+        </label>
+      `).join("")}
+    </div>
+  `;
+
+  abrirPopupVendaExterna(
+    produto.name || config.titulo,
+    config.descricao || "Escolha uma opção",
+    html,
+    "Adicionar"
+  );
+}
+
+function abrirPersonalizacaoLancheVendaExterna(produto) {
+  vendaExternaPopupEstado = {
+    etapa: "personalizar-lanche",
+    produto
+  };
+
+  const ingredientes = ingredientesVendaExternaPorLanche(produto.name);
+
+  const html = `
+    <div class="ve-options-list">
+      ${ingredientes.map((ingrediente) => `
+        <label class="ve-option-item">
+          <input
+            type="checkbox"
+            name="ingredienteRemoverVendaExterna"
+            value="${escaparHtml(ingrediente)}"
+          >
+          <span class="ve-option-content">
+            <strong>Sem ${escaparHtml(ingrediente)}</strong>
+          </span>
+        </label>
+      `).join("")}
+    </div>
+
+    <div class="ve-observacao">
+      <label for="observacaoLancheVendaExterna">
+        Observação do lanche:
+      </label>
+      <textarea
+        id="observacaoLancheVendaExterna"
+        placeholder="Ex.: carne bem passada, pouco molho..."
+      ></textarea>
+    </div>
+  `;
+
+  abrirPopupVendaExterna(
+    produto.name,
+    "Deseja remover algum ingrediente?",
+    html,
+    "Adicionar"
+  );
+}
+
+function abrirEscolhaAdicionalVendaExterna(produto, config) {
+  const lanches = carrinhoVendaExterna.filter(ehLancheVendaExterna);
+
+  if (!lanches.length) {
+    alert("Adicione um lanche à venda antes de escolher um adicional.");
+    return;
+  }
+
+  vendaExternaPopupEstado = {
+    etapa: "escolher-adicional",
+    produto,
+    config
+  };
+
+  const html = `
+    <div class="ve-options-list">
+      ${config.opcoes.map((opcao) => `
+        <label class="ve-option-item">
+          <input
+            type="radio"
+            name="opcaoAdicionalVendaExterna"
+            value="${escaparHtml(opcao)}"
+          >
+          <span class="ve-option-content">
+            <strong>${escaparHtml(opcao)}</strong>
+            <small>+ ${formatarMoeda(produto.sale_price)}</small>
+          </span>
+        </label>
+      `).join("")}
+    </div>
+  `;
+
+  abrirPopupVendaExterna(
+    produto.name || config.titulo,
+    config.descricao || "Qual adicional você deseja?",
+    html,
+    "Continuar"
+  );
+}
+
+function abrirEscolhaLancheAdicionalVendaExterna(produto, nomeAdicional) {
+  const lanches = carrinhoVendaExterna
+    .map((item, index) => ({ ...item, index }))
+    .filter(ehLancheVendaExterna);
+
+  if (!lanches.length) {
+    alert("Não há nenhum lanche na venda.");
+    fecharOpcoesVendaExterna();
+    return;
+  }
+
+  vendaExternaPopupEstado = {
+    etapa: "escolher-lanche-adicional",
+    produto,
+    nomeAdicional
+  };
+
+  const html = `
+    <div class="ve-options-list">
+      ${lanches.map((item, posicao) => `
+        <label class="ve-option-item">
+          <input
+            type="radio"
+            name="lancheAdicionalVendaExterna"
+            value="${item.index}"
+          >
+          <span class="ve-option-content">
+            <strong>${escaparHtml(item.product_name)}</strong>
+            <small>
+              Lanche ${posicao + 1}
+              ${Number(item.quantity || 1) > 1
+                ? ` • Quantidade: ${escaparHtml(item.quantity)}`
+                : ""}
+            </small>
+            ${item.observation
+              ? `<small>${escaparHtml(item.observation)}</small>`
+              : `<small>Sem alterações</small>`
+            }
+            <small>+ ${formatarMoeda(produto.sale_price)}</small>
+          </span>
+        </label>
+      `).join("")}
+    </div>
+  `;
+
+  abrirPopupVendaExterna(
+    nomeAdicional,
+    "Em qual lanche você deseja colocar este adicional?",
+    html,
+    "Adicionar"
+  );
+}
+
+function confirmarOpcoesVendaExterna() {
+  const estado = vendaExternaPopupEstado;
+
+  if (!estado) {
+    fecharOpcoesVendaExterna();
+    return;
+  }
+
+  if (estado.etapa === "opcao-produto") {
+    const selecionado = document.querySelector(
+      'input[name="opcaoProdutoVendaExterna"]:checked'
+    );
+
+    if (!selecionado) {
+      alert("Escolha uma opção antes de adicionar.");
+      return;
+    }
+
+    const adicionou = adicionarItemFinalVendaExterna(
+      estado.produto,
+      `Opção: ${selecionado.value}`
+    );
+
+    if (adicionou) fecharOpcoesVendaExterna();
+    return;
+  }
+
+  if (estado.etapa === "personalizar-lanche") {
+    const removidos = Array.from(
+      document.querySelectorAll(
+        'input[name="ingredienteRemoverVendaExterna"]:checked'
+      )
+    ).map((input) => `Sem ${input.value}`);
+
+    const observacaoLivre = String(
+      byId("observacaoLancheVendaExterna")?.value || ""
+    ).trim();
+
+    const observation = [
+      ...removidos,
+      observacaoLivre ? `Obs: ${observacaoLivre}` : ""
+    ]
+      .filter(Boolean)
+      .join(" | ");
+
+    const adicionou = adicionarItemFinalVendaExterna(
+      estado.produto,
+      observation
+    );
+
+    if (adicionou) fecharOpcoesVendaExterna();
+    return;
+  }
+
+  if (estado.etapa === "escolher-adicional") {
+    const selecionado = document.querySelector(
+      'input[name="opcaoAdicionalVendaExterna"]:checked'
+    );
+
+    if (!selecionado) {
+      alert("Escolha qual adicional deseja.");
+      return;
+    }
+
+    abrirEscolhaLancheAdicionalVendaExterna(
+      estado.produto,
+      selecionado.value
+    );
+
+    return;
+  }
+
+  if (estado.etapa === "escolher-lanche-adicional") {
+    const selecionado = document.querySelector(
+      'input[name="lancheAdicionalVendaExterna"]:checked'
+    );
+
+    if (!selecionado) {
+      alert("Escolha em qual lanche deseja colocar o adicional.");
+      return;
+    }
+
+    const indexLanche = Number(selecionado.value);
+    const lanche = carrinhoVendaExterna[indexLanche];
+
+    if (!lanche) {
+      alert("O lanche escolhido não foi encontrado.");
+      fecharOpcoesVendaExterna();
+      return;
+    }
+
+    const observation =
+      `Adicional: ${estado.nomeAdicional} | Aplicar em: ${lanche.product_name}`;
+
+    const adicionou = adicionarItemFinalVendaExterna(
+      estado.produto,
+      observation
+    );
+
+    if (adicionou) fecharOpcoesVendaExterna();
+    return;
+  }
+
+  fecharOpcoesVendaExterna();
 }
 
 async function buscarProdutosVendaExterna() {
@@ -2446,6 +3304,7 @@ function abrirModalVendaExterna() {
   }
 
   carrinhoVendaExterna = [];
+  fecharOpcoesVendaExterna();
 
   const origem = byId("vendaExternaOrigem");
   const referencia = byId("vendaExternaReferencia");
@@ -2487,6 +3346,8 @@ function abrirModalVendaExterna() {
 function fecharModalVendaExterna() {
   if (salvandoVendaExterna) return;
 
+  fecharOpcoesVendaExterna();
+
   const modal = byId("modalVendaExterna");
 
   if (modal) {
@@ -2514,44 +3375,43 @@ function adicionarProdutoVendaExterna(productCode) {
     return;
   }
 
-  const existente = carrinhoVendaExterna.find(
-    (item) =>
-      String(item.product_code) ===
-      String(produto.product_code)
-  );
+  const configPopup = obterConfigPopupVendaExterna(produto);
 
-  if (existente) {
-    const novaQuantidade =
-      Number(existente.quantity || 0) + 1;
-
-    if (
-      produto.stock_control === true &&
-      novaQuantidade >
-        Number(produto.stock_quantity || 0)
-    ) {
-      alert(
-        `Estoque insuficiente de "${produto.name}".`
-      );
-      return;
-    }
-
-    existente.quantity = novaQuantidade;
-  } else {
-    carrinhoVendaExterna.push({
-      product_id: produto.id,
-      product_code: produto.product_code,
-      product_name: produto.name,
-      category: produto.category || "",
-      sale_unit_price: Number(produto.sale_price || 0),
-      quantity: 1,
-      observation: "",
-      stock_control: produto.stock_control === true,
-      stock_quantity: Number(produto.stock_quantity || 0)
-    });
+  /*
+   * Adicionais: escolha adicional + lanche.
+   */
+  if (configPopup?.tipo === "adicional") {
+    abrirEscolhaAdicionalVendaExterna(
+      produto,
+      configPopup
+    );
+    return;
   }
 
-  renderizarCarrinhoVendaExterna();
-  atualizarResumoVendaExterna();
+  /*
+   * Bebidas e produtos com sabor/tipo.
+   */
+  if (configPopup?.tipo === "opcao") {
+    abrirOpcoesSimplesVendaExterna(
+      produto,
+      configPopup
+    );
+    return;
+  }
+
+  /*
+   * Lanches: mesmo comportamento do pedido normal,
+   * permitindo remoção de ingredientes e observação.
+   */
+  if (ehLancheVendaExterna(produto)) {
+    abrirPersonalizacaoLancheVendaExterna(produto);
+    return;
+  }
+
+  /*
+   * Produto simples: adiciona direto.
+   */
+  adicionarItemFinalVendaExterna(produto, "");
 }
 
 function alterarQuantidadeVendaExterna(index, alteracao) {
@@ -2568,15 +3428,30 @@ function alterarQuantidadeVendaExterna(index, alteracao) {
     return;
   }
 
-  if (
-    item.stock_control === true &&
-    novaQuantidade >
-      Number(item.stock_quantity || 0)
-  ) {
-    alert(
-      `Estoque insuficiente de "${item.product_name}".`
+  if (item.stock_control === true) {
+    const totalOutros = carrinhoVendaExterna.reduce(
+      (total, outro, outroIndex) => {
+        if (
+          outroIndex === index ||
+          String(outro.product_code) !== String(item.product_code)
+        ) {
+          return total;
+        }
+
+        return total + Number(outro.quantity || 0);
+      },
+      0
     );
-    return;
+
+    if (
+      totalOutros + novaQuantidade >
+      Number(item.stock_quantity || 0)
+    ) {
+      alert(
+        `Estoque insuficiente de "${item.product_name}".`
+      );
+      return;
+    }
   }
 
   item.quantity = novaQuantidade;
@@ -2633,6 +3508,12 @@ function renderizarCarrinhoVendaExterna() {
                 #${escaparHtml(item.product_code)}
                 · ${formatarMoeda(item.sale_unit_price)} cada
               </span>
+
+              ${
+                item.observation
+                  ? `<small>Obs.: ${escaparHtml(item.observation)}</small>`
+                  : ""
+              }
 
               <small>
                 Total: ${formatarMoeda(totalItem)}
@@ -3000,25 +3881,26 @@ async function registrarVendaExterna() {
       modal.classList.add("hidden");
     }
 
+    fecharOpcoesVendaExterna();
     carrinhoVendaExterna = [];
 
-   ultimoHashPedidos = "";
+    ultimoHashPedidos = "";
 
-await carregarPedidos();
+    await carregarPedidos();
 
-} catch (erro) {
-  console.error(
-    "Falha ao registrar venda externa:",
-    erro
-  );
+  } catch (erro) {
+    console.error(
+      "Falha ao registrar venda externa:",
+      erro
+    );
 
-  alert(
-    "Não foi possível registrar a venda externa.\n\n" +
-    (
-      erro?.message ||
-      "Erro desconhecido."
-    )
-  );
+    alert(
+      "Não foi possível registrar a venda externa.\n\n" +
+      (
+        erro?.message ||
+        "Erro desconhecido."
+      )
+    );
 
   } finally {
     salvandoVendaExterna = false;
@@ -3623,6 +4505,8 @@ window.adicionarProdutoVendaExterna = adicionarProdutoVendaExterna;
 window.alterarQuantidadeVendaExterna = alterarQuantidadeVendaExterna;
 window.removerItemVendaExterna = removerItemVendaExterna;
 window.registrarVendaExterna = registrarVendaExterna;
+window.fecharOpcoesVendaExterna = fecharOpcoesVendaExterna;
+window.confirmarOpcoesVendaExterna = confirmarOpcoesVendaExterna;
 
 console.log(
   "ADMIN JS CARREGADO - PEDIDOS DO DIA + VENDA EXTERNA"
