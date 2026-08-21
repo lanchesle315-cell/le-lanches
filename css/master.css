@@ -4532,3 +4532,150 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* =========================================================
+   CARDÁPIO DINÂMICO - CADASTRO DE PRODUTOS
+========================================================= */
+
+.master-dynamic-config-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.master-dynamic-box {
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.master-dynamic-box-full {
+  margin-top: 16px;
+}
+
+.master-dynamic-box-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.master-dynamic-box-header > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.master-dynamic-box-header strong {
+  color: var(--master-text, #fff);
+}
+
+.master-dynamic-box-header span,
+.master-empty-inline {
+  color: var(--master-muted, #9ca3af);
+  font-size: 0.82rem;
+}
+
+.btn-master-small {
+  padding: 8px 11px;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.master-dynamic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.master-dynamic-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px 80px 42px;
+  gap: 8px;
+  align-items: center;
+}
+
+.master-dynamic-row.master-removable-row {
+  grid-template-columns: minmax(0, 1fr) 80px 42px;
+}
+
+.master-dynamic-row input {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.18);
+  color: var(--master-text, #fff);
+  padding: 8px 10px;
+}
+
+.master-dynamic-remove {
+  min-width: 42px;
+  min-height: 40px;
+  border: 1px solid rgba(239, 68, 68, 0.28);
+  border-radius: 9px;
+  background: rgba(239, 68, 68, 0.08);
+  color: #fca5a5;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.master-addon-checklist {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.master-addon-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.025);
+  cursor: pointer;
+}
+
+.master-addon-option input {
+  accent-color: #facc15;
+}
+
+.master-addon-option span {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.master-addon-option small {
+  color: var(--master-muted, #9ca3af);
+  margin-top: 3px;
+}
+
+#masterSecaoCardapio.master-cardapio-hidden {
+  display: none;
+}
+
+@media (max-width: 780px) {
+  .master-dynamic-config-grid,
+  .master-addon-checklist {
+    grid-template-columns: 1fr;
+  }
+
+  .master-dynamic-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .master-dynamic-row.master-removable-row {
+    grid-template-columns: 1fr 80px 42px;
+  }
+
+  .master-dynamic-box-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
