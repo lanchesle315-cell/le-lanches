@@ -501,7 +501,31 @@ function normalizarPedido(pedido, index) {
       item.observacoes ||
       item.observation ||
       item.notes ||
-      ""
+      "",
+
+    product_id:
+      item.product_id ??
+      item.productId ??
+      null,
+
+    product_code:
+      item.product_code ||
+      item.productCode ||
+      "",
+
+    category:
+      item.category ||
+      "",
+
+    sale_unit_price: Number(
+      item.sale_unit_price ??
+      item.preco ??
+      item.valor ??
+      item.price ??
+      item.unit_price ??
+      item.unitPrice ??
+      0
+    )
   }));
 
   const tipoEntregaBruto =
@@ -1869,7 +1893,14 @@ function clonarItensPedido(itens) {
     nome: String(item.nome || "Item"),
     quantidade: Math.max(1, Number(item.quantidade || 1)),
     preco: Math.max(0, Number(item.preco || 0)),
-    observacao: String(item.observacao || "")
+    observacao: String(item.observacao || ""),
+    product_id: item.product_id ?? null,
+    product_code: String(item.product_code || ""),
+    category: String(item.category || ""),
+    sale_unit_price: Math.max(
+      0,
+      Number(item.sale_unit_price ?? item.preco ?? 0)
+    )
   }));
 }
 
@@ -2005,9 +2036,8 @@ function abrirModalEditarPedido(uidPedido) {
   const modal = byId("modalEditarPedido");
   const identificacao = byId("editarPedidoIdentificacao");
   const observacao = byId("editarPedidoObservacao");
-  const novoItemNome = byId("novoItemNome");
-  const novoItemPreco = byId("novoItemPreco");
-  const novoItemQuantidade = byId("novoItemQuantidade");
+  const buscaProduto = byId("editarPedidoBuscaProduto");
+  const listaProdutos = byId("editarPedidoListaProdutos");
 
   if (!modal) {
     alert("Modal de edição não encontrado no admin.html.");
@@ -2022,15 +2052,33 @@ function abrirModalEditarPedido(uidPedido) {
   }
 
   if (observacao) observacao.value = pedidoOriginal.observacao || "";
-  if (novoItemNome) novoItemNome.value = "";
-  if (novoItemPreco) novoItemPreco.value = "";
-  if (novoItemQuantidade) novoItemQuantidade.value = "1";
+  if (buscaProduto) buscaProduto.value = "";
+
+  if (listaProdutos) {
+    listaProdutos.innerHTML = `
+      <div class="empty-column">
+        Carregando produtos...
+      </div>
+    `;
+  }
 
   renderizarItensEdicao();
   modal.classList.remove("hidden");
 
+  buscarProdutosEdicao().catch((erro) => {
+    console.error("Falha ao carregar produtos para edição:", erro);
+
+    if (listaProdutos) {
+      listaProdutos.innerHTML = `
+        <div class="empty-column">
+          Não foi possível carregar os produtos.
+        </div>
+      `;
+    }
+  });
+
   setTimeout(() => {
-    if (novoItemNome) novoItemNome.focus();
+    if (buscaProduto) buscaProduto.focus();
   }, 100);
 }
 
@@ -2096,72 +2144,355 @@ function converterValorDigitado(valor) {
 }
 
 
-function adicionarItemEdicao() {
+function adicionarItemFinalEdicao(produto, observation = "") {
   if (!pedidoEmEdicao) {
     alert("Nenhum pedido selecionado.");
-    return;
+    return false;
   }
 
-  const campoNome = byId("novoItemNome");
-  const campoPreco = byId("novoItemPreco");
-  const campoQuantidade = byId("novoItemQuantidade");
-
-  const nome = String(campoNome?.value || "").trim();
-  const preco = converterValorDigitado(campoPreco?.value);
-  const quantidade = Math.floor(
-    converterValorDigitado(campoQuantidade?.value)
-  );
-
-  if (!nome) {
-    alert("Informe o nome do item.");
-    if (campoNome) campoNome.focus();
-    return;
+  if (!produtoVendaExternaPodeSerAdicionado(produto)) {
+    alert("Este produto está indisponível ou sem estoque.");
+    return false;
   }
 
-  if (!Number.isFinite(preco) || preco < 0) {
-    alert("Informe um valor unitário válido.");
-    if (campoPreco) campoPreco.focus();
-    return;
-  }
+  const nome = String(produto.name || "Item");
+  const preco = Math.max(0, Number(produto.sale_price || 0));
+  const codigo = String(produto.product_code || "");
+  const observacao = String(observation || "");
 
-  if (!Number.isFinite(quantidade) || quantidade < 1) {
-    alert("Informe uma quantidade válida.");
-    if (campoQuantidade) campoQuantidade.focus();
-    return;
-  }
-
-  const itemExistente = pedidoEmEdicao.itens.find(
+  const existente = pedidoEmEdicao.itens.find(
     (item) =>
-      String(item.nome).trim().toLowerCase() === nome.toLowerCase() &&
-      Number(item.preco) === Number(preco) &&
-      !item.observacao
+      String(item.product_code || "") === codigo &&
+      String(item.observacao || "") === observacao
   );
 
-  if (itemExistente) {
-    itemExistente.quantidade += quantidade;
+  if (existente) {
+    existente.quantidade += 1;
   } else {
     pedidoEmEdicao.itens.push({
       nome,
-      quantidade,
+      quantidade: 1,
       preco,
-      observacao: ""
+      observacao,
+      product_id: produto.id ?? null,
+      product_code: codigo,
+      category: String(produto.category || ""),
+      sale_unit_price: preco
     });
   }
 
-  if (campoNome) campoNome.value = "";
-  if (campoPreco) campoPreco.value = "";
-  if (campoQuantidade) campoQuantidade.value = "1";
-
   renderizarItensEdicao();
+  return true;
+}
 
-  if (campoNome) campoNome.focus();
+function renderizarProdutosEdicao() {
+  const container = byId("editarPedidoListaProdutos");
+  if (!container) return;
+
+  const busca = normalizarTextoVendaExterna(
+    byId("editarPedidoBuscaProduto")?.value || ""
+  );
+
+  const lista = produtosVendaExterna.filter((produto) => {
+    if (!busca) return true;
+
+    return normalizarTextoVendaExterna(
+      [produto.name, produto.product_code, produto.category].join(" ")
+    ).includes(busca);
+  });
+
+  if (!lista.length) {
+    container.innerHTML = `
+      <div class="empty-column">
+        Nenhum produto encontrado.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = lista.map((produto) => {
+    const resumo = obterResumoDisponibilidadeVendaExterna(produto);
+
+    return `
+      <div class="external-product-item">
+        <div class="external-product-info">
+          <strong>${escaparHtml(produto.name)}</strong>
+          <span>
+            ${escaparHtml(produto.category || "Sem categoria")}
+            · #${escaparHtml(produto.product_code)}
+          </span>
+          <span class="external-product-price">
+            ${formatarMoeda(produto.sale_price)}
+          </span>
+          <span class="external-product-stock ${resumo.classe}">
+            ${escaparHtml(resumo.texto)}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          class="external-product-add"
+          onclick="adicionarProdutoEdicao('${escaparHtml(produto.product_code)}')"
+          ${resumo.disponivel ? "" : "disabled"}
+        >
+          + Add
+        </button>
+      </div>
+    `;
+  }).join("");
+}
+
+async function buscarProdutosEdicao() {
+  if (!produtosVendaExterna.length) {
+    await buscarProdutosVendaExterna();
+  } else {
+    await carregarDisponibilidadeVendaExterna();
+  }
+
+  renderizarProdutosEdicao();
+}
+
+function adicionarProdutoEdicao(productCode) {
+  const produto = produtosVendaExterna.find(
+    (item) => String(item.product_code) === String(productCode)
+  );
+
+  if (!produto) {
+    alert("Produto não encontrado.");
+    return;
+  }
+
+  if (!produtoVendaExternaPodeSerAdicionado(produto)) {
+    alert("Este produto está indisponível ou sem estoque.");
+    return;
+  }
+
+  const configPopup = obterConfigPopupVendaExterna(produto);
+
+  if (configPopup?.tipo === "adicional") {
+    abrirEscolhaAdicionalEdicao(produto, configPopup);
+    return;
+  }
+
+  if (configPopup?.tipo === "opcao") {
+    abrirOpcoesSimplesEdicao(produto, configPopup);
+    return;
+  }
+
+  if (ehLancheVendaExterna(produto)) {
+    abrirPersonalizacaoLancheEdicao(produto);
+    return;
+  }
+
+  adicionarItemFinalEdicao(produto, "");
+}
+
+function abrirOpcoesSimplesEdicao(produto, config) {
+  vendaExternaPopupEstado = {
+    contexto: "edicao",
+    etapa: "opcao-produto",
+    produto
+  };
+
+  const html = `
+    <div class="ve-options-list">
+      ${config.opcoes.map((opcao) => {
+        const disponivel = opcaoVendaExternaEstaDisponivel(produto, opcao);
+
+        return `
+          <label
+            class="ve-option-item"
+            style="${disponivel ? "" : "opacity:.48;cursor:not-allowed;"}"
+          >
+            <input
+              type="radio"
+              name="opcaoProdutoVendaExterna"
+              value="${escaparHtml(opcao)}"
+              ${disponivel ? "" : "disabled"}
+            >
+            <span class="ve-option-content">
+              <strong>${escaparHtml(opcao)}</strong>
+              <small>${disponivel ? "Disponível" : "Esgotado"}</small>
+            </span>
+          </label>
+        `;
+      }).join("")}
+    </div>
+  `;
+
+  abrirPopupVendaExterna(
+    produto.name || config.titulo,
+    config.descricao || "Escolha uma opção",
+    html,
+    "Adicionar"
+  );
+}
+
+function abrirPersonalizacaoLancheEdicao(produto) {
+  vendaExternaPopupEstado = {
+    contexto: "edicao",
+    etapa: "personalizar-lanche",
+    produto
+  };
+
+  const ingredientes = ingredientesVendaExternaPorLanche(produto.name);
+
+  const html = `
+    <div class="ve-options-list">
+      ${ingredientes.map((ingrediente) => `
+        <label class="ve-option-item">
+          <input
+            type="checkbox"
+            name="ingredienteRemoverVendaExterna"
+            value="${escaparHtml(ingrediente)}"
+          >
+          <span class="ve-option-content">
+            <strong>Sem ${escaparHtml(ingrediente)}</strong>
+          </span>
+        </label>
+      `).join("")}
+    </div>
+
+    <div class="ve-observacao">
+      <label for="observacaoLancheVendaExterna">
+        Observação do lanche:
+      </label>
+      <textarea
+        id="observacaoLancheVendaExterna"
+        placeholder="Ex.: carne bem passada, pouco molho..."
+      ></textarea>
+    </div>
+  `;
+
+  abrirPopupVendaExterna(
+    produto.name,
+    "Deseja remover algum ingrediente?",
+    html,
+    "Adicionar"
+  );
+}
+
+function abrirEscolhaAdicionalEdicao(produto, config) {
+  const lanches = pedidoEmEdicao?.itens?.filter(ehLancheVendaExterna) || [];
+
+  if (!lanches.length) {
+    alert("O pedido precisa ter um lanche antes de adicionar um adicional.");
+    return;
+  }
+
+  vendaExternaPopupEstado = {
+    contexto: "edicao",
+    etapa: "escolher-adicional",
+    produto,
+    config
+  };
+
+  const html = `
+    <div class="ve-options-list">
+      ${config.opcoes.map((opcao) => {
+        const disponivel = opcaoVendaExternaEstaDisponivel(produto, opcao);
+
+        return `
+          <label
+            class="ve-option-item"
+            style="${disponivel ? "" : "opacity:.48;cursor:not-allowed;"}"
+          >
+            <input
+              type="radio"
+              name="opcaoAdicionalVendaExterna"
+              value="${escaparHtml(opcao)}"
+              ${disponivel ? "" : "disabled"}
+            >
+            <span class="ve-option-content">
+              <strong>${escaparHtml(opcao)}</strong>
+              <small>
+                ${disponivel ? `+ ${formatarMoeda(produto.sale_price)}` : "Esgotado"}
+              </small>
+            </span>
+          </label>
+        `;
+      }).join("")}
+    </div>
+  `;
+
+  abrirPopupVendaExterna(
+    produto.name || config.titulo,
+    config.descricao || "Qual adicional você deseja?",
+    html,
+    "Continuar"
+  );
+}
+
+function abrirEscolhaLancheAdicionalEdicao(produto, nomeAdicional) {
+  const lanches = (pedidoEmEdicao?.itens || [])
+    .map((item, index) => ({ ...item, index }))
+    .filter(ehLancheVendaExterna);
+
+  if (!lanches.length) {
+    alert("Não há nenhum lanche no pedido.");
+    fecharOpcoesVendaExterna();
+    return;
+  }
+
+  vendaExternaPopupEstado = {
+    contexto: "edicao",
+    etapa: "escolher-lanche-adicional",
+    produto,
+    nomeAdicional
+  };
+
+  const html = `
+    <div class="ve-options-list">
+      ${lanches.map((item, posicao) => `
+        <label class="ve-option-item">
+          <input
+            type="radio"
+            name="lancheAdicionalVendaExterna"
+            value="${item.index}"
+          >
+          <span class="ve-option-content">
+            <strong>${escaparHtml(item.nome)}</strong>
+            <small>Lanche ${posicao + 1}</small>
+            ${item.observacao
+              ? `<small>${escaparHtml(item.observacao)}</small>`
+              : `<small>Sem alterações</small>`
+            }
+            <small>+ ${formatarMoeda(produto.sale_price)}</small>
+          </span>
+        </label>
+      `).join("")}
+    </div>
+  `;
+
+  abrirPopupVendaExterna(
+    nomeAdicional,
+    "Em qual lanche você deseja colocar este adicional?",
+    html,
+    "Adicionar"
+  );
+}
+
+/*
+ * Mantida por compatibilidade caso algum HTML antigo ainda a chame.
+ * A edição agora deve adicionar somente produtos cadastrados.
+ */
+function adicionarItemEdicao() {
+  alert("Use a lista de produtos cadastrados para adicionar itens ao pedido.");
 }
 
 function prepararItensParaBanco(itens) {
   return itens.map((item) => ({
     name: String(item.nome || "Item").trim(),
+    product_name: String(item.nome || "Item").trim(),
+    product_id: item.product_id ?? null,
+    product_code: String(item.product_code || ""),
+    category: String(item.category || ""),
     quantity: Math.max(1, Number(item.quantidade || 1)),
     price: Math.max(0, Number(item.preco || 0)),
+    sale_unit_price: Math.max(
+      0,
+      Number(item.sale_unit_price ?? item.preco ?? 0)
+    ),
     observation: String(item.observacao || "")
   }));
 }
@@ -3188,6 +3519,8 @@ function confirmarOpcoesVendaExterna() {
     return;
   }
 
+  const contextoEdicao = estado.contexto === "edicao";
+
   if (estado.etapa === "opcao-produto") {
     const selecionado = document.querySelector(
       'input[name="opcaoProdutoVendaExterna"]:checked'
@@ -3208,10 +3541,15 @@ function confirmarOpcoesVendaExterna() {
       return;
     }
 
-    const adicionou = adicionarItemFinalVendaExterna(
-      estado.produto,
-      `Opção: ${selecionado.value}`
-    );
+    const adicionou = contextoEdicao
+      ? adicionarItemFinalEdicao(
+          estado.produto,
+          `Opção: ${selecionado.value}`
+        )
+      : adicionarItemFinalVendaExterna(
+          estado.produto,
+          `Opção: ${selecionado.value}`
+        );
 
     if (adicionou) fecharOpcoesVendaExterna();
     return;
@@ -3235,10 +3573,15 @@ function confirmarOpcoesVendaExterna() {
       .filter(Boolean)
       .join(" | ");
 
-    const adicionou = adicionarItemFinalVendaExterna(
-      estado.produto,
-      observation
-    );
+    const adicionou = contextoEdicao
+      ? adicionarItemFinalEdicao(
+          estado.produto,
+          observation
+        )
+      : adicionarItemFinalVendaExterna(
+          estado.produto,
+          observation
+        );
 
     if (adicionou) fecharOpcoesVendaExterna();
     return;
@@ -3264,10 +3607,17 @@ function confirmarOpcoesVendaExterna() {
       return;
     }
 
-    abrirEscolhaLancheAdicionalVendaExterna(
-      estado.produto,
-      selecionado.value
-    );
+    if (contextoEdicao) {
+      abrirEscolhaLancheAdicionalEdicao(
+        estado.produto,
+        selecionado.value
+      );
+    } else {
+      abrirEscolhaLancheAdicionalVendaExterna(
+        estado.produto,
+        selecionado.value
+      );
+    }
 
     return;
   }
@@ -3283,7 +3633,9 @@ function confirmarOpcoesVendaExterna() {
     }
 
     const indexLanche = Number(selecionado.value);
-    const lanche = carrinhoVendaExterna[indexLanche];
+    const lanche = contextoEdicao
+      ? pedidoEmEdicao?.itens?.[indexLanche]
+      : carrinhoVendaExterna[indexLanche];
 
     if (!lanche) {
       alert("O lanche escolhido não foi encontrado.");
@@ -3291,13 +3643,22 @@ function confirmarOpcoesVendaExterna() {
       return;
     }
 
-    const observation =
-      `Adicional: ${estado.nomeAdicional} | Aplicar em: ${lanche.product_name}`;
+    const nomeLanche = contextoEdicao
+      ? lanche.nome
+      : lanche.product_name;
 
-    const adicionou = adicionarItemFinalVendaExterna(
-      estado.produto,
-      observation
-    );
+    const observation =
+      `Adicional: ${estado.nomeAdicional} | Aplicar em: ${nomeLanche}`;
+
+    const adicionou = contextoEdicao
+      ? adicionarItemFinalEdicao(
+          estado.produto,
+          observation
+        )
+      : adicionarItemFinalVendaExterna(
+          estado.produto,
+          observation
+        );
 
     if (adicionou) fecharOpcoesVendaExterna();
     return;
@@ -4687,6 +5048,15 @@ if (vendaExternaBuscaProduto) {
   );
 }
 
+const editarPedidoBuscaProduto = byId("editarPedidoBuscaProduto");
+
+if (editarPedidoBuscaProduto) {
+  editarPedidoBuscaProduto.addEventListener(
+    "input",
+    renderizarProdutosEdicao
+  );
+}
+
 if (vendaExternaTaxaPlataforma) {
   vendaExternaTaxaPlataforma.addEventListener(
     "input",
@@ -4783,6 +5153,7 @@ window.fecharModalEditarPedido = fecharModalEditarPedido;
 window.alterarQuantidadeItemEdicao = alterarQuantidadeItemEdicao;
 window.removerItemEdicao = removerItemEdicao;
 window.adicionarItemEdicao = adicionarItemEdicao;
+window.adicionarProdutoEdicao = adicionarProdutoEdicao;
 window.salvarEdicaoPedido = salvarEdicaoPedido;
 
 window.abrirModalVendaExterna = abrirModalVendaExterna;
