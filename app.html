@@ -1,117 +1,237 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no"
+>
+
+<meta name="theme-color" content="#0f0f10">
 
 <title>Lê Lanches</title>
 
+<link
+  rel="icon"
+  type="image/png"
+  href="img/le-lanches-logo.png"
+>
+
 <style>
-html,body{
-margin:0;
-padding:0;
-min-height:100%;
+
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  margin:0;
+  padding:0;
+  min-height:100%;
 }
 
 body{
-font-family:Arial,sans-serif;
-background:#0f0f10;
-color:#fff;
 
-display:flex;
-justify-content:center;
-align-items:center;
+  font-family:Arial,sans-serif;
 
-min-height:100dvh;
+  background:#0f0f10;
+  color:#fff;
 
-padding:
-env(safe-area-inset-top)
-20px
-calc(env(safe-area-inset-bottom) + 20px)
-20px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  min-height:100vh;
+  min-height:100dvh;
+
+  padding:
+    calc(env(safe-area-inset-top) + 20px)
+    20px
+    calc(env(safe-area-inset-bottom) + 20px)
+    20px;
 }
 
 .container{
-text-align:center;
-width:90%;
-max-width:400px;
+
+  text-align:center;
+
+  width:100%;
+  max-width:400px;
+}
+
+.logo{
+
+  width:130px;
+  max-width:45%;
+
+  height:auto;
+
+  display:block;
+
+  margin:
+    0 auto
+    20px auto;
 }
 
 h1{
-margin-bottom:30px;
-font-size:28px;
-color:#f2b300;
+
+  margin:
+    0 0
+    30px;
+
+  font-size:28px;
+
+  color:#f2b300;
 }
 
 .btn{
-display:block;
-width:100%;
-padding:18px;
-margin:12px 0;
-border-radius:12px;
-font-size:18px;
-font-weight:bold;
-border:none;
-cursor:pointer;
-transition:.3s;
+
+  display:block;
+
+  width:100%;
+
+  padding:18px;
+
+  margin:12px 0;
+
+  border-radius:12px;
+
+  font-size:18px;
+  font-weight:bold;
+
+  border:none;
+
+  cursor:pointer;
+
+  transition:
+    transform .15s ease,
+    opacity .15s ease,
+    background .3s ease;
+}
+
+.btn:active{
+
+  transform:
+    scale(.98);
 }
 
 .pedido{
-background:#25d366;
-color:#000;
+
+  background:#25d366;
+  color:#000;
 }
 
 .pedido:hover{
-background:#1ebe5d;
+
+  background:#1ebe5d;
 }
 
 .admin{
-background:#3b82f6;
-color:#fff;
+
+  background:#3b82f6;
+  color:#fff;
 }
 
 .admin:hover{
-background:#2563eb;
+
+  background:#2563eb;
 }
 
 .footer{
-margin-top:30px;
-font-size:12px;
-color:#888;
+
+  margin-top:30px;
+
+  font-size:12px;
+
+  color:#888;
 }
+
 </style>
+
 </head>
+
 
 <body>
 
+
 <div class="container">
 
-<h1>🍔 Lê Lanches</h1>
 
-<button class="btn pedido" onclick="abrirPedido()">
-Fazer Pedido
-</button>
+  <img
+    class="logo"
+    src="img/le-lanches-logo.png"
+    alt="Lê Lanches"
+  >
 
-<button class="btn admin" onclick="abrirAdmin()">
-Painel Admin
-</button>
 
-<div class="footer">
-Sistema interno
+  <h1>
+    🍔 Lê Lanches
+  </h1>
+
+
+  <button
+    class="btn pedido"
+    type="button"
+    onclick="abrirPedido()"
+  >
+    Fazer Pedido
+  </button>
+
+
+  <button
+    class="btn admin"
+    type="button"
+    onclick="abrirAdmin()"
+  >
+    Painel Admin
+  </button>
+
+
+  <div class="footer">
+    Sistema Lê Lanches
+  </div>
+
+
 </div>
 
-</div>
 
 <script>
+
+/*
+ * ==========================================
+ * ABRIR CARDÁPIO
+ * ==========================================
+ *
+ * O cardápio principal está no index.html.
+ */
+
 function abrirPedido(){
-window.location.href="./index.html";
+
+  window.location.href =
+    "./index.html?v=20260821-2110";
+
 }
+
+
+/*
+ * ==========================================
+ * ABRIR PAINEL ADMIN
+ * ==========================================
+ */
 
 function abrirAdmin(){
-window.location.href="./admin.html";
+
+  window.location.href =
+    "./admin.html?v=20260821-2110";
+
 }
+
 </script>
 
+
 </body>
+
 </html>
