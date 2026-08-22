@@ -1212,54 +1212,45 @@
           <div class="edit-section-title">
 
             <h4>
-              Adicionar item
+              Adicionar produto
             </h4>
 
             <span>
-              Informe o nome, valor e quantidade.
+              Selecione um produto cadastrado no sistema, igual à Venda Externa.
+              Preço, opções, sabores e adicionais serão carregados automaticamente.
             </span>
 
           </div>
 
 
-          <div class="add-item-grid">
+          <div class="external-product-search">
+
+            <div class="external-field">
+
+              <label for="editarPedidoBuscaProduto">
+                Buscar produto
+              </label>
+
+              <input
+                id="editarPedidoBuscaProduto"
+                type="text"
+                placeholder="Digite o nome do produto..."
+                autocomplete="off"
+              >
+
+            </div>
+
+          </div>
 
 
-            <input
-              id="novoItemNome"
-              type="text"
-              placeholder="Ex.: Coca-Cola 2L"
-              autocomplete="off"
-            >
+          <div
+            id="editarPedidoListaProdutos"
+            class="external-products-list"
+          >
 
-
-            <input
-              id="novoItemPreco"
-              type="number"
-              min="0"
-              step="0.01"
-              placeholder="Valor unitário"
-            >
-
-
-            <input
-              id="novoItemQuantidade"
-              type="number"
-              min="1"
-              step="1"
-              value="1"
-              aria-label="Quantidade"
-            >
-
-
-            <button
-              class="btn btn-blue"
-              type="button"
-              onclick="adicionarItemEdicao()"
-            >
-              + Adicionar
-            </button>
-
+            <div class="empty-column">
+              Carregando produtos...
+            </div>
 
           </div>
 
