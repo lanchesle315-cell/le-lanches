@@ -2539,32 +2539,88 @@ async function salvarEdicaoPedidoNoBanco(pedidoOriginal, pedidoEditado) {
   const total = subtotal + taxaEntrega;
 
   const observacaoCampo = byId("editarPedidoObservacao");
-  const novaObservacao = String(observacaoCampo?.value || "").trim();
+  const novaObservacao = String(
+    observacaoCampo?.value || ""
+  ).trim();
 
-  const payload = {
-    items: prepararItensParaBanco(pedidoEditado.itens),
-    subtotal,
-    total,
-    customer_notes: montarCustomerNotesEditado(
-      pedidoOriginal,
-      novaObservacao
-    )
-  };
+  /*
+   * IMPORTANTE:
+   * A edição não atualiza mais apenas orders.items.
+   *
+   * A RPC edit_order_and_sync_items faz, na mesma transação:
+   * - UPDATE em orders
+   * - DELETE dos order_items antigos daquele pedido
+   * - INSERT dos order_items atuais
+   * - recalcula venda/custo/lucro de cada item
+   *
+   * Assim o Painel Master passa a enxergar imediatamente
+   * produtos adicionados/removidos na edição.
+   */
+  const pItems = pedidoEditado.itens.map((item) => ({
+    product_id:
+      item.product_id ?? null,
 
-  const { data, error } = await supabaseClient
-    .from(TABELA_PEDIDOS)
-    .update(payload)
-    .eq("id", Number(pedidoOriginal.bancoId))
-    .select("id");
+    product_code:
+      String(item.product_code || "").trim() || null,
+
+    product_name:
+      String(item.nome || "Item").trim(),
+
+    quantity:
+      Math.max(1, Number(item.quantidade || 1)),
+
+    sale_unit_price:
+      Math.max(
+        0,
+        Number(item.sale_unit_price ?? item.preco ?? 0)
+      ),
+
+    observation:
+      String(item.observacao || "")
+  }));
+
+  const { data, error } = await supabaseClient.rpc(
+    "edit_order_and_sync_items",
+    {
+      p_order_id:
+        Number(pedidoOriginal.bancoId),
+
+      p_items:
+        pItems,
+
+      p_subtotal:
+        subtotal,
+
+      p_total:
+        total,
+
+      p_customer_notes:
+        montarCustomerNotesEditado(
+          pedidoOriginal,
+          novaObservacao
+        )
+    }
+  );
 
   if (error) {
-    console.error("Erro ao salvar edição no Supabase:", error);
-    throw error;
+    console.error(
+      "Erro ao salvar edição sincronizada no Supabase:",
+      error
+    );
+
+    throw new Error(
+      error.message ||
+      "Não foi possível sincronizar a edição do pedido."
+    );
   }
 
-  if (!Array.isArray(data) || data.length === 0) {
+  if (
+    data &&
+    data.success === false
+  ) {
     throw new Error(
-      "Nenhuma linha foi atualizada. Verifique as policies do Supabase."
+      data.message ||
+      "Não foi possível sincronizar a edição do pedido."
     );
   }
 
