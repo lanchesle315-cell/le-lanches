@@ -1,4 +1,4 @@
-/* =========================================================
+* =========================================================
    PAINEL MASTER - LÊ LANCHES
 ========================================================= */
 
@@ -5192,4 +5192,29 @@ button:disabled {
   .products-category-tabs-list {
     grid-template-columns: 1fr;
   }
+}
+
+
+/* =========================================================
+   PRODUTOS / INSUMOS - BOTÃO EXCLUIR
+========================================================= */
+
+.product-action-btn.delete {
+  color: #ff7d7d;
+
+  background: rgba(255, 80, 80, 0.055);
+
+  border-color: rgba(255, 80, 80, 0.18);
+}
+
+.product-action-btn.delete:hover {
+  color: #ffffff;
+
+  background: rgba(255, 80, 80, 0.16);
+
+  border-color: rgba(255, 80, 80, 0.36);
+}
+
+.product-action-btn.delete:active {
+  transform: translateY(1px);
 }
