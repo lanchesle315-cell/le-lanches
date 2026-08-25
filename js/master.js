@@ -41,6 +41,7 @@ let periodoAtual = 'hoje';
 
 let carregandoMaster = false;
 let salvandoProdutoMaster = false;
+let excluindoProdutoMaster = false;
 let salvandoEntradaMaster = false;
 let salvandoFichaMaster = false;
 let salvandoDespesaMaster = false;
@@ -6395,6 +6396,15 @@ function renderizarProdutosMaster() {
                   Editar
                 </button>
 
+                <button
+                  type="button"
+                  class="product-action-btn delete"
+                  data-master-delete-product="${produto.id}"
+                  title="Excluir este item definitivamente"
+                >
+                  🗑 Excluir
+                </button>
+
                 ${
                   produto.stock_control
                     ? `
@@ -8336,6 +8346,165 @@ function abrirEditarProdutoMaster(id) {
       'modalMasterProduto'
     )
   );
+}
+
+
+/* =========================================================
+   EXCLUIR PRODUTO / INSUMO
+========================================================= */
+
+async function excluirProdutoMaster(id) {
+
+  if (
+    excluindoProdutoMaster
+  ) {
+
+    return;
+  }
+
+  const produto =
+    buscarProdutoLocalPorId(id);
+
+  if (!produto) {
+
+    alert(
+      'Item não encontrado.'
+    );
+
+    return;
+  }
+
+  const tipoLabel =
+    produto.item_type ===
+      'ingredient'
+      ? 'insumo'
+      : 'produto';
+
+  const primeiraConfirmacao =
+    confirm(
+      `Deseja realmente excluir o ${tipoLabel} “${produto.name}”?\
+\
+Esta ação apaga o cadastro definitivamente.`
+    );
+
+  if (!primeiraConfirmacao) {
+
+    return;
+  }
+
+  const segundaConfirmacao =
+    confirm(
+      `CONFIRMAÇÃO FINAL\
+\
+Excluir definitivamente: ${produto.name}?\
+\
+Se este item já estiver vinculado a vendas, ficha técnica ou outro cadastro protegido, o banco impedirá a exclusão.`
+    );
+
+  if (!segundaConfirmacao) {
+
+    return;
+  }
+
+  try {
+
+    excluindoProdutoMaster =
+      true;
+
+    /*
+      A policy products_master_delete já existe no Supabase
+      e permite DELETE apenas para usuário autenticado Master.
+
+      Não removemos manualmente históricos ou vínculos protegidos.
+      Se houver FK impedindo a exclusão, o PostgreSQL rejeita a operação.
+    */
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from('products')
+        .delete()
+        .eq(
+          'id',
+          Number(produto.id)
+        )
+        .select(
+          'id, name'
+        );
+
+    if (error) {
+
+      throw error;
+    }
+
+    if (
+      !Array.isArray(data) ||
+      data.length === 0
+    ) {
+
+      throw new Error(
+        'O item não foi excluído. Verifique sua sessão Master e tente novamente.'
+      );
+    }
+
+    await carregarProdutosMaster();
+
+    try {
+
+      await carregarEstoqueMaster();
+
+    } catch (_) {}
+
+    try {
+
+      await carregarDashboard();
+
+    } catch (_) {}
+
+    alert(
+      `“${produto.name}” foi excluído com sucesso.`
+    );
+
+  } catch (erro) {
+
+    console.error(
+      'Erro ao excluir produto/insumo:',
+      erro
+    );
+
+    const codigo =
+      String(
+        erro?.code ||
+        ''
+      );
+
+    let mensagem =
+      erro?.message ||
+      'Não foi possível excluir este item.';
+
+    if (
+      codigo === '23503'
+    ) {
+
+      mensagem =
+        `Não é possível excluir “${produto.name}” porque ele já está vinculado a outro registro do sistema.\
+\
+Isso pode acontecer quando o item possui movimentação de estoque, foi usado em pedido, ficha técnica ou está vinculado a uma opção/adicional.\
+\
+Nesse caso, mantenha o cadastro e desmarque “Ativo” para desativá-lo.`;
+    }
+
+    alert(
+      mensagem
+    );
+
+  } finally {
+
+    excluindoProdutoMaster =
+      false;
+  }
 }
 
 
@@ -12182,6 +12351,22 @@ function configurarEventosListaProdutos() {
         abrirEditarProdutoMaster(
           botaoEditar.dataset
             .masterEditProduct
+        );
+
+        return;
+      }
+
+
+      const botaoExcluir =
+        evento.target.closest(
+          '[data-master-delete-product]'
+        );
+
+      if (botaoExcluir) {
+
+        excluirProdutoMaster(
+          botaoExcluir.dataset
+            .masterDeleteProduct
         );
 
         return;
