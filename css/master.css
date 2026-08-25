@@ -4918,3 +4918,278 @@ button:disabled {
     grid-column: 1;
   }
 }
+
+
+/* =========================================================
+   PRODUTOS E INSUMOS - ABAS CLICÁVEIS V2
+   Os cards de resumo agora funcionam como filtros principais.
+========================================================= */
+
+#page-produtos .products-summary-grid {
+  grid-template-columns:
+    repeat(5, minmax(0, 1fr));
+}
+
+#page-produtos .products-summary-card.products-tab-card {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+#page-produtos .products-summary-card.products-tab-card:hover {
+  transform: translateY(-2px);
+
+  border-color: rgba(255, 193, 7, 0.34);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 193, 7, 0.075),
+      rgba(15, 15, 17, 0.98)
+    );
+
+  box-shadow:
+    0 14px 32px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 193, 7, 0.04);
+}
+
+#page-produtos .products-summary-card.products-tab-card:focus-visible {
+  outline: 0;
+
+  border-color: rgba(255, 193, 7, 0.72);
+
+  box-shadow:
+    0 0 0 3px rgba(255, 193, 7, 0.1),
+    0 14px 32px rgba(0, 0, 0, 0.2);
+}
+
+#page-produtos .products-summary-card.products-tab-card.active {
+  border-color: rgba(255, 193, 7, 0.72);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 193, 7, 0.16),
+      rgba(25, 22, 13, 0.96)
+    );
+
+  box-shadow:
+    0 14px 32px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(255, 193, 7, 0.08);
+}
+
+#page-produtos .products-summary-card.products-tab-card.active::after {
+  content: "";
+
+  position: absolute;
+
+  left: 18px;
+  right: 18px;
+  bottom: -1px;
+
+  height: 3px;
+
+  border-radius: 999px 999px 0 0;
+
+  background: #ffc107;
+
+  box-shadow:
+    0 0 14px rgba(255, 193, 7, 0.38);
+}
+
+#page-produtos .products-summary-card.products-tab-card.active
+.products-summary-icon {
+  color: #111111;
+
+  background: #ffc107;
+
+  border-color: #ffc107;
+}
+
+#page-produtos .products-summary-card.products-summary-info-card {
+  cursor: default;
+
+  border-color: rgba(255, 193, 7, 0.16);
+}
+
+#page-produtos .products-summary-card.products-summary-info-card
+.products-summary-icon {
+  background: rgba(255, 193, 7, 0.1);
+}
+
+
+/* Filtro antigo fica oculto porque agora os cards fazem esse papel. */
+#page-produtos .products-filters {
+  display: none !important;
+}
+
+
+/* =========================================================
+   PRODUTOS - SUBABAS DE CATEGORIA
+========================================================= */
+
+.products-category-tabs {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  margin-top: -4px;
+  margin-bottom: 18px;
+
+  padding: 13px 14px;
+
+  border: 1px solid rgba(255, 193, 7, 0.13);
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 193, 7, 0.045),
+      rgba(255, 255, 255, 0.018)
+    );
+}
+
+.products-category-tabs-head {
+  min-width: 170px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.products-category-tabs-head span {
+  color: #ffffff;
+
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.products-category-tabs-head small {
+  color: #777780;
+
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.products-category-tabs-list {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+
+  gap: 6px;
+}
+
+.product-category-btn {
+  min-height: 32px;
+
+  padding: 0 11px;
+
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 999px;
+
+  color: #8d8d96;
+  background: rgba(255, 255, 255, 0.025);
+
+  font-size: 9px;
+  font-weight: 900;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+
+  transition:
+    color 0.16s ease,
+    background 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.product-category-btn:hover {
+  transform: translateY(-1px);
+
+  color: #ffffff;
+
+  border-color: rgba(255, 193, 7, 0.28);
+
+  background: rgba(255, 193, 7, 0.055);
+}
+
+.product-category-btn.active {
+  color: #111111;
+
+  background: #ffc107;
+
+  border-color: #ffc107;
+
+  box-shadow:
+    0 5px 14px rgba(255, 193, 7, 0.12);
+}
+
+
+/* =========================================================
+   ABAS PRODUTOS - RESPONSIVO
+========================================================= */
+
+@media (max-width: 1350px) {
+
+  #page-produtos .products-summary-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+
+  #page-produtos .products-summary-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .products-category-tabs {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .products-category-tabs-list {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 520px) {
+
+  #page-produtos .products-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .products-category-tabs-list {
+    display: grid;
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    width: 100%;
+  }
+
+  .product-category-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 380px) {
+
+  .products-category-tabs-list {
+    grid-template-columns: 1fr;
+  }
+}
