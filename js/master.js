@@ -3872,6 +3872,8 @@ async function buscarProdutos(
         item_type,
         menu_type,
         unit,
+        purchase_package_name,
+        purchase_package_quantity,
         supplier,
         notes,
         description,
@@ -6009,6 +6011,650 @@ function fecharModalPorNome(nome) {
 }
 
 
+
+/* =========================================================
+   INSUMOS - EMBALAGEM DE COMPRA
+========================================================= */
+
+function garantirCamposEmbalagemInsumoMaster() {
+
+  if (byId('masterInsumoEmbalagemConfig')) return;
+
+  const campoCusto = byId('masterProdutoCusto');
+  const secao = campoCusto?.closest('.master-form-section');
+
+  if (!secao) return;
+
+  const bloco = document.createElement('div');
+  bloco.id = 'masterInsumoEmbalagemConfig';
+  bloco.className = 'master-form-section master-purchase-package-section';
+  bloco.style.display = 'none';
+
+  bloco.innerHTML = `
+    <div class="master-form-section-title">
+      <strong>📦 Embalagem de compra</strong>
+      <span>
+        Opcional. Use quando o insumo é comprado por peça, bisnaga, pacote, caixa etc.
+        O estoque continuará sendo controlado na unidade escolhida acima.
+      </span>
+    </div>
+
+    <div class="master-form-grid">
+
+      <div class="master-field">
+        <label for="masterProdutoEmbalagemNome">
+          Nome da embalagem
+        </label>
+        <input
+          type="text"
+          id="masterProdutoEmbalagemNome"
+          maxlength="60"
+          placeholder="Ex.: bisnaga, peça, pacote, caixa"
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="master-field">
+        <label for="masterProdutoEmbalagemQuantidade">
+          Conteúdo de 1 embalagem
+        </label>
+        <input
+          type="number"
+          id="masterProdutoEmbalagemQuantidade"
+          min="0"
+          step="0.0001"
+          value="0"
+          placeholder="Ex.: 1500"
+        >
+        <small id="masterProdutoEmbalagemAjuda">
+          Informe quanto existe em 1 embalagem na unidade de estoque.
+        </small>
+      </div>
+
+    </div>
+
+    <div class="recipe-info-box master-package-example">
+      <span class="recipe-info-icon">💡</span>
+      <div>
+        <strong>Exemplo</strong>
+        <p id="masterProdutoEmbalagemExemplo">
+          Cheddar em gramas: “bisnaga” com 1.500 g.
+        </p>
+      </div>
+    </div>
+  `;
+
+  secao.insertAdjacentElement('afterend', bloco);
+
+  byId('masterProdutoUnidade')?.addEventListener(
+    'change',
+    atualizarAjudaEmbalagemInsumoMaster
+  );
+
+  byId('masterProdutoEmbalagemNome')?.addEventListener(
+    'input',
+    atualizarAjudaEmbalagemInsumoMaster
+  );
+
+  byId('masterProdutoEmbalagemQuantidade')?.addEventListener(
+    'input',
+    atualizarAjudaEmbalagemInsumoMaster
+  );
+
+  atualizarAjudaEmbalagemInsumoMaster();
+}
+
+
+function atualizarAjudaEmbalagemInsumoMaster() {
+
+  const ajuda = byId('masterProdutoEmbalagemAjuda');
+  const exemplo = byId('masterProdutoEmbalagemExemplo');
+
+  const unidade = formatarUnidade(
+    byId('masterProdutoUnidade')?.value || 'un'
+  );
+
+  const nome = String(
+    byId('masterProdutoEmbalagemNome')?.value || 'embalagem'
+  ).trim() || 'embalagem';
+
+  const quantidade = numeroSeguro(
+    byId('masterProdutoEmbalagemQuantidade')?.value
+  );
+
+  if (ajuda) {
+    ajuda.textContent =
+      `Informe quanto existe em 1 ${nome} na unidade de estoque (${unidade}).`;
+  }
+
+  if (exemplo) {
+    exemplo.textContent =
+      quantidade > 0
+        ? `1 ${nome} = ${formatarQuantidade(quantidade)} ${unidade}. Ao dar entrada por embalagem, o sistema fará a conversão automaticamente.`
+        : `Ex.: se uma bisnaga possui 1.500 g, informe “bisnaga” e 1500.`;
+  }
+}
+
+
+function atualizarVisibilidadeEmbalagemInsumoMaster() {
+
+  garantirCamposEmbalagemInsumoMaster();
+
+  const bloco = byId('masterInsumoEmbalagemConfig');
+  if (!bloco) return;
+
+  const ehInsumo =
+    obterTipoItemSelecionado() === 'ingredient';
+
+  bloco.style.display =
+    ehInsumo ? '' : 'none';
+
+  atualizarAjudaEmbalagemInsumoMaster();
+}
+
+
+/* =========================================================
+   OPÇÕES - VÍNCULO COM INSUMO REAL
+========================================================= */
+
+function obterInsumosAtivosParaOpcaoMaster() {
+
+  return masterProdutos
+    .filter(item =>
+      item.item_type === 'ingredient' &&
+      item.active === true
+    )
+    .sort((a, b) =>
+      String(a.name || '').localeCompare(
+        String(b.name || ''),
+        'pt-BR'
+      )
+    );
+}
+
+
+function htmlSelectInsumosOpcaoMaster(
+  selecionado = ''
+) {
+
+  const atual = String(
+    selecionado || ''
+  );
+
+  return `
+    <option value="">Não vincular insumo</option>
+    ${
+      obterInsumosAtivosParaOpcaoMaster()
+        .map(insumo => `
+          <option
+            value="${insumo.id}"
+            ${String(insumo.id) === atual ? 'selected' : ''}
+          >
+            ${escaparHtml(insumo.name)}
+            (${escaparHtml(formatarUnidade(insumo.unit))})
+          </option>
+        `)
+        .join('')
+    }
+  `;
+}
+
+
+function criarBlocoReceitaOpcaoMaster(
+  linha,
+  dados = {}
+) {
+
+  if (!linha) return;
+
+  let bloco =
+    linha.querySelector(
+      '[data-option-recipe-box]'
+    );
+
+  if (!bloco) {
+
+    bloco =
+      document.createElement('div');
+
+    bloco.className =
+      'master-option-recipe-box';
+
+    bloco.setAttribute(
+      'data-option-recipe-box',
+      ''
+    );
+
+    linha.appendChild(bloco);
+  }
+
+  const ingredientId =
+    dados.ingredient_id ??
+    bloco.querySelector(
+      '[data-option-ingredient]'
+    )?.value ??
+    '';
+
+  const quantity =
+    dados.ingredient_quantity ??
+    bloco.querySelector(
+      '[data-option-ingredient-qty]'
+    )?.value ??
+    '';
+
+  bloco.innerHTML = `
+    <div class="master-option-recipe-title">
+      <strong>🧾 Consumo real desta opção</strong>
+      <span>
+        Quando esta opção for vendida, qual insumo ela representa?
+      </span>
+    </div>
+
+    <label class="master-dynamic-field master-dynamic-field-name">
+      <span>Insumo</span>
+      <select data-option-ingredient>
+        ${htmlSelectInsumosOpcaoMaster(ingredientId)}
+      </select>
+    </label>
+
+    <label class="master-dynamic-field">
+      <span>Quantidade consumida</span>
+      <input
+        type="number"
+        data-option-ingredient-qty
+        min="0"
+        step="0.0001"
+        value="${quantity || ''}"
+        placeholder="Ex.: 50"
+      >
+    </label>
+
+    <div class="master-option-recipe-help" data-option-recipe-help></div>
+  `;
+
+  const select =
+    bloco.querySelector(
+      '[data-option-ingredient]'
+    );
+
+  const input =
+    bloco.querySelector(
+      '[data-option-ingredient-qty]'
+    );
+
+  const atualizarAjuda = () => {
+
+    const ajuda =
+      bloco.querySelector(
+        '[data-option-recipe-help]'
+      );
+
+    const insumo =
+      buscarProdutoLocalPorId(
+        select?.value
+      );
+
+    const quantidade =
+      numeroSeguro(
+        input?.value
+      );
+
+    if (!ajuda) return;
+
+    if (!insumo) {
+
+      ajuda.textContent =
+        'Sem vínculo: esta opção não baixará um insumo específico.';
+
+      return;
+    }
+
+    const custo =
+      quantidade *
+      numeroSeguro(
+        insumo.average_cost
+      );
+
+    ajuda.textContent =
+      quantidade > 0
+        ? `${formatarQuantidade(quantidade)} ${formatarUnidade(insumo.unit)} de ${insumo.name} • custo estimado ${formatarMoeda(custo)}`
+        : `Informe a quantidade de ${insumo.name} consumida nesta opção.`;
+  };
+
+  select?.addEventListener(
+    'change',
+    atualizarAjuda
+  );
+
+  input?.addEventListener(
+    'input',
+    atualizarAjuda
+  );
+
+  atualizarAjuda();
+}
+
+
+function atualizarReceitasOpcoesMaster() {
+
+  const ehAdicional =
+    obterTipoCardapioSelecionado() ===
+    'adicional';
+
+  document
+    .querySelectorAll(
+      '#masterProdutoOpcoesLista .master-option-row'
+    )
+    .forEach(linha => {
+
+      if (ehAdicional) {
+
+        criarBlocoReceitaOpcaoMaster(
+          linha
+        );
+
+      } else {
+
+        linha
+          .querySelector(
+            '[data-option-recipe-box]'
+          )
+          ?.remove();
+      }
+    });
+}
+
+
+function coletarReceitaOpcaoLinhaMaster(
+  linha
+) {
+
+  const ingredientId =
+    Number(
+      linha.querySelector(
+        '[data-option-ingredient]'
+      )?.value || 0
+    );
+
+  const ingredientQuantity =
+    numeroSeguro(
+      linha.querySelector(
+        '[data-option-ingredient-qty]'
+      )?.value
+    );
+
+  return {
+    ingredient_id:
+      ingredientId > 0
+        ? ingredientId
+        : null,
+
+    ingredient_quantity:
+      ingredientQuantity > 0
+        ? ingredientQuantity
+        : null
+  };
+}
+
+
+/* =========================================================
+   ENTRADA - CONVERSÃO DE EMBALAGEM
+========================================================= */
+
+function garantirCamposEntradaEmbalagemMaster() {
+
+  if (byId('masterEntradaEmbalagemBox')) return;
+
+  const referencia =
+    byId('masterEntradaOpcoesBox') ||
+    byId('masterEntradaQuantidadeBloco')
+      ?.closest('.master-form-grid');
+
+  if (!referencia) return;
+
+  const box =
+    document.createElement('div');
+
+  box.id =
+    'masterEntradaEmbalagemBox';
+
+  box.className =
+    'master-purchase-entry-box hidden';
+
+  box.innerHTML = `
+    <div class="master-purchase-entry-head">
+      <div>
+        <strong>📦 Entrada por embalagem</strong>
+        <span id="masterEntradaEmbalagemDescricao">
+          O sistema converterá automaticamente para a unidade do estoque.
+        </span>
+      </div>
+    </div>
+
+    <div class="master-form-grid">
+
+      <div class="master-field">
+        <label for="masterEntradaQuantidadeEmbalagens">
+          Quantidade de embalagens *
+        </label>
+        <input
+          type="number"
+          id="masterEntradaQuantidadeEmbalagens"
+          min="0"
+          step="0.0001"
+          placeholder="Ex.: 2"
+        >
+      </div>
+
+      <div class="master-field">
+        <label for="masterEntradaCustoEmbalagem">
+          Valor pago por embalagem *
+        </label>
+        <div class="money-input">
+          <span>R$</span>
+          <input
+            type="number"
+            id="masterEntradaCustoEmbalagem"
+            min="0"
+            step="0.01"
+            placeholder="0,00"
+          >
+        </div>
+      </div>
+
+    </div>
+
+    <div
+      id="masterEntradaEmbalagemConversao"
+      class="master-package-conversion"
+    >
+      Informe a compra para visualizar a conversão.
+    </div>
+  `;
+
+  referencia.insertAdjacentElement(
+    'afterend',
+    box
+  );
+
+  byId('masterEntradaQuantidadeEmbalagens')
+    ?.addEventListener(
+      'input',
+      calcularPrevisaoEntradaMaster
+    );
+
+  byId('masterEntradaCustoEmbalagem')
+    ?.addEventListener(
+      'input',
+      calcularPrevisaoEntradaMaster
+    );
+}
+
+
+function entradaPorEmbalagemAtivaMaster() {
+
+  const box =
+    byId(
+      'masterEntradaEmbalagemBox'
+    );
+
+  return !!box &&
+    !box.classList.contains(
+      'hidden'
+    );
+}
+
+
+function configurarEntradaEmbalagemMaster(
+  produto
+) {
+
+  garantirCamposEntradaEmbalagemMaster();
+
+  const box =
+    byId(
+      'masterEntradaEmbalagemBox'
+    );
+
+  if (!box) return;
+
+  const ehInsumo =
+    produto?.item_type ===
+    'ingredient';
+
+  const nome =
+    String(
+      produto?.purchase_package_name ||
+      ''
+    ).trim();
+
+  const conteudo =
+    numeroSeguro(
+      produto?.purchase_package_quantity
+    );
+
+  const usar =
+    ehInsumo &&
+    nome &&
+    conteudo > 0;
+
+  box.classList.toggle(
+    'hidden',
+    !usar
+  );
+
+  const blocoQuantidade =
+    byId(
+      'masterEntradaQuantidadeBloco'
+    );
+
+  const custoUnitario =
+    byId(
+      'masterEntradaCustoUnitario'
+    )?.closest(
+      '.master-field'
+    );
+
+  if (usar) {
+
+    blocoQuantidade
+      ?.classList
+      .add(
+        'hidden'
+      );
+
+    custoUnitario
+      ?.classList
+      .add(
+        'hidden'
+      );
+
+    const descricao =
+      byId(
+        'masterEntradaEmbalagemDescricao'
+      );
+
+    if (descricao) {
+
+      descricao.textContent =
+        `1 ${nome} = ${formatarQuantidade(conteudo)} ${formatarUnidade(produto.unit)}.`;
+    }
+
+  } else if (
+    !entradasOpcoesVisiveisMaster()
+  ) {
+
+    blocoQuantidade
+      ?.classList
+      .remove(
+        'hidden'
+      );
+
+    custoUnitario
+      ?.classList
+      .remove(
+        'hidden'
+      );
+  }
+}
+
+
+function calcularEntradaConvertidaEmbalagemMaster(
+  produto
+) {
+
+  if (
+    !produto ||
+    !entradaPorEmbalagemAtivaMaster()
+  ) {
+
+    return null;
+  }
+
+  const embalagens =
+    numeroSeguro(
+      byId(
+        'masterEntradaQuantidadeEmbalagens'
+      )?.value
+    );
+
+  const custoEmbalagem =
+    numeroSeguro(
+      byId(
+        'masterEntradaCustoEmbalagem'
+      )?.value
+    );
+
+  const conteudo =
+    numeroSeguro(
+      produto.purchase_package_quantity
+    );
+
+  const quantidadeEstoque =
+    embalagens *
+    conteudo;
+
+  const custoPorUnidadeEstoque =
+    conteudo > 0
+      ? custoEmbalagem /
+        conteudo
+      : 0;
+
+  const totalCompra =
+    embalagens *
+    custoEmbalagem;
+
+  return {
+    embalagens,
+    custoEmbalagem,
+    conteudo,
+    quantidadeEstoque,
+    custoPorUnidadeEstoque,
+    totalCompra
+  };
+}
+
+
 /* =========================================================
    TIPO DO ITEM
 ========================================================= */
@@ -6081,6 +6727,8 @@ function atualizarFormularioPorTipo() {
 
     atualizarFormularioPorTipoCardapio();
   }
+
+  atualizarVisibilidadeEmbalagemInsumoMaster();
 }
 
 
@@ -6200,6 +6848,8 @@ function atualizarFormularioPorTipoCardapio() {
         ? 'Cadastre os itens que fazem parte deste grupo de adicional.'
         : 'Opcional. Use somente se este produto tiver alguma variação.';
   }
+
+  atualizarReceitasOpcoesMaster();
 }
 
 
@@ -6265,6 +6915,17 @@ function criarLinhaOpcaoProduto(opcao = {}) {
   `;
 
   container.appendChild(linha);
+
+  if (
+    obterTipoCardapioSelecionado() ===
+    'adicional'
+  ) {
+
+    criarBlocoReceitaOpcaoMaster(
+      linha,
+      opcao
+    );
+  }
 }
 
 
@@ -6362,12 +7023,22 @@ function coletarOpcoesProdutoMaster() {
   return Array.from(
     document.querySelectorAll('#masterProdutoOpcoesLista .master-dynamic-row')
   )
-    .map((linha, index) => ({
-      id: linha.dataset.optionId || null,
-      name: String(linha.querySelector('[data-option-name]')?.value || '').trim(),
-      price_adjustment: numeroSeguro(linha.querySelector('[data-option-price]')?.value),
-      display_order: Number(linha.querySelector('[data-option-order]')?.value || index)
-    }))
+    .map((linha, index) => {
+
+      const receita =
+        coletarReceitaOpcaoLinhaMaster(
+          linha
+        );
+
+      return {
+        id: linha.dataset.optionId || null,
+        name: String(linha.querySelector('[data-option-name]')?.value || '').trim(),
+        price_adjustment: numeroSeguro(linha.querySelector('[data-option-price]')?.value),
+        display_order: Number(linha.querySelector('[data-option-order]')?.value || index),
+        ingredient_id: receita.ingredient_id,
+        ingredient_quantity: receita.ingredient_quantity
+      };
+    })
     .filter(item => item.name);
 }
 
@@ -6424,21 +7095,68 @@ async function carregarConfiguracaoDinamicaProdutoMaster(produtoId) {
   if (removiveisResp.error) throw removiveisResp.error;
   if (adicionaisResp.error) throw adicionaisResp.error;
 
+  const opcoes =
+    Array.isArray(opcoesResp.data)
+      ? opcoesResp.data
+      : [];
+
+  const optionIds =
+    opcoes.map(item => item.id);
+
+  let receitasPorOpcao =
+    new Map();
+
+  if (optionIds.length) {
+
+    const {
+      data: receitas,
+      error: erroReceitas
+    } =
+      await supabaseClient
+        .from('product_option_ingredients')
+        .select('option_id, ingredient_id, quantity')
+        .in('option_id', optionIds);
+
+    if (erroReceitas) throw erroReceitas;
+
+    (receitas || []).forEach(item => {
+      receitasPorOpcao.set(
+        String(item.option_id),
+        item
+      );
+    });
+  }
+
   const listaOpcoes = byId('masterProdutoOpcoesLista');
   const listaRemoviveis = byId('masterProdutoRemoviveisLista');
 
   if (listaOpcoes) listaOpcoes.innerHTML = '';
   if (listaRemoviveis) listaRemoviveis.innerHTML = '';
 
-  (opcoesResp.data || []).forEach(criarLinhaOpcaoProduto);
+  opcoes.forEach(opcao => {
+
+    const receita =
+      receitasPorOpcao.get(
+        String(opcao.id)
+      );
+
+    criarLinhaOpcaoProduto({
+      ...opcao,
+      ingredient_id:
+        receita?.ingredient_id ||
+        null,
+      ingredient_quantity:
+        receita?.quantity ||
+        null
+    });
+  });
+
   (removiveisResp.data || []).forEach(criarLinhaIngredienteRemovivel);
 
   renderizarAdicionaisProdutoMaster(
     (adicionaisResp.data || []).map(item => item.addon_product_id)
   );
 
-  // Reaplica as regras visuais depois do carregamento assíncrono.
-  // Isso evita que blocos de lanche reapareçam ao editar bebidas.
   atualizarFormularioPorTipoCardapio();
 }
 
@@ -6449,25 +7167,166 @@ async function sincronizarConfiguracaoDinamicaProdutoMaster(produtoId) {
   const removiveis = coletarRemoviveisProdutoMaster();
   const adicionais = coletarAdicionaisProdutoMaster();
 
-  const { error: erroExcluirOpcoes } = await supabaseClient
-    .from('product_options')
-    .delete()
-    .eq('product_id', produtoId);
+  const nomes =
+    opcoes.map(item =>
+      normalizarTexto(item.name)
+    );
 
-  if (erroExcluirOpcoes) throw erroExcluirOpcoes;
+  if (
+    new Set(nomes).size !==
+    nomes.length
+  ) {
 
-  if (opcoes.length) {
-    const { error } = await supabaseClient
+    throw new Error(
+      'Não use duas opções com o mesmo nome no mesmo produto.'
+    );
+  }
+
+  const {
+    data: opcoesExistentes,
+    error: erroExistentes
+  } =
+    await supabaseClient
       .from('product_options')
-      .insert(opcoes.map((item, index) => ({
-        product_id: produtoId,
-        name: item.name,
-        price_adjustment: item.price_adjustment,
-        available: true,
-        active: true,
-        display_order: Number.isFinite(item.display_order) ? item.display_order : index
-      })));
+      .select('id')
+      .eq('product_id', produtoId);
+
+  if (erroExistentes) throw erroExistentes;
+
+  const idsMantidos =
+    new Set();
+
+  const opcoesSalvas = [];
+
+  for (
+    let index = 0;
+    index < opcoes.length;
+    index++
+  ) {
+
+    const item =
+      opcoes[index];
+
+    const payload = {
+      product_id: Number(produtoId),
+      name: item.name,
+      price_adjustment: item.price_adjustment,
+      available: true,
+      active: true,
+      display_order:
+        Number.isFinite(item.display_order)
+          ? item.display_order
+          : index
+    };
+
+    let salva = null;
+
+    if (item.id) {
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .from('product_options')
+          .update(payload)
+          .eq('id', item.id)
+          .eq('product_id', produtoId)
+          .select('id, name')
+          .single();
+
+      if (error) throw error;
+
+      salva = data;
+
+    } else {
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .from('product_options')
+          .insert(payload)
+          .select('id, name')
+          .single();
+
+      if (error) throw error;
+
+      salva = data;
+    }
+
+    idsMantidos.add(
+      String(salva.id)
+    );
+
+    opcoesSalvas.push({
+      ...item,
+      id: salva.id
+    });
+  }
+
+  const idsExcluir =
+    (opcoesExistentes || [])
+      .map(item => item.id)
+      .filter(id =>
+        !idsMantidos.has(
+          String(id)
+        )
+      );
+
+  if (idsExcluir.length) {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from('product_options')
+        .delete()
+        .in('id', idsExcluir);
+
     if (error) throw error;
+  }
+
+  for (
+    const opcao
+    of opcoesSalvas
+  ) {
+
+    const {
+      error: erroLimparReceita
+    } =
+      await supabaseClient
+        .from('product_option_ingredients')
+        .delete()
+        .eq('option_id', opcao.id);
+
+    if (erroLimparReceita) throw erroLimparReceita;
+
+    if (
+      opcao.ingredient_id &&
+      opcao.ingredient_quantity
+    ) {
+
+      const {
+        error
+      } =
+        await supabaseClient
+          .from('product_option_ingredients')
+          .insert({
+            option_id: Number(opcao.id),
+            ingredient_id:
+              Number(
+                opcao.ingredient_id
+              ),
+            quantity:
+              numeroSeguro(
+                opcao.ingredient_quantity
+              )
+          });
+
+      if (error) throw error;
+    }
   }
 
   const { error: erroExcluirRemoviveis } = await supabaseClient
@@ -6507,6 +7366,24 @@ async function sincronizarConfiguracaoDinamicaProdutoMaster(produtoId) {
       })));
     if (error) throw error;
   }
+
+  const linhas =
+    Array.from(
+      document.querySelectorAll(
+        '#masterProdutoOpcoesLista .master-option-row'
+      )
+    );
+
+  opcoesSalvas.forEach(
+    (opcao, index) => {
+
+      if (linhas[index]) {
+
+        linhas[index].dataset.optionId =
+          opcao.id;
+      }
+    }
+  );
 }
 
 
@@ -6618,6 +7495,16 @@ function limparFormularioProdutoMaster() {
   if (byId('masterProdutoOpcoesLista')) byId('masterProdutoOpcoesLista').innerHTML = '';
   if (byId('masterProdutoRemoviveisLista')) byId('masterProdutoRemoviveisLista').innerHTML = '';
   renderizarAdicionaisProdutoMaster([]);
+
+  garantirCamposEmbalagemInsumoMaster();
+
+  if (byId('masterProdutoEmbalagemNome')) {
+    byId('masterProdutoEmbalagemNome').value = '';
+  }
+
+  if (byId('masterProdutoEmbalagemQuantidade')) {
+    byId('masterProdutoEmbalagemQuantidade').value = '0';
+  }
 
   mostrarMensagemFormulario(
     byId(
@@ -6750,6 +7637,20 @@ function abrirEditarProdutoMaster(id) {
     'masterProdutoFornecedor'
   ).value =
     produto.supplier || '';
+
+  garantirCamposEmbalagemInsumoMaster();
+
+  if (byId('masterProdutoEmbalagemNome')) {
+    byId('masterProdutoEmbalagemNome').value =
+      produto.purchase_package_name || '';
+  }
+
+  if (byId('masterProdutoEmbalagemQuantidade')) {
+    byId('masterProdutoEmbalagemQuantidade').value =
+      numeroSeguro(
+        produto.purchase_package_quantity
+      );
+  }
 
   byId(
     'masterProdutoPrecoVenda'
@@ -6950,6 +7851,24 @@ async function salvarProdutoMaster(evento) {
       )?.value || ''
     ).trim();
 
+  const embalagemCompraNome =
+    tipo === 'ingredient'
+      ? String(
+          byId(
+            'masterProdutoEmbalagemNome'
+          )?.value || ''
+        ).trim()
+      : '';
+
+  const embalagemCompraQuantidade =
+    tipo === 'ingredient'
+      ? numeroSeguro(
+          byId(
+            'masterProdutoEmbalagemQuantidade'
+          )?.value
+        )
+      : 0;
+
   const precoVenda =
     tipo === 'product'
       ? numeroSeguro(
@@ -7034,6 +7953,22 @@ async function salvarProdutoMaster(evento) {
     return;
   }
 
+  if (
+    tipo === 'ingredient' &&
+    (
+      Boolean(embalagemCompraNome) !==
+      (embalagemCompraQuantidade > 0)
+    )
+  ) {
+
+    mostrarMensagemFormulario(
+      mensagem,
+      'Para usar embalagem de compra, informe o nome da embalagem e o conteúdo de 1 embalagem.'
+    );
+
+    return;
+  }
+
   if (!codigo) {
 
     codigo =
@@ -7084,6 +8019,20 @@ async function salvarProdutoMaster(evento) {
 
     unit:
       unidade,
+
+    purchase_package_name:
+      tipo === 'ingredient' &&
+      embalagemCompraNome
+        ? embalagemCompraNome
+        : null,
+
+    purchase_package_quantity:
+      tipo === 'ingredient' &&
+      embalagemCompraQuantidade > 0
+        ? arredondarCusto(
+            embalagemCompraQuantidade
+          )
+        : null,
 
     supplier:
       fornecedor || null,
@@ -8542,6 +9491,93 @@ function calcularPrevisaoEntradaMaster() {
       produto.average_cost
     );
 
+  const entradaEmbalagem =
+    calcularEntradaConvertidaEmbalagemMaster(
+      produto
+    );
+
+  if (entradaEmbalagem) {
+
+    const quantidade =
+      entradaEmbalagem.quantidadeEstoque;
+
+    const custoUnitario =
+      entradaEmbalagem.custoPorUnidadeEstoque;
+
+    const novoEstoque =
+      estoqueAtual +
+      quantidade;
+
+    const totalCompra =
+      entradaEmbalagem.totalCompra;
+
+    let novoCusto =
+      custoAtual;
+
+    if (
+      quantidade > 0 &&
+      novoEstoque > 0
+    ) {
+
+      novoCusto =
+        (
+          estoqueAtual *
+          custoAtual +
+          totalCompra
+        ) /
+        novoEstoque;
+    }
+
+    novoCusto =
+      arredondarCusto(
+        novoCusto
+      );
+
+    if (byId('masterEntradaQuantidade')) {
+      byId('masterEntradaQuantidade').value =
+        quantidade > 0
+          ? quantidade
+          : '';
+    }
+
+    if (byId('masterEntradaCustoUnitario')) {
+      byId('masterEntradaCustoUnitario').value =
+        custoUnitario > 0
+          ? arredondarCusto(custoUnitario)
+          : '';
+    }
+
+    if (byId('masterEntradaNovoEstoque')) {
+      byId('masterEntradaNovoEstoque').textContent =
+        `${formatarQuantidade(novoEstoque)} ${formatarUnidade(produto.unit)}`;
+    }
+
+    if (byId('masterEntradaNovoCusto')) {
+      byId('masterEntradaNovoCusto').textContent =
+        formatarMoeda(novoCusto);
+    }
+
+    if (byId('masterEntradaTotalCompra')) {
+      byId('masterEntradaTotalCompra').textContent =
+        formatarMoeda(totalCompra);
+    }
+
+    const conversao =
+      byId(
+        'masterEntradaEmbalagemConversao'
+      );
+
+    if (conversao) {
+
+      conversao.textContent =
+        entradaEmbalagem.embalagens > 0
+          ? `${formatarQuantidade(entradaEmbalagem.embalagens)} ${produto.purchase_package_name}(s) = ${formatarQuantidade(quantidade)} ${formatarUnidade(produto.unit)} • custo ${formatarMoeda(custoUnitario)} por ${formatarUnidade(produto.unit)}`
+          : `1 ${produto.purchase_package_name} = ${formatarQuantidade(entradaEmbalagem.conteudo)} ${formatarUnidade(produto.unit)}.`;
+    }
+
+    return;
+  }
+
   const quantidade =
     entradasOpcoesVisiveisMaster()
       ? coletarEntradasOpcoesMaster().reduce((total, item) => total + numeroSeguro(item.quantity), 0)
@@ -8734,6 +9770,10 @@ async function abrirEntradaEstoqueMaster(id) {
     console.error('Erro ao carregar estoque das opções:', erro);
   }
 
+  configurarEntradaEmbalagemMaster(
+    produto
+  );
+
   calcularPrevisaoEntradaMaster();
 
   abrirModalMaster(
@@ -8798,7 +9838,7 @@ async function salvarEntradaEstoqueMaster(
       ? coletarEntradasOpcoesMaster()
       : [];
 
-  const quantidade =
+  let quantidade =
     entradasOpcoesVisiveisMaster()
       ? entradasOpcoes.reduce((total, item) => total + numeroSeguro(item.quantity), 0)
       : numeroSeguro(
@@ -8807,7 +9847,7 @@ async function salvarEntradaEstoqueMaster(
           )?.value
         );
 
-  const custoUnitario =
+  let custoUnitario =
     numeroSeguro(
       byId(
         'masterEntradaCustoUnitario'
@@ -8820,6 +9860,40 @@ async function salvarEntradaEstoqueMaster(
         'masterEntradaObservacao'
       )?.value || ''
     ).trim();
+
+  const produtoLocal =
+    buscarProdutoLocalPorId(
+      produtoId
+    );
+
+  const entradaEmbalagem =
+    calcularEntradaConvertidaEmbalagemMaster(
+      produtoLocal
+    );
+
+  // Quando o insumo possui embalagem de compra configurada,
+  // o estoque continua sendo gravado na unidade-base (g, ml, un etc.).
+  // Ex.: 2 bisnagas x 1500 g = entrada real de 3000 g.
+  if (entradaEmbalagem) {
+
+    quantidade =
+      entradaEmbalagem
+        .quantidadeEstoque;
+
+    custoUnitario =
+      entradaEmbalagem
+        .custoPorUnidadeEstoque;
+  }
+
+  const observacaoCompleta =
+    entradaEmbalagem
+      ? [
+          observacao,
+          `${formatarQuantidade(entradaEmbalagem.embalagens)} ${produtoLocal?.purchase_package_name || 'embalagem'}(s) × ${formatarQuantidade(entradaEmbalagem.conteudo)} ${formatarUnidade(produtoLocal?.unit)}; ${formatarMoeda(entradaEmbalagem.custoEmbalagem)} por embalagem.`
+        ]
+          .filter(Boolean)
+          .join(' • ')
+      : observacao;
 
   if (!produtoId) {
 
@@ -8895,7 +9969,7 @@ async function salvarEntradaEstoqueMaster(
           p_product_id: Number(produtoId),
           p_entries: entradasOpcoes,
           p_unit_cost: custoUnitario,
-          p_notes: observacao || 'Entrada de estoque por opção pelo Painel Master.'
+          p_notes: observacaoCompleta || 'Entrada de estoque por opção pelo Painel Master.'
         }
       );
 
@@ -8917,190 +9991,57 @@ async function salvarEntradaEstoqueMaster(
     }
 
     const {
-      data:
-        produtoAtual,
-      error:
-        erroProduto
+      data: resultadoEntrada,
+      error: erroEntrada
     } =
       await supabaseClient
-        .from('products')
-        .select(
-          `
-          id,
-          name,
-          average_cost,
-          stock_quantity,
-          stock_control,
-          unit
-          `
-        )
-        .eq(
-          'id',
-          produtoId
-        )
-        .single();
-
-    if (erroProduto) {
-
-      throw erroProduto;
-    }
-
-    if (
-      produtoAtual.stock_control !==
-      true
-    ) {
-
-      throw new Error(
-        'O controle de estoque deste item está desativado.'
-      );
-    }
-
-    const estoqueAnterior =
-      numeroSeguro(
-        produtoAtual.stock_quantity
-      );
-
-    const custoAnterior =
-      numeroSeguro(
-        produtoAtual.average_cost
-      );
-
-    const estoqueDepois =
-      estoqueAnterior +
-      quantidade;
-
-    const valorAnterior =
-      estoqueAnterior *
-      custoAnterior;
-
-    const totalCompra =
-      quantidade *
-      custoUnitario;
-
-    const novoCusto =
-      arredondarCusto(
-        estoqueDepois > 0
-          ? (
-              valorAnterior +
-              totalCompra
-            ) /
-            estoqueDepois
-          : custoUnitario
-      );
-
-    const {
-      data:
-        produtoAtualizado,
-      error:
-        erroAtualizacao
-    } =
-      await supabaseClient
-        .from('products')
-        .update(
+        .rpc(
+          'move_stock',
           {
+            p_product_id:
+              Number(produtoId),
 
-            stock_quantity:
-              estoqueDepois,
-
-            average_cost:
-              novoCusto,
-
-            updated_at:
-              new Date()
-                .toISOString()
-          }
-        )
-        .eq(
-          'id',
-          produtoId
-        )
-        .eq(
-          'stock_quantity',
-          estoqueAnterior
-        )
-        .select(
-          'id, stock_quantity, average_cost'
-        )
-        .maybeSingle();
-
-    if (erroAtualizacao) {
-
-      throw erroAtualizacao;
-    }
-
-    if (!produtoAtualizado) {
-
-      throw new Error(
-        'O estoque foi alterado por outra operação. Tente novamente.'
-      );
-    }
-
-    const {
-      error:
-        erroMovimento
-    } =
-      await supabaseClient
-        .from('stock_movements')
-        .insert(
-          {
-
-            product_id:
-              produtoId,
-
-            movement_type:
+            p_movement_type:
               'entrada',
 
-            quantity:
+            p_quantity:
               quantidade,
 
-            unit_cost:
+            p_unit_cost:
               custoUnitario,
 
-            total_cost:
-              totalCompra,
-
-            stock_before:
-              estoqueAnterior,
-
-            stock_after:
-              estoqueDepois,
-
-            average_cost_before:
-              custoAnterior,
-
-            average_cost_after:
-              novoCusto,
-
-            notes:
-              observacao ||
+            p_notes:
+              observacaoCompleta ||
               'Entrada de estoque pelo Painel Master.',
 
-            created_by:
-              masterUsuario?.id ||
+            p_order_id:
               null
           }
         );
 
-    if (erroMovimento) {
+    if (erroEntrada) {
 
-      console.error(
-        'Falha ao registrar movimentação:',
-        erroMovimento
-      );
+      throw erroEntrada;
+    }
+
+    if (
+      !resultadoEntrada?.success
+    ) {
 
       throw new Error(
-        'O estoque foi atualizado, mas houve erro ao gravar o histórico.'
+        resultadoEntrada?.message ||
+        'Não foi possível registrar a entrada.'
       );
     }
 
     mostrarMensagemFormulario(
       mensagem,
       `Entrada registrada. Novo estoque: ${formatarQuantidade(
-        estoqueDepois
+        resultadoEntrada.stock_after
       )} ${formatarUnidade(
-        produtoAtual.unit
+        produtoLocal?.unit
       )} • Custo médio: ${formatarMoeda(
-        novoCusto
+        resultadoEntrada.average_cost_after
       )}`,
       'success'
     );
@@ -9123,6 +10064,7 @@ async function salvarEntradaEstoqueMaster(
       },
       650
     );
+
 
   } catch (erro) {
 
@@ -10797,6 +11739,9 @@ function configurarBotoesMaster() {
 ========================================================= */
 
 function configurarFormulariosMaster() {
+
+  garantirCamposEmbalagemInsumoMaster();
+  garantirCamposEntradaEmbalagemMaster();
 
   const formProduto =
     byId(
