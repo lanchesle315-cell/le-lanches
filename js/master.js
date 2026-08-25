@@ -54,6 +54,7 @@ let buscaEstoqueMaster = '';
 let filtroMovimentacaoEstoqueMaster = 'all';
 
 let filtroProdutoMaster = 'all';
+let filtroCategoriaProdutoMaster = 'all';
 let buscaProdutoMaster = '';
 
 let masterFichaProduto = null;
@@ -5317,10 +5318,505 @@ async function carregarDashboard() {
 
 
 /* =========================================================
+   PRODUTOS / INSUMOS - ABAS PRINCIPAIS
+========================================================= */
+
+function obterCardResumoProdutoPorIdMaster(idInterno) {
+
+  return byId(idInterno)
+    ?.closest('.products-summary-card') ||
+    null;
+}
+
+
+function garantirAbasResumoProdutosMaster() {
+
+  const grade =
+    document.querySelector(
+      '#page-produtos .products-summary-grid'
+    ) ||
+    document.querySelector(
+      '.products-summary-grid'
+    );
+
+  if (!grade) {
+
+    return;
+  }
+
+  let cardTodos =
+    byId(
+      'masterResumoTodosCard'
+    );
+
+  if (!cardTodos) {
+
+    cardTodos =
+      document.createElement('div');
+
+    cardTodos.id =
+      'masterResumoTodosCard';
+
+    cardTodos.className =
+      'products-summary-card products-tab-card';
+
+    cardTodos.dataset.productsTab =
+      'all';
+
+    cardTodos.innerHTML = `
+      <div class="products-summary-icon">
+        📋
+      </div>
+
+      <div>
+        <span>Todos</span>
+        <strong id="masterQuantidadeTodos">0</strong>
+      </div>
+    `;
+
+    grade.insertAdjacentElement(
+      'afterbegin',
+      cardTodos
+    );
+  }
+
+  const mapa = [
+    {
+      id: 'masterQuantidadeProdutos',
+      filtro: 'product',
+      titulo: 'Mostrar somente produtos'
+    },
+    {
+      id: 'masterQuantidadeInsumos',
+      filtro: 'ingredient',
+      titulo: 'Mostrar somente insumos'
+    },
+    {
+      id: 'masterQuantidadeEstoqueBaixo',
+      filtro: 'low',
+      titulo: 'Mostrar somente itens com estoque baixo'
+    }
+  ];
+
+  mapa.forEach(
+    item => {
+
+      const card =
+        obterCardResumoProdutoPorIdMaster(
+          item.id
+        );
+
+      if (!card) {
+
+        return;
+      }
+
+      card.classList.add(
+        'products-tab-card'
+      );
+
+      card.dataset.productsTab =
+        item.filtro;
+
+      card.setAttribute(
+        'title',
+        item.titulo
+      );
+    }
+  );
+
+  const cardValor =
+    obterCardResumoProdutoPorIdMaster(
+      'masterValorEstoque'
+    );
+
+  if (cardValor) {
+
+    cardValor.classList.add(
+      'products-summary-info-card'
+    );
+
+    cardValor.removeAttribute(
+      'data-products-tab'
+    );
+
+    cardValor.setAttribute(
+      'title',
+      'Indicador do valor total atualmente em estoque'
+    );
+  }
+
+  grade
+    .querySelectorAll(
+      '.products-tab-card[data-products-tab]'
+    )
+    .forEach(
+      card => {
+
+        card.setAttribute(
+          'role',
+          'button'
+        );
+
+        card.setAttribute(
+          'tabindex',
+          '0'
+        );
+      }
+    );
+
+  atualizarEstadoAbasProdutosMaster();
+}
+
+
+function atualizarEstadoAbasProdutosMaster() {
+
+  document
+    .querySelectorAll(
+      '.products-tab-card[data-products-tab]'
+    )
+    .forEach(
+      card => {
+
+        const ativo =
+          card.dataset.productsTab ===
+          filtroProdutoMaster;
+
+        card.classList.toggle(
+          'active',
+          ativo
+        );
+
+        card.setAttribute(
+          'aria-pressed',
+          ativo
+            ? 'true'
+            : 'false'
+        );
+      }
+    );
+}
+
+
+function obterCategoriasProdutosMaster() {
+
+  const categorias =
+    new Set();
+
+  masterProdutos
+    .filter(
+      produto =>
+        produto.item_type ===
+        'product'
+    )
+    .forEach(
+      produto => {
+
+        const categoria =
+          String(
+            produto.category ||
+            ''
+          ).trim();
+
+        if (categoria) {
+
+          categorias.add(
+            categoria
+          );
+        }
+      }
+    );
+
+  return Array
+    .from(
+      categorias
+    )
+    .sort(
+      (a, b) =>
+        a.localeCompare(
+          b,
+          'pt-BR'
+        )
+    );
+}
+
+
+function garantirFiltroCategoriasProdutosMaster() {
+
+  const toolbar =
+    document.querySelector(
+      '#page-produtos .products-toolbar'
+    ) ||
+    document.querySelector(
+      '.products-toolbar'
+    );
+
+  if (!toolbar) {
+
+    return;
+  }
+
+  let bloco =
+    byId(
+      'masterCategoriasProdutos'
+    );
+
+  if (!bloco) {
+
+    bloco =
+      document.createElement('div');
+
+    bloco.id =
+      'masterCategoriasProdutos';
+
+    bloco.className =
+      'products-category-tabs hidden';
+
+    bloco.innerHTML = `
+      <div class="products-category-tabs-head">
+        <span>🍔 Categorias dos produtos</span>
+        <small>
+          Refine a lista sem misturar as categorias.
+        </small>
+      </div>
+
+      <div
+        id="masterCategoriasProdutosLista"
+        class="products-category-tabs-list"
+      ></div>
+    `;
+
+    toolbar.insertAdjacentElement(
+      'afterend',
+      bloco
+    );
+
+    bloco.addEventListener(
+      'click',
+      evento => {
+
+        const botao =
+          evento.target.closest(
+            '[data-product-category]'
+          );
+
+        if (!botao) {
+
+          return;
+        }
+
+        filtroCategoriaProdutoMaster =
+          botao.dataset
+            .productCategory ||
+          'all';
+
+        renderizarProdutosMaster();
+      }
+    );
+  }
+
+  const lista =
+    byId(
+      'masterCategoriasProdutosLista'
+    );
+
+  if (!lista) {
+
+    return;
+  }
+
+  const categorias =
+    obterCategoriasProdutosMaster();
+
+  if (
+    filtroCategoriaProdutoMaster !==
+      'all' &&
+    !categorias.includes(
+      filtroCategoriaProdutoMaster
+    )
+  ) {
+
+    filtroCategoriaProdutoMaster =
+      'all';
+  }
+
+  lista.innerHTML = `
+    <button
+      type="button"
+      class="product-category-btn ${
+        filtroCategoriaProdutoMaster ===
+        'all'
+          ? 'active'
+          : ''
+      }"
+      data-product-category="all"
+    >
+      Todos
+    </button>
+
+    ${
+      categorias
+        .map(
+          categoria => `
+            <button
+              type="button"
+              class="product-category-btn ${
+                filtroCategoriaProdutoMaster ===
+                categoria
+                  ? 'active'
+                  : ''
+              }"
+              data-product-category="${escaparHtml(
+                categoria
+              )}"
+            >
+              ${escaparHtml(
+                categoria
+              )}
+            </button>
+          `
+        )
+        .join('')
+    }
+  `;
+
+  bloco.classList.toggle(
+    'hidden',
+    filtroProdutoMaster !==
+      'product'
+  );
+}
+
+
+function aplicarAbaProdutosMaster(
+  filtro
+) {
+
+  const permitidos =
+    new Set(
+      [
+        'all',
+        'product',
+        'ingredient',
+        'low'
+      ]
+    );
+
+  filtroProdutoMaster =
+    permitidos.has(
+      filtro
+    )
+      ? filtro
+      : 'all';
+
+  if (
+    filtroProdutoMaster !==
+    'product'
+  ) {
+
+    filtroCategoriaProdutoMaster =
+      'all';
+  }
+
+  atualizarEstadoAbasProdutosMaster();
+
+  garantirFiltroCategoriasProdutosMaster();
+
+  document
+    .querySelectorAll(
+      '.product-filter-btn'
+    )
+    .forEach(
+      botao => {
+
+        botao.classList.toggle(
+          'active',
+          botao.dataset.productFilter ===
+          filtroProdutoMaster
+        );
+      }
+    );
+
+  renderizarProdutosMaster();
+}
+
+
+function configurarAbasResumoProdutosMaster() {
+
+  garantirAbasResumoProdutosMaster();
+
+  const grade =
+    document.querySelector(
+      '#page-produtos .products-summary-grid'
+    ) ||
+    document.querySelector(
+      '.products-summary-grid'
+    );
+
+  if (!grade) {
+
+    return;
+  }
+
+  grade.addEventListener(
+    'click',
+    evento => {
+
+      const card =
+        evento.target.closest(
+          '.products-tab-card[data-products-tab]'
+        );
+
+      if (!card) {
+
+        return;
+      }
+
+      aplicarAbaProdutosMaster(
+        card.dataset.productsTab
+      );
+    }
+  );
+
+  grade.addEventListener(
+    'keydown',
+    evento => {
+
+      if (
+        evento.key !== 'Enter' &&
+        evento.key !== ' '
+      ) {
+
+        return;
+      }
+
+      const card =
+        evento.target.closest(
+          '.products-tab-card[data-products-tab]'
+        );
+
+      if (!card) {
+
+        return;
+      }
+
+      evento.preventDefault();
+
+      aplicarAbaProdutosMaster(
+        card.dataset.productsTab
+      );
+    }
+  );
+}
+
+
+/* =========================================================
    PRODUTOS / INSUMOS - RESUMO
 ========================================================= */
 
 function atualizarResumoProdutosMaster() {
+
+  garantirAbasResumoProdutosMaster();
 
   const ativos =
     masterProdutos.filter(
@@ -5395,6 +5891,20 @@ function atualizarResumoProdutosMaster() {
 
   if (
     byId(
+      'masterQuantidadeTodos'
+    )
+  ) {
+
+    byId(
+      'masterQuantidadeTodos'
+    ).textContent =
+      formatarNumero(
+        masterProdutos.length
+      );
+  }
+
+  if (
+    byId(
       'masterQuantidadeProdutos'
     )
   ) {
@@ -5466,11 +5976,61 @@ function obterProdutosFiltrados() {
     .filter(
       produto => {
 
+        const estoque =
+          numeroSeguro(
+            produto.stock_quantity
+          );
+
+        const minimo =
+          numeroSeguro(
+            produto.minimum_stock
+          );
+
         if (
-          filtroProdutoMaster !==
-            'all' &&
+          filtroProdutoMaster ===
+            'product' &&
           produto.item_type !==
-            filtroProdutoMaster
+            'product'
+        ) {
+
+          return false;
+        }
+
+        if (
+          filtroProdutoMaster ===
+            'ingredient' &&
+          produto.item_type !==
+            'ingredient'
+        ) {
+
+          return false;
+        }
+
+        if (
+          filtroProdutoMaster ===
+          'low'
+        ) {
+
+          if (
+            produto.active !== true ||
+            produto.stock_control !== true ||
+            estoque > minimo
+          ) {
+
+            return false;
+          }
+        }
+
+        if (
+          filtroProdutoMaster ===
+            'product' &&
+          filtroCategoriaProdutoMaster !==
+            'all' &&
+          String(
+            produto.category ||
+            ''
+          ).trim() !==
+            filtroCategoriaProdutoMaster
         ) {
 
           return false;
@@ -5487,7 +6047,11 @@ function obterProdutosFiltrados() {
               produto.name,
               produto.product_code,
               produto.category,
-              produto.supplier
+              produto.supplier,
+              produto.item_type ===
+                'ingredient'
+                ? 'insumo ingrediente'
+                : 'produto'
             ].join(' ')
           );
 
@@ -5522,6 +6086,10 @@ function renderizarProdutosMaster() {
   }
 
   atualizarResumoProdutosMaster();
+
+  garantirFiltroCategoriasProdutosMaster();
+
+  atualizarEstadoAbasProdutosMaster();
 
   const produtos =
     obterProdutosFiltrados();
@@ -11505,6 +12073,10 @@ function configurarEventosDespesasMaster() {
 
 function configurarFiltrosProdutosMaster() {
 
+  configurarAbasResumoProdutosMaster();
+
+  garantirFiltroCategoriasProdutosMaster();
+
   const busca =
     byId(
       'masterBuscaProduto'
@@ -11552,12 +12124,11 @@ function configurarFiltrosProdutosMaster() {
               'active'
             );
 
-            filtroProdutoMaster =
+            aplicarAbaProdutosMaster(
               botao.dataset
                 .productFilter ||
-              'all';
-
-            renderizarProdutosMaster();
+              'all'
+            );
           }
         );
       }
